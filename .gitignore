@@ -6,3 +6,9 @@
 # Windows metadata
 Thumbs.db
 Desktop.ini
+
+# Python / Django
+__pycache__/
+*.py[cod]
+backend/.venv/
+backend/db.sqlite3
