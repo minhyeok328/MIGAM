@@ -37,6 +37,14 @@ sources:
       venue: "PLACE_LIST"
       official_url: "INFO_URL"
       genre: "GENRE_NAME"
+    csv_headers:
+      PERFORM_IDX: "공연 고유번호"
+      TITLE: "공연명"
+      START_DATE: "공연 시작일자"
+      END_DATE: "공연 종료일자"
+      PLACE_LIST: "공연 장소목록"
+      INFO_URL: "공연상세 URL"
+      GENRE_NAME: "공연 장르명"
     source_filter:
       genres: ["전시기타", "기획전시"]
       venues:
@@ -76,6 +84,13 @@ sources:
       end_date: "DP_END"
       venue: "DP_PLACE"
       official_url: "DP_LNK"
+    csv_headers:
+      DP_EX_NO: "전시NO"
+      DP_NAME: "전시회명"
+      DP_START: "전시시작기간"
+      DP_END: "전시끝기간"
+      DP_PLACE: "전시장소"
+      DP_LNK: "바로가기링크"
     source_filter:
       venues:
         - "서울시립 서서울미술관"
