@@ -13,6 +13,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 INSTALLED_APPS = [
     "backend.apps.sources",
     "backend.apps.data_quality",
+    "backend.apps.catalog",
 ]
 
 DATABASES = {

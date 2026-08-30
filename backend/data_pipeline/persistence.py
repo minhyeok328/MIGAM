@@ -13,6 +13,7 @@ from backend.apps.sources.models import (
     IngestionRun,
     SourceRecord,
 )
+from backend.data_pipeline.canonicalization import canonicalize_candidates
 from backend.data_pipeline.models import RawExhibitionRecord
 from backend.data_pipeline.pipeline import ProcessedExhibition, process_records
 from backend.data_pipeline.registry import SourceRegistry
@@ -42,6 +43,7 @@ def persist_records(
     try:
         with transaction.atomic():
             processed = process_records(records, registry, as_of=as_of)
+            candidates: list[ExhibitionCandidate] = []
             for item in processed:
                 raw = item.normalized.raw_record
                 payload = _raw_payload(raw)
@@ -63,11 +65,14 @@ def persist_records(
                     ingestion_run=run,
                     source_record=source_record,
                 )
-                ExhibitionCandidate.objects.get_or_create(
+                candidate, _ = ExhibitionCandidate.objects.get_or_create(
                     source_record=source_record,
                     rule_version=item.normalized.rule_version,
                     defaults=_candidate_fields(item),
                 )
+                candidates.append(candidate)
+
+            canonicalize_candidates(candidates, registry=registry)
 
             run.received_count = len(processed)
             run.verified_count = sum(
