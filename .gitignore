@@ -12,3 +12,6 @@ __pycache__/
 *.py[cod]
 backend/.venv/
 backend/db.sqlite3
+
+# Data files
+data/incoming/
