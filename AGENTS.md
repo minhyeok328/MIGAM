@@ -1,8 +1,8 @@
 ---
 title: "미감 작업 규칙"
 status: DRAFT
-version: "0.1.0"
-last_updated: "2026-08-29"
+version: "0.2.0"
+last_updated: "2026-08-30"
 authoritative_for:
   - "저장소 내 문서·구현 작업의 공통 규칙"
   - "문서 우선순위와 변경·검증 절차"
@@ -29,8 +29,11 @@ related_documents:
 - 기능·계약·데이터·개인정보 변경 시 해당 영역의 소유 문서를 먼저 갱신한 뒤 코드와 테스트를 맞춘다.
 - 일반 사용자 계정·로그인·서버 익명 프로필·장기 취향 프로필을 만들지 않는다.
 - 추천 payload, 정확 좌표, 원문 검색어를 장기 로그·분석·프로필로 보존하지 않는다. 외부 행동 분석 도구를 추가하지 않는다.
+- 개발·테스트 이벤트는 `docs/05-engineering/security-privacy.md`의 이름·속성 allowlist만 사용하고 외부 전송·영속 저장·취향 학습을 하지 않는다. 운영 빌드에서는 no-op으로 둔다.
 - 필수 조건을 자동 완화하지 않으며, 출처·권리·최신성이 불명확한 정보를 사실이나 이미지로 노출하지 않는다.
-- Django Admin은 staff 운영자 전용이다. P0 API는 내부 프론트엔드·챗봇 소비용이며 외부 공개 API는 OD-005 전까지 만들지 않는다.
+- 기관 후보는 최근 전시 5건 중 4건 이상 `CORE_PASS`를 요구한다. 같은 필수 필드의 구조적 반복 누락이나 정책·접근 제한 문제가 있으면 `HOLD`로 심사를 보류한다. lifecycle은 `CANDIDATE → PROVISIONAL → ACTIVE → SUSPENDED → PROVISIONAL`이며, `PROVISIONAL`도 레코드별 품질·권리·최신성·충돌 게이트를 통과하면 정상 서비스에 사용할 수 있다. `ACTIVE` 승격에는 최소 14일, `Asia/Seoul` 기준 서로 다른 날짜의 3회 연속 최종 성공과 중간 `FAILED` 0건, 그중 1회 이상의 승인된 의미 변경 처리, 세 실행의 구조적 핵심 필드 누락·정책/접근 문제 0건, 마지막 성공·정상 Source·미해결 구조 충돌 0건이 모두 필요하다. 상세 veto와 증거 계약은 `DEC-098`·`P0-FR-091`을 따른다.
+- 기관 lifecycle·Source 운영 상태와 별도로 InstitutionAllowlistEntry의 수집 `health = HEALTHY | DEGRADED`를 둔다. `ACTIVE`의 재시도 소진 최종 `FAILED` 1회는 `DEGRADED`와 우선 재검증, 중간 `SUCCESS` 없는 서로 다른 실행 2회 연속 최종 `FAILED`는 `SUSPENDED`다. 정책·접근 차단이나 최소 품질 핵심 필드의 기관·템플릿 수준 `STRUCTURAL_CRITICAL`은 즉시 중단하며, `PROVISIONAL`은 미해결 Critical CollectionIssue가 있으면 lifecycle을 임의 전이하지 않고 해당 범위의 수집·승격을 차단한다. 선택 필드 구조 실패는 `UNKNOWN + DEGRADED`, 단건 예외는 레코드 격리로 처리하고 그것만으로 기관을 중단하지 않는다. 상세 계약은 `DEC-099`·`P0-FR-092`를 따른다.
+- Django Admin과 `/admin/data-status/`는 staff 운영자 전용이다. 상태 화면은 관련 Admin 레코드로 연결하며 별도 공개 편집기를 만들지 않는다. P0 API는 내부 프론트엔드·챗봇 소비용이며 외부 공개 API는 OD-005 전까지 만들지 않는다.
 - 데모 모드와 테스트는 외부 API 키 없이 실행되어야 한다.
 
 ## 작업·검증 규칙
@@ -38,6 +41,8 @@ related_documents:
 - 파일 탐색과 텍스트 검색에는 우선 `rg`를 사용한다.
 - 파일 변경은 `apply_patch`로 수행한다.
 - 변경 범위에 맞는 테스트·린트·빌드·문서 링크 검증을 실행하고, 실행하지 못한 검증은 이유와 함께 보고한다.
+- 정본 도메인·API·운영 기능은 `backend/apps/`, 수집·정규화·중복·권리·최신성·품질 처리는 `backend/data_pipeline/`에 둔다. 데이터 파이프라인이 정본을 임의로 직접 덮어쓰게 하지 않는다.
+- 프론트 UI는 Tailwind CSS와 Radix UI primitive 직접 사용 또는 Radix 기반 shadcn/ui 컴포넌트, Lucide React를 사용한다. 같은 역할의 primitive 전략은 작업 패킷에서 하나로 정하고 `docs/04-ux/ui-guidelines.md`에 맞게 스타일링한다.
 - SearchService 뒤에 SQLite FTS5를 두고, Kakao 지도는 MapProvider 뒤에 둔다. OpenAPI를 정본으로 하며 생성 TypeScript와 경계 Zod 어댑터를 사용한다.
 - 미확정 사항은 임의 표기로 구현하지 말고 OD-001~OD-007의 해당 결정에 연결한다.
 - 후반 결정으로 폐기된 안은 `docs/00-governance/decision-register.md`의 `SUPERSEDED` 항목을 확인하고 다시 도입하지 않는다.
