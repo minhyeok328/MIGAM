@@ -1,13 +1,14 @@
 ---
 title: "미감 구현 준비도"
 status: DRAFT
-version: "0.1.0"
-last_updated: "2026-08-29"
+version: "0.2.0"
+last_updated: "2026-08-30"
 authoritative_for:
   - "P0 구현 착수 전 확인 항목"
   - "확정 결정과 미결정 의존성의 구분"
   - "구현 준비도 판단 기준"
 related_documents:
+  - "../00-governance/decision-register.md"
   - "../01-product/project-brief.md"
   - "../05-engineering/system-architecture.md"
   - "../05-engineering/security-privacy.md"
@@ -25,20 +26,31 @@ P0의 방향·기술 경계·개인정보 금지 조건은 작업 단위로 분�
 
 | 영역 | 확정 기준 |
 | --- | --- |
-| 저장소·실행 | monorepo, 네이티브 개발 우선, Docker 재현성 |
-| 웹 | React + TypeScript + Vite, TanStack Query, Zustand |
-| 서버·데이터 | Django + DRF, 독립 Python pipeline, SQLite P0 |
+| 저장소·실행 | monorepo, 네이티브 개발 우선, Docker 재현성, `backend/` 단일 `uv` 의존성 경계 |
+| 웹 | React + TypeScript + Vite, Tailwind CSS, Radix 또는 shadcn/ui 기반 접근성 primitive, Lucide React, TanStack Query, Zustand |
+| 서버·데이터 | `backend/apps/`의 Django + DRF, `backend/data_pipeline/`의 Python 처리 계층, SQLite P0 |
 | 탐색 경계 | SQLite FTS5 뒤의 SearchService, Kakao 지도용 MapProvider |
 | 계약 | OpenAPI 정본, 생성 TypeScript, 경계 Zod 어댑터 |
 | 도메인 | catalog, discovery, sources, data_quality |
-| 개인정보 | 계정·서버 익명/장기 취향 프로필·외부 분석 없음 |
+| 운영자 | staff 전용 Django Admin CRUD와 읽기 요약·Admin 연결만 제공하는 `/admin/data-status/` |
+| 데이터 갱신 | `uv run python manage.py …` 관리 명령, `refresh_due_exhibitions`를 호출하는 배포 스케줄러, 상시 worker·Celery 없음 |
+| 전시 최소 품질 | 전시명·시작일·종료일·장소·지역·유효 상태·공식 상세 URL·공식 출처를 각각 확인하고, 요금·예약·예상 관람시간·접근성·감각 미확인은 `UNKNOWN`으로 보존하며 추론하지 않음 |
+| 기관 allowlist | 최근 전시 5건 중 4건 이상 `CORE_PASS`, 구조적 반복 누락·정책·접근 제한 시 비율 무관 `HOLD`, lifecycle과 별도 `HEALTHY`·`DEGRADED`; `PROVISIONAL`도 합격 레코드 서비스 가능, `ACTIVE` 승격은 14일·3일자 성공·의미 변경, 운영 중단은 첫 실패 DEGRADED·연속 최종 실패 2회 또는 Critical, `PROVISIONAL` Critical은 해당 scope 수집·승격 차단, 선택 구조는 UNKNOWN·DEGRADED, 단건은 격리 |
+| 개인정보 | 계정·서버 익명/장기 취향 프로필·외부 분석 없음, 개발 이벤트는 허용 계약의 비영속 어댑터이고 운영 빌드는 no-op |
 | 재현성 | 데모 모드와 테스트는 외부 API 키 없이 실행 |
 
 ## 작업 착수 입구 조건
 
 - 작업이 Project Brief의 P0 범위와 명시적 제외 범위에 연결되어 있다.
 - 변경 대상, 소유 문서, API·데이터·UI 경계, 검증 방법이 작업 패킷에 적혀 있다.
+- 백엔드 작업은 `backend/apps/`와 `backend/data_pipeline/` 중 소유 위치를 명시하고 파이프라인이 정본을 임의로 덮어쓰지 않게 한다.
+- 복합 UI 작업은 Radix 직접 사용과 Radix 기반 shadcn/ui 중 사용할 primitive 전략을 기록하고 키보드·포커스 계약을 포함한다.
+- 운영자 화면 작업은 staff 차단과 `/admin/data-status/`에서 Django Admin 레코드로 이어지는 경계를 검증한다.
+- 개발 이벤트 작업은 이름·속성 allowlist, 외부 전송·영속 0, 운영 빌드 no-op을 검증한다.
 - 필수 조건 미완화, 출처·권리·최신성, 계정 없는 경험, 로그 금지 원칙에 미치는 영향을 명시했다.
+- 데이터 작업은 최소 품질 핵심 항목의 항목별 합격·격리와 선택 정보 `UNKNOWN` 처리를 명시하고, 사용자 필수 방문 조건의 `UNKNOWN`을 충족으로 처리하지 않는다.
+- 출처 온보딩 작업은 5건 표본·`CORE_PASS` 수·예외 보류 근거, 네 lifecycle 상태와 전이, `PROVISIONAL`·`ACTIVE`의 동일한 레코드 서비스 게이트, 14일·`InstitutionQualificationRun.finished_at`의 `Asia/Seoul` 기준 서로 다른 날짜 3회 연속 최종 성공·중간 실패·재시도 판정, 의미 변경의 SourceRecord→승인 정규화 규칙과 버전→Canonical→ChangeHistory와 최종 Source·충돌 상태를 작업 패킷에 포함한다.
+- 기관 운영 작업은 InstitutionRunResult의 서로 다른 실행 ID, `ACTIVE` health·연속 실패 수·우선 재검증, 실행 중·실행 밖 Critical 결과 차이, `PROVISIONAL`의 실패·Critical 차단과 승격 증거 초기화, Critical 세 분류와 `ENTRY`·`SOURCE` scope, 선택 구조 `UNKNOWN + DEGRADED`, 단건 격리와 DataEligibility 재계산을 작업 패킷에 포함한다.
 - 외부 의존성이 있으면 키 없는 데모·테스트 대체 경로를 정했다.
 - 모호한 제품·운영 결정은 임의 추정하지 않고 아래 OD 항목에 연결했다.
 
@@ -48,7 +60,7 @@ P0의 방향·기술 경계·개인정보 금지 조건은 작업 단위로 분�
 | --- | --- |
 | OD-001 공개/상업 목적 | 공개 문구, 권리·운영 범위 |
 | OD-002 저장소 공개/라이선스·데모 재배포 | 라이선스, fixture·이미지 배포 방식 |
-| OD-003 P0 출처 allowlist | pipeline 대상, 출처 검증, 데모 데이터 근거 |
+| OD-003 P0 출처 allowlist | 실제 기관 5~10곳, 출처별 허용 필드·호출 제약과 데모 데이터 근거 |
 | OD-004 로고·최종 폰트 | 브랜드 자산 교체와 라이선스 확인 |
 | OD-005 외부 공개 API | 인증·할당량·공개 계약 여부 |
 | OD-006 P1 호스팅·비용·관측성 | 배포, 보존, 운영 관측성 |
@@ -59,10 +71,10 @@ P0의 방향·기술 경계·개인정보 금지 조건은 작업 단위로 분�
 | 게이트 | 통과 기준 |
 | --- | --- |
 | 범위 | P0 사용자 과업을 직접 지원하고 제외 기능을 추가하지 않음 |
-| 데이터 | 출처·권리·확인 시점·불확실성 표현 또는 안전한 누락 처리 정의 |
+| 데이터 | 최소 품질 항목별 검증·격리, 기관 4/5·예외 보류, lifecycle·health·DataEligibility 독립성, `PROVISIONAL` 서비스 적격성과 Critical 수집 전 차단, 승격 증거, `ACTIVE` 첫/두 번째 최종 실패·Critical·선택 구조·단건 격리, CollectionIssue scope, 출처·권리·확인 시점, 선택 정보 `UNKNOWN`과 추론 금지 정의 |
 | 개인정보 | 사용자 식별·장기 서버 프로필·금지 로그를 만들지 않음 |
 | 계약 | OpenAPI, API 경계 검증, 실패·빈 결과 처리의 영향 확인 |
 | 재현성 | 외부 키 없는 데모와 자동 테스트 경로 정의 |
 | 검증 | 단위·통합·접근성·수동 확인 중 필요한 증거가 명시됨 |
 
-OD-003은 실제 수집·적재 작업의 선행 결정이다. OD-005는 외부 소비자 대상 API 작업의 선행 결정이다. OD-006과 OD-007은 P1 운영 또는 병합 일정 관련 작업의 선행 결정이다. 그 외 P0 내부 작업은 해당 결정과 충돌하지 않는 범위에서 패킷 단위로 준비할 수 있다.
+OD-003의 선정 우선순위, 최근 전시 5건 검토, `4/5 CORE_PASS`, 구조·정책·접근 예외, lifecycle, 승격과 health·중단 기준은 확정됐다. 실제 기관·출처 목록과 출처별 허용 필드·호출 제약은 실제 수집·적재 작업의 선행 결정으로 남아 있다. OD-005는 외부 소비자 대상 API 작업의 선행 결정이다. OD-006과 OD-007은 P1 운영 또는 병합 일정 관련 작업의 선행 결정이다. 그 외 P0 내부 작업은 해당 결정과 충돌하지 않는 범위에서 패킷 단위로 준비할 수 있다.
