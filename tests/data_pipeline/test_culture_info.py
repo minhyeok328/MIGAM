@@ -1,12 +1,59 @@
 from pathlib import Path
 from typing import Mapping
 import unittest
+from unittest.mock import patch
+from urllib.error import HTTPError
 
-from backend.data_pipeline.collectors.culture_info import CultureInfoApiCollector
+from backend.data_pipeline.collectors.culture_info import (
+    CultureInfoApiCollector,
+    CultureInfoApiError,
+    UrllibXmlTransport,
+)
 from backend.data_pipeline.registry import SourceRegistry
 
 
 ROOT = Path(__file__).resolve().parents[2]
+
+
+class StaticHttpResponse:
+    def __init__(self, payload: bytes) -> None:
+        self.payload = payload
+
+    def __enter__(self) -> "StaticHttpResponse":
+        return self
+
+    def __exit__(self, *args: object) -> None:
+        return None
+
+    def read(self) -> bytes:
+        return self.payload
+
+
+class FakeClock:
+    def __init__(self) -> None:
+        self.now = 0.0
+
+    def monotonic(self) -> float:
+        return self.now
+
+    def sleep(self, seconds: float) -> None:
+        self.now += seconds
+
+
+class TwoRequestsPerSecondGateway:
+    def __init__(self, clock: FakeClock) -> None:
+        self.clock = clock
+        self.last_request_at: float | None = None
+        self.attempts = 0
+
+    def open(self, request: object, timeout: float) -> StaticHttpResponse:
+        del request, timeout
+        now = self.clock.monotonic()
+        self.attempts += 1
+        if self.last_request_at is not None and now - self.last_request_at < 0.5:
+            raise RuntimeError("request started before the rate-limit window elapsed")
+        self.last_request_at = now
+        return StaticHttpResponse(b"<response />")
 
 
 class StaticXmlTransport:
@@ -39,6 +86,57 @@ class StaticXmlTransport:
 </item></body></response>""",
         }
         return details[seq].encode("utf-8")
+
+
+class UrllibXmlTransportTests(unittest.TestCase):
+    def test_spaces_successive_requests_to_two_per_second(self) -> None:
+        clock = FakeClock()
+        gateway = TwoRequestsPerSecondGateway(clock)
+        try:
+            transport = UrllibXmlTransport(
+                clock=clock.monotonic,
+                sleeper=clock.sleep,
+            )
+        except TypeError as error:
+            self.fail(f"transport must support deterministic request pacing: {error}")
+
+        with patch(
+            "backend.data_pipeline.collectors.culture_info.urlopen",
+            side_effect=gateway.open,
+        ):
+            try:
+                transport.get("https://apis.data.go.kr/example", {})
+                transport.get("https://apis.data.go.kr/example", {})
+            except RuntimeError as error:
+                self.fail(f"successive requests must be paced: {error}")
+
+        self.assertEqual(gateway.attempts, 2)
+
+    def test_retries_a_rate_limited_request(self) -> None:
+        clock = FakeClock()
+        rate_limit = HTTPError(
+            "https://apis.data.go.kr/example",
+            429,
+            "Too Many Requests",
+            {"Retry-After": "0"},
+            None,
+        )
+        with patch(
+            "backend.data_pipeline.collectors.culture_info.urlopen",
+            side_effect=(rate_limit, StaticHttpResponse(b"<response />")),
+        ):
+            try:
+                payload = UrllibXmlTransport(
+                    clock=clock.monotonic,
+                    sleeper=clock.sleep,
+                ).get(
+                    "https://apis.data.go.kr/example",
+                    {"serviceKey": "test-service-key"},
+                )
+            except CultureInfoApiError as error:
+                self.fail(f"HTTP 429 must be retried with backoff: {error}")
+
+        self.assertEqual(payload, b"<response />")
 
 
 class CultureInfoApiCollectorTests(unittest.TestCase):

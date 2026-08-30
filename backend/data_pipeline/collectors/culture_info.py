@@ -1,5 +1,6 @@
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from time import monotonic, sleep
 from typing import Protocol
 from urllib.error import HTTPError, URLError
 from urllib.parse import unquote, urlencode
@@ -27,8 +28,29 @@ class XmlTransport(Protocol):
 
 
 class UrllibXmlTransport:
-    def __init__(self, timeout: float = 15.0) -> None:
+    RATE_LIMIT_RETRIES = 3
+
+    def __init__(
+        self,
+        timeout: float = 15.0,
+        minimum_interval_seconds: float = 0.5,
+        clock: Callable[[], float] = monotonic,
+        sleeper: Callable[[float], None] = sleep,
+    ) -> None:
         self.timeout = timeout
+        self.minimum_interval_seconds = minimum_interval_seconds
+        self.clock = clock
+        self.sleeper = sleeper
+        self._last_request_at: float | None = None
+
+    def _wait_for_request_slot(self) -> None:
+        if self._last_request_at is not None:
+            remaining = self.minimum_interval_seconds - (
+                self.clock() - self._last_request_at
+            )
+            if remaining > 0:
+                self.sleeper(remaining)
+        self._last_request_at = self.clock()
 
     def get(self, url: str, params: Mapping[str, str]) -> bytes:
         normalized_params = dict(params)
@@ -38,15 +60,28 @@ class UrllibXmlTransport:
             f"{url}?{urlencode(normalized_params)}",
             headers={"Accept": "application/xml", "User-Agent": "MIGAM/0.1"},
         )
-        try:
-            with urlopen(request, timeout=self.timeout) as response:
-                return response.read()
-        except HTTPError as error:
-            raise CultureInfoApiError(
-                f"culture API HTTP error: {error.code}"
-            ) from error
-        except URLError as error:
-            raise CultureInfoApiError("culture API request failed") from error
+        for attempt in range(self.RATE_LIMIT_RETRIES + 1):
+            self._wait_for_request_slot()
+            try:
+                with urlopen(request, timeout=self.timeout) as response:
+                    return response.read()
+            except HTTPError as error:
+                if error.code == 429 and attempt < self.RATE_LIMIT_RETRIES:
+                    retry_after = (
+                        error.headers.get("Retry-After") if error.headers else None
+                    )
+                    try:
+                        delay = float(retry_after) if retry_after else 2**attempt
+                    except ValueError:
+                        delay = 2**attempt
+                    self.sleeper(min(30.0, max(0.0, delay)))
+                    continue
+                raise CultureInfoApiError(
+                    f"culture API HTTP error: {error.code}"
+                ) from error
+            except URLError as error:
+                raise CultureInfoApiError("culture API request failed") from error
+        raise CultureInfoApiError("culture API request failed")
 
 
 def _local_name(tag: str) -> str:
