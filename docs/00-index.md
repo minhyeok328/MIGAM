@@ -1,8 +1,8 @@
 ---
 title: "미감 문서 인덱스"
 status: DRAFT
-version: "0.1.0"
-last_updated: "2026-08-29"
+version: "0.2.0"
+last_updated: "2026-08-30"
 authoritative_for:
   - "프로젝트 문서 목록과 읽기 순서"
   - "문서별 권한·상태·열린 결정 현황"
@@ -15,7 +15,7 @@ related_documents:
 
 ## 1. 현재 문서 세트
 
-모든 문서는 전체 기획 대화에서 확정된 결정을 구조화한 `DRAFT v0.1.0`이다. `DRAFT`는 검토 가능한 초안이지 구현 승인 상태가 아니다.
+모든 문서는 전체 기획 대화에서 확정된 결정을 구조화한 `DRAFT`다. 문서별 버전은 front matter에 기록하며, `DRAFT`는 검토 가능한 초안이지 구현 승인 상태가 아니다.
 
 | 영역 | 문서 | 권위 범위 | 상태 |
 | --- | --- | --- | --- |
@@ -34,6 +34,7 @@ related_documents:
 | UX | [User Flows](04-ux/user-flows.md) | 화면 간 사용자 흐름과 분기 | `DRAFT` |
 | UX | [Screen Spec](04-ux/screen-spec.md) | 화면별 정보·행동·상태·반응형 요구 | `DRAFT` |
 | UX | [UI Guidelines](04-ux/ui-guidelines.md) | 브랜드·시각 언어·공통 문구·접근성 표현 | `DRAFT` |
+| UX | [Design Reference](04-ux/design-reference.md) | 화면·컴포넌트·상태·반응형의 검토용 시각 표본 | `DRAFT` |
 | 기술 | [System Architecture](05-engineering/system-architecture.md) | 런타임·저장소·컴포넌트 경계 | `DRAFT` |
 | 기술 | [Security & Privacy](05-engineering/security-privacy.md) | 개인정보·인증·로그·비밀값 원칙 | `DRAFT` |
 | 기술 | [API Guidelines](05-engineering/api-guidelines.md) | 내부 API와 OpenAPI 계약 원칙 | `DRAFT` |
@@ -71,6 +72,7 @@ related_documents:
 3. User Flows
 4. Screen Spec
 5. UI Guidelines
+6. Design Reference
 
 ### 구현 준비를 검토할 때
 
@@ -106,7 +108,7 @@ Project Brief
 | --- | --- | --- |
 | OD-001 | 공개·비영리·상업 이용 목적 | 출처·권리·공개 운영 |
 | OD-002 | 저장소 공개와 문서·데모 데이터 재배포 | README·배포 자산 |
-| OD-003 | P0 공식 출처 allowlist | 실제 수집·적재 |
+| OD-003 | 실제 P0 기관·출처 목록과 출처별 허용 범위·호출 제약 | 실제 기관 선정·수집·적재 |
 | OD-004 | 로고와 최종 폰트 | 최종 시각 시스템 |
 | OD-005 | 외부 공개 API 여부 | 인증·할당량·외부 계약 |
 | OD-006 | P1 호스팅·비용·관측성 | 공개 배포·운영 |
@@ -132,7 +134,7 @@ Project Brief
 
 1. 제품·도메인: Project Brief, P0 PRD, Domain Rules
 2. 데이터·추천: Data Source, Data Model, Pipeline, Normalization, Recommendation
-3. 경험: User Flows, Screen Spec, UI Guidelines
+3. 경험: User Flows, Screen Spec, UI Guidelines, Design Reference
 4. 기술·보안: Architecture, Security & Privacy, API Guidelines
 5. 품질·실행: Acceptance, Test, Traceability, Implementation Readiness
 
