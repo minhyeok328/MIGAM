@@ -1,7 +1,7 @@
 ---
 title: "미감(美感) Domain Rules"
-status: DRAFT
-version: "0.2.0"
+status: APPROVED
+version: "1.0.0"
 last_updated: "2026-08-30"
 authoritative_for:
   - "전시·작품·기관 도메인 용어와 의미"
