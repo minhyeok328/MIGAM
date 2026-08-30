@@ -1,7 +1,7 @@
 ---
 title: "미감 P0 테스트 계획"
 status: DRAFT
-version: "0.2.0"
+version: "0.3.0"
 last_updated: "2026-08-30"
 authoritative_for:
   - "P0 계층별 테스트 전략과 검증 범위"
@@ -264,5 +264,5 @@ Firefox와 WebKit에서는 다음을 최소 수행한다.
 
 ## 11. 열린 결정
 
-- `OD-003`: 4/5 판정, 구조·정책·접근 예외, lifecycle, 승격과 health·중단 기준은 고정 픽스처로 검증한다. 실제 수도권 기관·출처 목록과 출처별 허용 필드·호출 제약이 확정되면 출처별 계약 픽스처를 추가한다.
+- `OD-003`: `RESOLVED`. 출처 계약 픽스처는 [`source-qualification.json`](../../fixtures/source-qualification.json)이며 3개 Source·5개 기관·24개 `PASS`·1개 격리를 검증한다. 실제 허용 필드와 호출 제약은 [`sources.yaml`](../../sources.yaml)을 따른다.
 - `OD-004`: 최종 워드마크·폰트가 확정되면 해당 자산의 라이선스, 로딩 실패, 한국어 렌더링과 시각 회귀 검증을 `TEST-030`·`TEST-034`에 포함한다.

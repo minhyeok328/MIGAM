@@ -1,7 +1,7 @@
 ---
 title: "미감 P0 요구사항 추적성 매트릭스"
 status: DRAFT
-version: "0.2.0"
+version: "0.3.0"
 last_updated: "2026-08-30"
 authoritative_for:
   - "P0 요구사항과 결정·화면·합격 기준·테스트의 연결"
@@ -165,5 +165,5 @@ related_documents:
 
 ## 12. 열린 결정
 
-- `OD-003`: `DEC-094`~`DEC-099`의 선정 우선순위, 최근 5건 검토, 레코드 게이트, 4/5·예외 보류, lifecycle, 승격과 health·중단 기준은 현재 적용한다. 실제 수도권 기관·출처 목록과 출처별 허용 필드·호출 제약이 확정되면 출처별 계약 테스트를 추가한다.
+- `OD-003`: `RESOLVED`. `DEC-094`~`DEC-099`의 출처 계약은 [`sources.yaml`](../../sources.yaml)과 [`source-qualification.json`](../../fixtures/source-qualification.json)으로 추적하며, 계약 테스트는 3개 Source·5개 기관·24개 `PASS`·1개 격리를 기준으로 한다.
 - `OD-004`: 최종 워드마크·폰트 확정 후 해당 자산의 라이선스·로딩·렌더링 검증을 `P0-NFR-004`, `AC-020`, `TEST-030`·`TEST-034` 연결에 포함한다.

@@ -1,7 +1,7 @@
 ---
 title: "미감 결정 등록부"
 status: DRAFT
-version: "0.2.0"
+version: "0.4.0"
 last_updated: "2026-08-30"
 authoritative_for:
   - "기획 대화에서 확정·폐기·미확정된 결정의 추적"
@@ -9,6 +9,7 @@ authoritative_for:
 related_documents:
   - "./document-policy.md"
   - "../01-product/project-brief.md"
+  - "../02-data/source-qualification.md"
 ---
 
 # 미감 결정 등록부
@@ -112,7 +113,7 @@ related_documents:
 | DEC-096 | 전시 데이터의 최소 품질 합격에는 전시명, 시작일, 종료일, 장소, 지역, `UNKNOWN`이 아닌 유효한 전시 상태, 공식 상세 URL, 공식 출처 확인이 모두 필요하다. 요금·예약·예상 관람시간·접근성·감각 정보는 이 게이트 밖에서 미확인 시 `UNKNOWN`으로 관리하고 추론하지 않으며, 사용자가 해당 정보를 필수 방문 조건으로 지정하면 `UNKNOWN`은 조건을 충족하지 않는다. | Project Brief, Domain Rules, Data Source Policy, Data Model, Data Pipeline, Normalization Rules, Recommendation Spec |
 | DEC-097 | 후보 기관의 최근 전시 5건 중 최소 4건이 `CORE_PASS`여야 allowlist 후보 심사를 통과한다. 같은 필수 필드의 반복적·구조적 누락 또는 정책·접근 제한 문제가 확인되면 비율과 무관하게 등록을 보류한다. 심사 통과 기관은 먼저 `PROVISIONAL`로 등록하고 실제 수집 안정성을 추가 검증한 뒤에만 `ACTIVE`로 승격한다. | P0 PRD, Roadmap, Data Source Policy, Data Model, Data Pipeline, System Architecture, Acceptance Criteria, Test Plan, Traceability Matrix, Implementation Readiness |
 | DEC-098 | 기관 온보딩 lifecycle은 `CANDIDATE → PROVISIONAL → ACTIVE → SUSPENDED → PROVISIONAL`이다. `PROVISIONAL`도 레코드별 최소 품질·권리·최신성·충돌 게이트를 통과한 데이터는 정상 서비스에 사용할 수 있으며, `ACTIVE`는 최초 검증 시작 후 최소 14일이 지나고 `InstitutionQualificationRun.finished_at`을 `Asia/Seoul`로 환산한 서로 다른 날짜의 최종 성공 실행 3회가 중간 `FAILED` 없이 연속되며 그중 1회 이상 승인된 의미 있는 신규·변경 전시가 `SourceRecord → 정규화 → Canonical Exhibition → ChangeHistory`까지 반영된 고신뢰 상태다. P0 의미 변경은 새 전시, 종료일 변경·연장, 요금·장소·예약 방식 변경, 전시 취소, 공식 설명에서 승인·버전 고정 정규화 규칙이 만든 Canonical 필드 변경만 인정하며 페이지 외피·raw hash만의 변화는 인정하지 않는다. 세 실행의 치명적 수집 실패·구조적 핵심 필드 누락·정책·robots·약관 문제·CAPTCHA·로그인 요구·지속 접근 차단은 모두 0건이어야 하며, 승격 순간에는 마지막 실행 성공·Source 정상·미해결 구조 충돌 0건을 다시 확인한다. 요청 재시도 후 최종 성공은 성공으로 인정하지만 핵심 대상 페이지 최종 미수집이나 미완성 핵심 데이터의 Canonical 반영은 최종 `FAILED`다. `ACTIVE` 운영 실패와 중단 판정은 `DEC-099`를 따르며, 중단 사유를 수정한 뒤 `PROVISIONAL`에서 검증을 처음부터 다시 시작한다. | P0 PRD, Roadmap, Data Source Policy, Data Model, Data Pipeline, Normalization Rules, Recommendation Spec, System Architecture, API Guidelines, Security & Privacy, Acceptance Criteria, Test Plan, Traceability Matrix, Implementation Readiness |
-| DEC-099 | InstitutionAllowlistEntry의 수집 `health = HEALTHY | DEGRADED`는 lifecycle과 Source 운영 상태에서 분리한다. `ACTIVE` 기관의 허용 재시도를 모두 소진한 기관별 최종 `FAILED` 1회는 lifecycle을 유지한 채 `DEGRADED`, 연속 실패 수 1, 출처 호출 제한·backoff 안의 최우선 재검증으로 처리한다. 중간 기관별 최종 `SUCCESS` 없이 서로 다른 IngestionRun ID에 속한 해당 기관의 InstitutionRunResult 2개가 연속 `FAILED`이면 `SUSPENDED`로 전환하며, 기관별 최종 `SUCCESS`는 실패 수를 0으로 초기화하고 미해결 선택 필드 구조 문제가 없을 때 `HEALTHY`로 복구한다. `POLICY_BLOCK`은 약관상 자동 수집 불허 또는 중대한 변경의 미해결 불명확성, robots 대상 경로 금지이고, `ACCESS_BLOCK`은 CAPTCHA·로그인 필수·한 실행 안의 반복 403/bot 차단·접근 통제 우회 필요이며, `STRUCTURAL_CRITICAL`은 최소 품질 핵심 필드의 기관·템플릿 수준 안정적 추출 불가, 핵심 오값 대량 생성 위험, 목록과 상세의 신뢰 가능한 연결 상실이다. 이 Critical 사유는 실패 횟수와 관계없이 `ACTIVE → SUSPENDED`다. 실행 중 확인된 Critical은 영향 기관의 InstitutionRunResult를 최종 `FAILED`로 기록하고 `ACTIVE` 실패 수를 기존 0에서 1 또는 1에서 2로 올리되 중단 판정은 수치를 기다리지 않는다. `PROVISIONAL`에서는 lifecycle을 임의 전이하지 않고 미해결 Critical CollectionIssue를 수집 전 차단 게이트로 사용하며, 실행 중 확인됐다면 InstitutionQualificationRun도 `FAILED`로 기록해 승격 연속 성공을 초기화한다. 실행 밖 검토로 발견한 Critical은 가상 실패 실행이나 실패 수를 만들지 않는다. 모든 Critical의 영향 범위는 기관 단위가 기본이며 Source 전체 근거가 있을 때만 공유 Source 전체로 넓힌다. 요금·예약·관람시간·접근성·감각·미디어 같은 선택 필드 구조 문제는 값을 `UNKNOWN`으로 두고 `DEGRADED`를 유지하며 실행 실패 수를 올리지 않는다. 가져온 단일 전시의 예외는 해당 레코드만 격리하고 기관 health·lifecycle을 바꾸지 않되, 반복·기관 수준 패턴이면 `STRUCTURAL_CRITICAL`로 재분류한다. | Project Brief, P0 PRD, Roadmap, Domain Rules, Data Source Policy, Data Model, Data Pipeline, Normalization Rules, Recommendation Spec, System Architecture, API Guidelines, Security & Privacy, Acceptance Criteria, Test Plan, Traceability Matrix, Implementation Readiness |
+| DEC-099 | InstitutionAllowlistEntry의 수집 `health = HEALTHY \| DEGRADED`는 lifecycle과 Source 운영 상태에서 분리한다. `ACTIVE` 기관의 허용 재시도를 모두 소진한 기관별 최종 `FAILED` 1회는 lifecycle을 유지한 채 `DEGRADED`, 연속 실패 수 1, 출처 호출 제한·backoff 안의 최우선 재검증으로 처리한다. 중간 기관별 최종 `SUCCESS` 없이 서로 다른 IngestionRun ID에 속한 해당 기관의 InstitutionRunResult 2개가 연속 `FAILED`이면 `SUSPENDED`로 전환하며, 기관별 최종 `SUCCESS`는 실패 수를 0으로 초기화하고 미해결 선택 필드 구조 문제가 없을 때 `HEALTHY`로 복구한다. `POLICY_BLOCK`은 약관상 자동 수집 불허 또는 중대한 변경의 미해결 불명확성, robots 대상 경로 금지이고, `ACCESS_BLOCK`은 CAPTCHA·로그인 필수·한 실행 안의 반복 403/bot 차단·접근 통제 우회 필요이며, `STRUCTURAL_CRITICAL`은 최소 품질 핵심 필드의 기관·템플릿 수준 안정적 추출 불가, 핵심 오값 대량 생성 위험, 목록과 상세의 신뢰 가능한 연결 상실이다. 이 Critical 사유는 실패 횟수와 관계없이 `ACTIVE → SUSPENDED`다. 실행 중 확인된 Critical은 영향 기관의 InstitutionRunResult를 최종 `FAILED`로 기록하고 `ACTIVE` 실패 수를 기존 0에서 1 또는 1에서 2로 올리되 중단 판정은 수치를 기다리지 않는다. `PROVISIONAL`에서는 lifecycle을 임의 전이하지 않고 미해결 Critical CollectionIssue를 수집 전 차단 게이트로 사용하며, 실행 중 확인됐다면 InstitutionQualificationRun도 `FAILED`로 기록해 승격 연속 성공을 초기화한다. 실행 밖 검토로 발견한 Critical은 가상 실패 실행이나 실패 수를 만들지 않는다. 모든 Critical의 영향 범위는 기관 단위가 기본이며 Source 전체 근거가 있을 때만 공유 Source 전체로 넓힌다. 요금·예약·관람시간·접근성·감각·미디어 같은 선택 필드 구조 문제는 값을 `UNKNOWN`으로 두고 `DEGRADED`를 유지하며 실행 실패 수를 올리지 않는다. 가져온 단일 전시의 예외는 해당 레코드만 격리하고 기관 health·lifecycle을 바꾸지 않되, 반복·기관 수준 패턴이면 `STRUCTURAL_CRITICAL`로 재분류한다. | Project Brief, P0 PRD, Roadmap, Domain Rules, Data Source Policy, Data Model, Data Pipeline, Normalization Rules, Recommendation Spec, System Architecture, API Guidelines, Security & Privacy, Acceptance Criteria, Test Plan, Traceability Matrix, Implementation Readiness |
 
 ## 7. UX·기술·품질 결정
 
@@ -160,10 +161,12 @@ related_documents:
 | --- | --- | --- | --- |
 | OD-001 | `OPEN` | P0를 개인 로컬 포트폴리오로만 사용할지, 비영리 공개 또는 향후 상업 공개까지 고려할지 | Data Source Policy, Security & Privacy |
 | OD-002 | `OPEN` | Git 저장소 공개 여부와 MIT 코드 라이선스 외에 문서·데모 데이터 재배포 조건을 어떻게 둘지 | README, Data Source Policy |
-| OD-003 | `OPEN` | `DEC-097`~`DEC-099`을 적용할 수도권 공식 기관 5~10곳의 실제 목록과 출처별 허용 필드·호출 제약을 확정 | P0 PRD, Roadmap, Data Source Policy, Data Model, Data Pipeline, System Architecture, Acceptance Criteria, Test Plan, Traceability Matrix, Implementation Readiness |
+| OD-003 | `RESOLVED` | 세종문화회관 본관 전시공간·서울시립 서서울미술관·서울시립 사진미술관·수원시립미술관 행궁 본관·국립민속박물관 서울 본관과 공식 Source 3개를 P0 allowlist로 확정 | P0 PRD, Roadmap, Data Source Policy, Data Model, Data Pipeline, System Architecture, Acceptance Criteria, Test Plan, Traceability Matrix, Implementation Readiness |
 | OD-004 | `OPEN` | 타이포그래피형 워드마크와 별도 로고 중 무엇을 채택하고 Serif·Sans 최종 폰트를 무엇으로 할지 | UI Guidelines |
 | OD-005 | `OPEN` | P0 API를 내부 소비 전용으로 유지할지 제3자 공개 API까지 제공할지 | API Guidelines, Security & Privacy |
 | OD-006 | `OPEN` | P1 호스팅 대상, 월 비용 한도, 도메인, 오류 모니터링과 최소 분석 허용 범위 | Roadmap, System Architecture |
 | OD-007 | `OPEN` | 구현 마감일, 동시 작업 에이전트 수, 브랜치·리뷰·병합 방식 | Implementation Readiness |
 
 열린 결정은 현재 초안 작성을 막지 않지만 관련 문서를 `APPROVED`로 올리기 전에 해결해야 한다.
+
+`OD-003`의 `2026-08-30` 검증 결과와 보류 근거는 [P0 Source Qualification](../02-data/source-qualification.md)에, 실행 설정은 [`sources.yaml`](../../sources.yaml)에, 25개 표본은 [고정 fixture](../../fixtures/source-qualification.json)에 기록한다. 세종문화회관 본관 전시공간·서울시립 서서울미술관·서울시립 사진미술관·수원시립미술관 행궁 본관은 `5/5`, 국립민속박물관 서울 본관은 `4/5`로 승인했다. 서울 열린데이터광장 기반 3곳은 공공누리 제1유형 공식 HTTPS CSV Sheet, 경기·국립박물관 두 곳은 이용허락 제한 없는 문화정보 HTTPS API를 사용하며 이미지·장문 설명은 제외한다. 다섯 곳의 첫 lifecycle은 `PROVISIONAL`이다. 서울 HTTP Open API는 HTTPS 미지원으로 정식 키를 사용하지 않으며, MMCA 서울·서울공예박물관·대한민국역사박물관·예술의전당 제7전시실·서울역사박물관 등 보류 후보는 `HOLD`로 남긴다.

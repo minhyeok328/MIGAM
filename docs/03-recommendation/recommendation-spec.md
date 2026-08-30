@@ -1,7 +1,7 @@
 ---
 title: "미감 P0 추천 명세"
 status: DRAFT
-version: "0.2.0"
+version: "0.3.0"
 last_updated: "2026-08-30"
 authoritative_for:
   - "추천 후보 생성과 제외 규칙"
@@ -218,7 +218,7 @@ P0 작품 유사성은 시대, 작가·문화권, 매체, 재료·기법, 주제
 
 ## 12. 열린 결정 영향
 
-- `OD-003`: 실제 출처 allowlist는 후보의 지역·기관 커버리지와 평가 데이터 구성을 결정한다.
+- `OD-003`: `RESOLVED`. 승인 allowlist의 초기 커버리지는 서울 4개 기관·경기 1개 기관이며, 추천 평가 데이터는 [`source-qualification.json`](../../fixtures/source-qualification.json)의 판정 결과를 반영한다.
 - `OD-005`: 외부 공개 API를 제공하면 추천 요청의 인증·오남용 방지·버전 지원 정책이 추가로 필요하다.
 - `OD-006`: P1 운영 환경이 정해져야 장기 성능·관측성 기준을 확정할 수 있다.
 

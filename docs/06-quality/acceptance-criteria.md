@@ -1,7 +1,7 @@
 ---
 title: "미감 P0 합격 기준"
 status: DRAFT
-version: "0.2.0"
+version: "0.3.0"
 last_updated: "2026-08-30"
 authoritative_for:
   - "P0 기능·데이터·추천·접근성의 합격 판정"
@@ -394,5 +394,5 @@ P0는 기능이 화면에 존재하는지만으로 합격하지 않는다. 대�
 
 ## 14. 열린 결정이 합격 판정에 미치는 영향
 
-- `OD-003`: `4/5 CORE_PASS`, 구조적 반복 누락·정책·접근 제한 예외, lifecycle, 승격과 health·중단 기준은 현재 적용한다. 실제 수도권 기관·출처 목록과 출처별 허용 필드·호출 제약만 열린 결정으로 유지한다.
+- `OD-003`: `RESOLVED`. 실제 수도권 기관·출처 목록과 출처별 허용 필드·호출 제약은 [`sources.yaml`](../../sources.yaml), `4/5 CORE_PASS`를 포함한 판정 근거는 [`source-qualification.json`](../../fixtures/source-qualification.json)을 적용한다.
 - `OD-004`: 정보 위계·키보드·대비·확대 합격 기준은 현재 적용한다. 최종 워드마크와 폰트 렌더링에 대한 시각 회귀 승인은 이 결정이 해소된 뒤 수행한다.

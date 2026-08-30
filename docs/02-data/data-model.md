@@ -1,7 +1,7 @@
 ---
 title: "미감(美感) Data Model"
 status: DRAFT
-version: "0.2.0"
+version: "0.3.0"
 last_updated: "2026-08-30"
 authoritative_for:
   - "공식 전시 데이터의 개념 엔터티와 관계"
@@ -221,5 +221,5 @@ Exhibition과 Institution 사이의 역할을 표현한다. 개최 장소, 운�
 | 결정 ID | 모델에 미치는 영향 |
 | --- | --- |
 | OD-002 | 공개 저장소와 데모 재배포 범위에 따라 배포 가능한 SourceRecord·MediaAsset 표현을 제한한다. |
-| OD-003 | 실제 기관 allowlist와 Source별 원본 식별자·허용 필드·호출 제약 매핑을 확정한다. 승격과 health·중단 증거 구조는 확정됐다. |
+| OD-003 | `RESOLVED`. 실제 기관 allowlist와 Source별 원본 식별자·허용 필드·호출 제약은 [`sources.yaml`](../../sources.yaml), 표본 판정은 [`source-qualification.json`](../../fixtures/source-qualification.json)에 고정한다. |
 | OD-005 | 외부 공개 API를 제공할 경우 내부 모델과 외부 계약의 분리·노출 범위를 별도로 결정한다. |

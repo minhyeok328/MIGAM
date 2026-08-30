@@ -1,7 +1,7 @@
 ---
 title: "미감 문서 인덱스"
 status: DRAFT
-version: "0.2.0"
+version: "0.4.0"
 last_updated: "2026-08-30"
 authoritative_for:
   - "프로젝트 문서 목록과 읽기 순서"
@@ -15,17 +15,19 @@ related_documents:
 
 ## 1. 현재 문서 세트
 
-모든 문서는 전체 기획 대화에서 확정된 결정을 구조화한 `DRAFT`다. 문서별 버전은 front matter에 기록하며, `DRAFT`는 검토 가능한 초안이지 구현 승인 상태가 아니다.
+문서별 상태와 버전은 front matter에 기록한다. 제품 책임자가 내용 검토를 승인했고 열린 결정의 직접 차단이 없는 Project Brief와 Domain Rules는 `APPROVED 1.0.0`이며, P0 PRD를 포함한 나머지는 계속 `DRAFT`다. `APPROVED` 문서만 해당 권위 범위의 구현 기준이 될 수 있고, 실제 구현에는 해당 범위를 직접 정의·검증하는 관련 상·하위 문서와 작업 패킷의 승인도 필요하다.
 
 | 영역 | 문서 | 권위 범위 | 상태 |
 | --- | --- | --- | --- |
 | 거버넌스 | [문서 관리 정책](00-governance/document-policy.md) | 상태·버전·권한·충돌·변경 규칙 | `DRAFT` |
 | 거버넌스 | [결정 등록부](00-governance/decision-register.md) | 현재·폐기·열린 결정 추적 | `DRAFT` |
-| 제품 | [Project Brief](01-product/project-brief.md) | 제품 정체성·사용자·단계 범위·비범위·성공 정의 | `DRAFT` |
+| 제품 | [Project Brief](01-product/project-brief.md) | 제품 정체성·사용자·단계 범위·비범위·성공 정의 | `APPROVED 1.0.0` |
 | 제품 | [P0 PRD](01-product/prd-p0.md) | P0 사용자 기능·예외·요구사항 ID | `DRAFT` |
 | 제품 | [Roadmap](01-product/roadmap.md) | P0 이후 후보 범위와 진입 조건 | `DRAFT` |
-| 도메인 | [Domain Rules](01-product/domain-rules.md) | 용어·분류·상태·판정 불변식 | `DRAFT` |
+| 도메인 | [Domain Rules](01-product/domain-rules.md) | 용어·분류·상태·판정 불변식 | `APPROVED 1.0.0` |
 | 데이터 | [Data Source Policy](02-data/data-source-policy.md) | 허용 출처·출처 우선순위·미디어 권리 | `DRAFT` |
+| 데이터 | [Source Qualification](02-data/source-qualification.md) | OD-003 후보 기관 표본·출처 접근·권리 심사 증거 | `APPROVED` |
+| 데이터 | [Source Registry](../sources.yaml) | 승인 Source 3개와 `PROVISIONAL` 기관 5곳의 실행 설정 | `APPROVED` |
 | 데이터 | [Data Model](02-data/data-model.md) | 논리 엔티티·관계·제약·상태축 | `DRAFT` |
 | 데이터 | [Data Pipeline](02-data/data-pipeline.md) | 수집·검증·병합·갱신 흐름 | `DRAFT` |
 | 데이터 | [Normalization Rules](02-data/normalization-rules.md) | 원본에서 canonical 값으로의 변환 규칙 | `DRAFT` |
@@ -59,11 +61,12 @@ related_documents:
 
 1. Domain Rules
 2. Data Source Policy
-3. Data Model
-4. Normalization Rules
-5. Data Pipeline
-6. Recommendation Spec
-7. Recommendation Evaluation
+3. Source Qualification
+4. Data Model
+5. Normalization Rules
+6. Data Pipeline
+7. Recommendation Spec
+8. Recommendation Evaluation
 
 ### 화면을 설계할 때
 
@@ -102,13 +105,12 @@ Project Brief
 
 ## 4. 열린 결정 현황
 
-현재 열린 결정은 7개다.
+현재 열린 결정은 6개다.
 
 | ID | 요약 | 승인 차단 범위 |
 | --- | --- | --- |
 | OD-001 | 공개·비영리·상업 이용 목적 | 출처·권리·공개 운영 |
 | OD-002 | 저장소 공개와 문서·데모 데이터 재배포 | README·배포 자산 |
-| OD-003 | 실제 P0 기관·출처 목록과 출처별 허용 범위·호출 제약 | 실제 기관 선정·수집·적재 |
 | OD-004 | 로고와 최종 폰트 | 최종 시각 시스템 |
 | OD-005 | 외부 공개 API 여부 | 인증·할당량·외부 계약 |
 | OD-006 | P1 호스팅·비용·관측성 | 공개 배포·운영 |
@@ -120,7 +122,6 @@ Project Brief
 
 다음 산출물은 확정 정보나 승인된 상위 문서가 부족하므로 현재 세트에 포함하지 않는다.
 
-- 실제 `sources.yaml`: OD-003의 기관 allowlist와 최신 약관·robots·권리 확인 필요
 - 완전한 `openapi.yaml`: Data Model·PRD·API Guidelines 승인 후 단일 기계 계약으로 작성
 - 상세 구현계획과 개별 작업 패킷: 상위 문서 승인 및 OD-007 결정 후 작성
 - 설치·운영 runbook: 실행 가능한 코드·명령·환경 파일이 생긴 뒤 실제 검증 결과로 작성

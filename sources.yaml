@@ -1,0 +1,230 @@
+schema_version: "1.0"
+approved_at: "2026-08-30"
+decision_id: "OD-003"
+qualification_fixture: "fixtures/source-qualification.json"
+
+defaults:
+  timezone: "Asia/Seoul"
+  source_status: "NORMAL"
+  media_collection: false
+  long_description_collection: false
+  require_core_pass_before_publish: true
+
+sources:
+  - id: "seoul-oa-2708-sejong"
+    name: "서울 열린데이터광장 세종문화회관 공연·전시 정보"
+    owner: "세종문화회관"
+    kind: "HTTPS_CSV_SHEET"
+    dataset_url: "https://data.seoul.go.kr/dataList/OA-2708/S/1/datasetView.do"
+    authentication: "NONE"
+    update_cadence: "ON_CHANGE"
+    access_limits:
+      sheet_preview_max_rows: 1000
+      full_csv_download: true
+      max_downloads_per_observed_update: 1
+      stop_http_statuses: [403, 429]
+    rights:
+      license: "KOGL_TYPE_1"
+      attribution_required: true
+      commercial_use: true
+      modification: true
+      review_url: "https://data.seoul.go.kr/etc/accessTerms.do"
+    fields:
+      record_id: "PERFORM_IDX"
+      title: "TITLE"
+      start_date: "START_DATE"
+      end_date: "END_DATE"
+      venue: "PLACE_LIST"
+      official_url: "INFO_URL"
+      genre: "GENRE_NAME"
+    source_filter:
+      genres: ["전시기타", "기획전시"]
+      venues:
+        - "세종미술관 1관"
+        - "세종미술관 2관"
+        - "세종미술관 1관,세종미술관 2관"
+        - "세종미술관1/2관"
+        - "야외전시"
+      official_url_host: "www.sejongpac.or.kr"
+      official_url_path: "/portal/performance/performance/performTicket.do"
+      official_url_query:
+        menuNo: "200558"
+        performIdx_equals_field: "PERFORM_IDX"
+
+  - id: "seoul-oa-15323-sema"
+    name: "서울 열린데이터광장 서울시립미술관 전시 정보"
+    owner: "서울시립미술관"
+    kind: "HTTPS_CSV_SHEET"
+    dataset_url: "https://data.seoul.go.kr/dataList/OA-15323/S/1/datasetView.do"
+    authentication: "NONE"
+    update_cadence: "ON_CHANGE"
+    access_limits:
+      sheet_preview_max_rows: 1000
+      full_csv_download: true
+      max_downloads_per_observed_update: 1
+      stop_http_statuses: [403, 429]
+    rights:
+      license: "KOGL_TYPE_1"
+      attribution_required: true
+      commercial_use: true
+      modification: true
+      review_url: "https://data.seoul.go.kr/etc/accessTerms.do"
+    fields:
+      record_id: "DP_EX_NO"
+      title: "DP_NAME"
+      start_date: "DP_START"
+      end_date: "DP_END"
+      venue: "DP_PLACE"
+      official_url: "DP_LNK"
+    source_filter:
+      venues:
+        - "서울시립 서서울미술관"
+        - "서울시립 사진미술관"
+      official_url_host: "sema.seoul.go.kr"
+      official_url_path: "/kr/whatson/exhibition/detail"
+      official_url_query:
+        exNo_equals_field: "DP_EX_NO"
+
+  - id: "kcisa-cultureinfo"
+    name: "한국문화정보원 한눈에보는문화정보조회서비스"
+    owner: "한국문화정보원"
+    kind: "HTTPS_XML_API"
+    registration_url: "https://www.data.go.kr/data/15138937/openapi.do"
+    base_url: "https://apis.data.go.kr/B553457/cultureinfo"
+    endpoints:
+      list: "/period2"
+      detail: "/detail2"
+    authentication:
+      type: "QUERY_PARAMETER"
+      parameter: "serviceKey"
+      environment_variable: "CULTURE_PORTAL_SERVICE_KEY"
+    update_cadence: "PERIODIC_UNPUBLISHED"
+    access_limits:
+      development_requests_per_day: 10000
+      request_mode: "SEQUENTIAL"
+      backoff_on_rate_limit: true
+    rights:
+      license: "NO_USE_RESTRICTION"
+      attribution_required: false
+      commercial_use: true
+      modification: true
+      review_url: "https://www.data.go.kr/data/15138937/openapi.do"
+    fields:
+      record_id: "seq"
+      title: "title"
+      start_date: "startDate"
+      end_date: "endDate"
+      venue: "place"
+      address: "placeAddr"
+      region: "area"
+      district: "sigungu"
+      official_url: "url"
+    excluded_fields:
+      - "contents1"
+      - "imgUrl"
+      - "gpsX"
+      - "gpsY"
+      - "phone"
+      - "price"
+
+institution_allowlist:
+  - id: "sejong-center-main-exhibition"
+    name: "세종문화회관 본관 전시공간"
+    source_id: "seoul-oa-2708-sejong"
+    lifecycle: "PROVISIONAL"
+    health: "HEALTHY"
+    promotion_validation_started_at: "2026-08-30"
+    consecutive_final_failed_count: 0
+    region:
+      area: "서울"
+      district: "종로구"
+    qualification:
+      result: "PASS"
+      core_pass: 5
+      sample_count: 5
+
+  - id: "sema-seoseoul"
+    name: "서울시립 서서울미술관"
+    source_id: "seoul-oa-15323-sema"
+    lifecycle: "PROVISIONAL"
+    health: "HEALTHY"
+    promotion_validation_started_at: "2026-08-30"
+    consecutive_final_failed_count: 0
+    source_filter:
+      DP_PLACE: "서울시립 서서울미술관"
+    region:
+      area: "서울"
+      district: "금천구"
+    qualification:
+      result: "PASS"
+      core_pass: 5
+      sample_count: 5
+
+  - id: "sema-photo"
+    name: "서울시립 사진미술관"
+    source_id: "seoul-oa-15323-sema"
+    lifecycle: "PROVISIONAL"
+    health: "HEALTHY"
+    promotion_validation_started_at: "2026-08-30"
+    consecutive_final_failed_count: 0
+    source_filter:
+      DP_PLACE: "서울시립 사진미술관"
+    region:
+      area: "서울"
+      district: "도봉구"
+    qualification:
+      result: "PASS"
+      core_pass: 5
+      sample_count: 5
+
+  - id: "suma-haenggung"
+    name: "수원시립미술관 행궁 본관"
+    source_id: "kcisa-cultureinfo"
+    lifecycle: "PROVISIONAL"
+    health: "HEALTHY"
+    promotion_validation_started_at: "2026-08-30"
+    consecutive_final_failed_count: 0
+    source_filter:
+      place: "수원시립미술관"
+      placeAddr: "경기도 수원시 팔달구 정조로 833"
+      official_url_host: "suma.suwon.go.kr"
+    region:
+      area: "경기"
+      district: "수원시"
+    qualification:
+      result: "PASS"
+      core_pass: 5
+      sample_count: 5
+
+  - id: "nfm-seoul-main"
+    name: "국립민속박물관 서울 본관"
+    source_id: "kcisa-cultureinfo"
+    lifecycle: "PROVISIONAL"
+    health: "HEALTHY"
+    promotion_validation_started_at: "2026-08-30"
+    consecutive_final_failed_count: 0
+    source_filter:
+      place: "국립민속박물관"
+      area: "서울"
+      official_url_host: "www.nfm.go.kr"
+    region:
+      area: "서울"
+      district: "종로구"
+    qualification:
+      result: "PASS"
+      core_pass: 4
+      sample_count: 5
+      quarantined_records: ["348222"]
+
+collection_issues:
+  - id: "nfm-348222-missing-official-url"
+    classification: "RECORD_EXCEPTION"
+    scope: "ENTRY"
+    source_id: "kcisa-cultureinfo"
+    institution_id: "nfm-seoul-main"
+    source_record_id: "348222"
+    field: "url"
+    status: "OPEN"
+    action: "QUARANTINE_RECORD"
+    institution_lifecycle_effect: "NONE"
+    institution_health_effect: "NONE"
