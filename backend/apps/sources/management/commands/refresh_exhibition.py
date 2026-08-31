@@ -1,0 +1,81 @@
+from datetime import date
+from pathlib import Path
+
+from django.conf import settings
+from django.core.management.base import BaseCommand, CommandError, CommandParser
+from django.utils import timezone
+
+from backend.apps.catalog.models import Exhibition
+from backend.data_pipeline.fixture_loader import load_qualification_fixture
+from backend.data_pipeline.freshness.execution import (
+    RefreshExecutionError,
+    refresh_exhibitions,
+)
+from backend.data_pipeline.registry import SourceRegistry
+
+
+class Command(BaseCommand):
+    help = "Immediately refresh one canonical exhibition by ID."
+
+    def add_arguments(self, parser: CommandParser) -> None:
+        parser.add_argument("--id", type=int, required=True)
+        parser.add_argument(
+            "--fixture",
+            default=str(
+                settings.REPOSITORY_ROOT
+                / "fixtures"
+                / "source-qualification.json"
+            ),
+            help="Approved offline source snapshot used by the P0 demo collector.",
+        )
+        parser.add_argument(
+            "--as-of",
+            dest="as_of",
+            help="Lifecycle reference date in YYYY-MM-DD format.",
+        )
+
+    def handle(self, *args: object, **options: object) -> None:
+        del args
+        exhibition_id = int(options["id"])
+        try:
+            exhibition = Exhibition.objects.get(pk=exhibition_id)
+        except Exhibition.DoesNotExist as error:
+            raise CommandError(f"unknown exhibition: {exhibition_id}") from error
+
+        now = timezone.now()
+        as_of = _as_of_date(options.get("as_of"), now=now)
+        registry = SourceRegistry.load(settings.REPOSITORY_ROOT / "sources.yaml")
+        fixture_path = Path(str(options["fixture"])).resolve()
+        try:
+            summary = refresh_exhibitions(
+                [exhibition],
+                collect=lambda: load_qualification_fixture(fixture_path, registry),
+                registry=registry,
+                as_of=as_of,
+                now=now,
+                command_name="refresh_exhibition",
+            )
+        except (RefreshExecutionError, OSError, ValueError, KeyError) as error:
+            raise CommandError(str(error)) from error
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                " ".join(
+                    (
+                        f"run={summary.run_id}",
+                        f"target={summary.target_count}",
+                        f"success={summary.success_count}",
+                        f"failure={summary.failure_count}",
+                    )
+                )
+            )
+        )
+
+
+def _as_of_date(value: object, *, now: object) -> date:
+    if value is None:
+        return timezone.localdate(now)
+    try:
+        return date.fromisoformat(str(value))
+    except ValueError as error:
+        raise CommandError("--as-of must use YYYY-MM-DD format") from error
