@@ -98,6 +98,44 @@ class ExhibitionSourceLink(models.Model):
         ]
 
 
+class VerificationRecord(models.Model):
+    class Outcome(models.TextChoices):
+        SUCCESS = "SUCCESS", "Success"
+        FAILED = "FAILED", "Failed"
+
+    exhibition = models.ForeignKey(
+        Exhibition,
+        on_delete=models.PROTECT,
+        related_name="verification_records",
+    )
+    ingestion_run = models.ForeignKey(
+        "sources.IngestionRun",
+        on_delete=models.PROTECT,
+        related_name="verification_records",
+    )
+    source_id = models.CharField(max_length=128, blank=True)
+    source_record_id = models.CharField(max_length=255, blank=True)
+    outcome = models.CharField(max_length=16, choices=Outcome.choices)
+    checked_at = models.DateTimeField(default=timezone.now)
+    error_message = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("-checked_at", "-id")
+        constraints = [
+            models.UniqueConstraint(
+                fields=("exhibition", "ingestion_run"),
+                name="catalog_unique_exhibition_verification_run",
+            )
+        ]
+        indexes = [
+            models.Index(
+                fields=("exhibition", "checked_at"),
+                name="catalog_verification_lookup",
+            )
+        ]
+
+
 class FieldEvidence(models.Model):
     exhibition = models.ForeignKey(
         Exhibition,

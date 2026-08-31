@@ -35,11 +35,15 @@ def persist_records(
     as_of: date,
     command_name: str,
     source_id: str = "",
+    run: IngestionRun | None = None,
 ) -> PersistenceSummary:
-    run = IngestionRun.objects.create(
-        command=command_name,
-        source_id=source_id,
-    )
+    if run is None:
+        run = IngestionRun.objects.create(
+            command=command_name,
+            source_id=source_id,
+        )
+    elif run.status != IngestionRun.Status.RUNNING:
+        raise ValueError("precreated ingestion run must be RUNNING")
     try:
         with transaction.atomic():
             processed = process_records(records, registry, as_of=as_of)

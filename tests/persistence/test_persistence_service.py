@@ -98,3 +98,19 @@ class PersistenceServiceTests(TestCase):
         self.assertEqual(SourceRecord.objects.count(), 1)
         self.assertEqual(ExhibitionCandidate.objects.count(), 1)
         self.assertEqual(IngestionObservation.objects.count(), 2)
+
+    def test_uses_precreated_run_for_collection_failure_traceability(self) -> None:
+        run = IngestionRun.objects.create(command="refresh_due_exhibitions")
+
+        summary = persist_records(
+            [valid_record()],
+            self.registry,
+            as_of=date(2026, 8, 30),
+            command_name="refresh_due_exhibitions",
+            run=run,
+        )
+
+        self.assertEqual(summary.run_id, run.pk)
+        self.assertEqual(IngestionRun.objects.count(), 1)
+        run.refresh_from_db()
+        self.assertEqual(run.status, IngestionRun.Status.SUCCESS)
