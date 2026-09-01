@@ -41,5 +41,9 @@ class SourceRegistry:
             raise KeyError(f"unknown institution: {institution_id}") from error
 
     @property
+    def source_ids(self) -> tuple[str, ...]:
+        return tuple(self._sources)
+
+    @property
     def collection_issues(self) -> tuple[Mapping[str, Any], ...]:
         return tuple(self.data.get("collection_issues", ()))

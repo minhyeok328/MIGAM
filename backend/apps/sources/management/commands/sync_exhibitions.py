@@ -4,15 +4,21 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, CommandParser
+from django.db import transaction
+from django.utils import timezone
 
-from backend.data_pipeline.collectors.culture_info import (
-    CultureInfoApiCollector,
-    CultureInfoApiError,
+from backend.apps.sources.models import IngestionRun, InstitutionAllowlistEntry
+from backend.data_pipeline.collection_gate import (
+    CollectionGateError,
+    select_collectible_entries,
 )
+from backend.data_pipeline.collectors.culture_info import CultureInfoApiCollector
 from backend.data_pipeline.collectors.seoul_csv import SeoulCsvCollector
 from backend.data_pipeline.fixture_loader import load_qualification_fixture
+from backend.data_pipeline.institution_runs import record_institution_results
 from backend.data_pipeline.persistence import persist_records
 from backend.data_pipeline.registry import SourceRegistry
+from backend.data_pipeline.registry_state import sync_registry_state
 
 
 SEJONG_SOURCE_ID = "seoul-oa-2708-sejong"
@@ -75,6 +81,11 @@ class Command(BaseCommand):
             help="Restrict the sync to one registered source ID.",
         )
         parser.add_argument(
+            "--qualification",
+            action="store_true",
+            help="Record this sync as an institution promotion qualification run.",
+        )
+        parser.add_argument(
             "--sejong-csv",
             dest="sejong_csv",
             help="Path to a Seoul Open Data Sejong Center CSV file.",
@@ -108,6 +119,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: object, **options: object) -> None:
+        del args
         registry = SourceRegistry.load(settings.REPOSITORY_ROOT / "sources.yaml")
         source_id = str(options.get("source") or "")
         if source_id:
@@ -121,39 +133,24 @@ class Command(BaseCommand):
         except ValueError as error:
             raise CommandError("--as-of must use YYYY-MM-DD format") from error
 
+        sejong_csv = options.get("sejong_csv")
+        sema_csv = options.get("sema_csv")
+        culture_requested = bool(
+            options.get("culture_from") or options.get("culture_to")
+        )
         try:
-            collected = []
-            sejong_csv = options.get("sejong_csv")
-            if sejong_csv:
-                if source_id and source_id != SEJONG_SOURCE_ID:
-                    raise ValueError(
-                        "--sejong-csv can only be used with "
-                        f"--source={SEJONG_SOURCE_ID}"
-                    )
-                collected.extend(
-                    SeoulCsvCollector(
-                        registry,
-                        SEJONG_SOURCE_ID,
-                    ).collect(Path(str(sejong_csv)).read_bytes())
+            if sejong_csv and source_id and source_id != SEJONG_SOURCE_ID:
+                raise ValueError(
+                    "--sejong-csv can only be used with "
+                    f"--source={SEJONG_SOURCE_ID}"
                 )
-
-            sema_csv = options.get("sema_csv")
-            if sema_csv:
-                if source_id and source_id != SEMA_SOURCE_ID:
-                    raise ValueError(
-                        "--sema-csv can only be used with "
-                        f"--source={SEMA_SOURCE_ID}"
-                    )
-                collected.extend(
-                    SeoulCsvCollector(
-                        registry,
-                        SEMA_SOURCE_ID,
-                    ).collect(Path(str(sema_csv)).read_bytes())
+            if sema_csv and source_id and source_id != SEMA_SOURCE_ID:
+                raise ValueError(
+                    "--sema-csv can only be used with "
+                    f"--source={SEMA_SOURCE_ID}"
                 )
-
-            culture_requested = bool(
-                options.get("culture_from") or options.get("culture_to")
-            )
+            culture_from = ""
+            culture_to = ""
             if culture_requested:
                 if not options.get("culture_from") or not options.get("culture_to"):
                     raise ValueError(
@@ -172,6 +169,52 @@ class Command(BaseCommand):
                     options["culture_to"],
                     "--culture-to",
                 )
+        except ValueError as error:
+            raise CommandError(str(error)) from error
+
+        requested_source_ids = _requested_source_ids(
+            registry,
+            source_id=source_id,
+            sejong_csv=bool(sejong_csv),
+            sema_csv=bool(sema_csv),
+            culture_requested=culture_requested,
+        )
+        try:
+            sync_registry_state(registry)
+            institutions = select_collectible_entries(
+                source_ids=requested_source_ids,
+            )
+        except (CollectionGateError, ValueError, KeyError) as error:
+            raise CommandError(str(error)) from error
+
+        eligible_source_ids = {entry.source.registry_id for entry in institutions}
+        eligible_institution_ids = {entry.registry_id for entry in institutions}
+        run = IngestionRun.objects.create(
+            command="sync_exhibitions",
+            source_id=(
+                requested_source_ids[0] if len(requested_source_ids) == 1 else ""
+            ),
+            qualification_mode=bool(options.get("qualification")),
+        )
+        try:
+            collected = []
+            if sejong_csv and SEJONG_SOURCE_ID in eligible_source_ids:
+                collected.extend(
+                    SeoulCsvCollector(
+                        registry,
+                        SEJONG_SOURCE_ID,
+                    ).collect(Path(str(sejong_csv)).read_bytes())
+                )
+
+            if sema_csv and SEMA_SOURCE_ID in eligible_source_ids:
+                collected.extend(
+                    SeoulCsvCollector(
+                        registry,
+                        SEMA_SOURCE_ID,
+                    ).collect(Path(str(sema_csv)).read_bytes())
+                )
+
+            if culture_requested and CULTURE_SOURCE_ID in eligible_source_ids:
                 collected.extend(
                     CultureInfoApiCollector(
                         registry,
@@ -188,23 +231,39 @@ class Command(BaseCommand):
                 )
 
             if sejong_csv or sema_csv or culture_requested:
-                records = tuple(collected)
+                records = tuple(
+                    record
+                    for record in collected
+                    if record.institution_id in eligible_institution_ids
+                )
             else:
                 fixture_path = Path(str(options["fixture"])).resolve()
-                records = load_qualification_fixture(fixture_path, registry)
-                if source_id:
-                    records = tuple(
-                        record for record in records if record.source_id == source_id
-                    )
-            summary = persist_records(
-                records,
-                registry,
-                as_of=as_of,
-                command_name="sync_exhibitions",
-                source_id=source_id,
-            )
-        except (OSError, ValueError, KeyError, CultureInfoApiError) as error:
+                records = tuple(
+                    record
+                    for record in load_qualification_fixture(fixture_path, registry)
+                    if record.institution_id in eligible_institution_ids
+                )
+            with transaction.atomic():
+                summary = persist_records(
+                    records,
+                    registry,
+                    as_of=as_of,
+                    command_name="sync_exhibitions",
+                    source_id=run.source_id,
+                    run=run,
+                )
+                record_institution_results(
+                    run,
+                    institutions,
+                    finished_at=run.finished_at,
+                )
+        except Exception as error:
+            _record_failed_execution(run, institutions, error)
             raise CommandError(str(error)) from error
+
+        run.refresh_from_db()
+        if run.status == IngestionRun.Status.FAILED:
+            raise CommandError(run.error_message or "qualification failed")
 
         self.stdout.write(
             self.style.SUCCESS(
@@ -219,3 +278,53 @@ class Command(BaseCommand):
                 )
             )
         )
+
+
+def _requested_source_ids(
+    registry: SourceRegistry,
+    *,
+    source_id: str,
+    sejong_csv: bool,
+    sema_csv: bool,
+    culture_requested: bool,
+) -> tuple[str, ...]:
+    if source_id:
+        return (source_id,)
+    requested: list[str] = []
+    if sejong_csv:
+        requested.append(SEJONG_SOURCE_ID)
+    if sema_csv:
+        requested.append(SEMA_SOURCE_ID)
+    if culture_requested:
+        requested.append(CULTURE_SOURCE_ID)
+    return tuple(requested) if requested else registry.source_ids
+
+
+def _mark_run_failed(run: IngestionRun, error: Exception) -> None:
+    run.status = IngestionRun.Status.FAILED
+    run.finished_at = timezone.now()
+    run.error_message = f"{type(error).__name__}: {error}"[:2000]
+    run.save(update_fields=("status", "finished_at", "error_message"))
+
+
+def _record_failed_execution(
+    run: IngestionRun,
+    institutions: tuple[InstitutionAllowlistEntry, ...],
+    error: Exception,
+) -> None:
+    failed_ids = {
+        institution.registry_id for institution in institutions
+    }
+    try:
+        with transaction.atomic():
+            _mark_run_failed(run, error)
+            record_institution_results(
+                run,
+                institutions,
+                failed_institution_ids=failed_ids,
+                error_message=str(error),
+                finished_at=run.finished_at,
+            )
+    except Exception:
+        _mark_run_failed(run, error)
+        raise

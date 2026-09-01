@@ -7,6 +7,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from backend.apps.catalog.models import (
+    ChangeHistory,
     DuplicateCandidate,
     Exhibition,
     ExhibitionSourceLink,
@@ -15,6 +16,7 @@ from backend.apps.catalog.models import (
     SourceConflict,
 )
 from backend.apps.data_quality.models import ExhibitionCandidate
+from backend.apps.sources.models import IngestionRun
 from backend.data_pipeline.registry import SourceRegistry
 
 
@@ -44,6 +46,7 @@ def canonicalize_candidates(
     candidates: Iterable[ExhibitionCandidate],
     *,
     registry: SourceRegistry | None = None,
+    ingestion_run: IngestionRun | None = None,
 ) -> CanonicalizationSummary:
     created_count = 0
     matched_count = 0
@@ -70,6 +73,7 @@ def canonicalize_candidates(
             conflict_count += _merge_same_source_version(
                 source_link.exhibition,
                 candidate,
+                ingestion_run=ingestion_run,
             )
             if source_link.latest_source_record_id != source_record.pk:
                 source_link.latest_source_record = source_record
@@ -89,6 +93,11 @@ def canonicalize_candidates(
         exhibition = _create_exhibition(candidate, institution)
         _link_source(exhibition, candidate)
         _record_initial_evidence(exhibition, candidate)
+        _record_created_history(
+            exhibition,
+            candidate,
+            ingestion_run=ingestion_run,
+        )
         created_count += 1
 
         for similar in similar_exhibitions:
@@ -242,11 +251,42 @@ def _record_initial_evidence(
         )
 
 
+def _record_created_history(
+    exhibition: Exhibition,
+    candidate: ExhibitionCandidate,
+    *,
+    ingestion_run: IngestionRun | None,
+) -> ChangeHistory:
+    new_value = {
+        field_name: _history_value(getattr(exhibition, field_name))
+        for field_name in CANONICAL_FIELDS
+    }
+    history, _ = ChangeHistory.objects.get_or_create(
+        exhibition=exhibition,
+        ingestion_run=ingestion_run,
+        candidate=candidate,
+        source_record=candidate.source_record,
+        change_type=ChangeHistory.ChangeType.CREATED,
+        field_name="",
+        defaults={
+            "old_value": None,
+            "new_value": new_value,
+            "rule_version": candidate.rule_version,
+            "meaningful_for_promotion": True,
+            "meaningful_type": ChangeHistory.MeaningfulType.NEW_EXHIBITION,
+        },
+    )
+    return history
+
+
 def _merge_same_source_version(
     exhibition: Exhibition,
     candidate: ExhibitionCandidate,
+    *,
+    ingestion_run: IngestionRun | None,
 ) -> int:
     changed_fields: list[str] = []
+    changed_values: list[tuple[str, object, object]] = []
     conflict_count = 0
     for field_name in CANONICAL_FIELDS:
         current_value = getattr(exhibition, field_name)
@@ -293,6 +333,7 @@ def _merge_same_source_version(
         ).update(adopted=False)
         setattr(exhibition, field_name, candidate_value)
         changed_fields.append(field_name)
+        changed_values.append((field_name, current_value, candidate_value))
         _record_evidence(
             exhibition,
             candidate,
@@ -302,7 +343,56 @@ def _merge_same_source_version(
         )
 
     _finish_merge(exhibition, changed_fields, conflict_count)
+    for field_name, old_value, new_value in changed_values:
+        _record_field_change_history(
+            exhibition,
+            candidate,
+            ingestion_run=ingestion_run,
+            field_name=field_name,
+            old_value=old_value,
+            new_value=new_value,
+        )
     return conflict_count
+
+
+def _record_field_change_history(
+    exhibition: Exhibition,
+    candidate: ExhibitionCandidate,
+    *,
+    ingestion_run: IngestionRun | None,
+    field_name: str,
+    old_value: object,
+    new_value: object,
+) -> ChangeHistory:
+    meaningful_type = _meaningful_change_type(field_name, new_value)
+    history, _ = ChangeHistory.objects.get_or_create(
+        exhibition=exhibition,
+        ingestion_run=ingestion_run,
+        candidate=candidate,
+        source_record=candidate.source_record,
+        change_type=ChangeHistory.ChangeType.FIELD_CHANGED,
+        field_name=field_name,
+        defaults={
+            "old_value": _history_value(old_value),
+            "new_value": _history_value(new_value),
+            "rule_version": candidate.rule_version,
+            "meaningful_for_promotion": (
+                meaningful_type != ChangeHistory.MeaningfulType.NONE
+            ),
+            "meaningful_type": meaningful_type,
+        },
+    )
+    return history
+
+
+def _meaningful_change_type(field_name: str, new_value: object) -> str:
+    if field_name == "end_date":
+        return ChangeHistory.MeaningfulType.END_DATE_CHANGED
+    if field_name == "venue":
+        return ChangeHistory.MeaningfulType.VENUE_CHANGED
+    if field_name == "lifecycle" and str(new_value) == Exhibition.Lifecycle.CANCELED:
+        return ChangeHistory.MeaningfulType.CANCELED
+    return ChangeHistory.MeaningfulType.NONE
 
 
 def _merge_additional_source(
@@ -410,3 +500,9 @@ def _serialized(value: object) -> str:
     if isinstance(value, date):
         return value.isoformat()
     return str(value)
+
+
+def _history_value(value: object) -> object:
+    if isinstance(value, date):
+        return value.isoformat()
+    return value

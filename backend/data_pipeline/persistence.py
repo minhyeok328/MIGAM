@@ -76,7 +76,11 @@ def persist_records(
                 )
                 candidates.append(candidate)
 
-            canonicalize_candidates(candidates, registry=registry)
+            canonicalize_candidates(
+                candidates,
+                registry=registry,
+                ingestion_run=run,
+            )
 
             run.received_count = len(processed)
             run.verified_count = sum(

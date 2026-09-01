@@ -6,6 +6,10 @@ from django.core.management.base import BaseCommand, CommandError, CommandParser
 from django.utils import timezone
 
 from backend.apps.catalog.models import Exhibition
+from backend.data_pipeline.collection_gate import (
+    CollectionGateError,
+    select_collectible_entries,
+)
 from backend.data_pipeline.fixture_loader import load_qualification_fixture
 from backend.data_pipeline.freshness.execution import (
     RefreshExecutionError,
@@ -13,6 +17,7 @@ from backend.data_pipeline.freshness.execution import (
 )
 from backend.data_pipeline.freshness.schedule import refresh_schedule_for
 from backend.data_pipeline.registry import SourceRegistry
+from backend.data_pipeline.registry_state import sync_registry_state
 
 
 class Command(BaseCommand):
@@ -39,10 +44,19 @@ class Command(BaseCommand):
         now = timezone.now()
         as_of = _as_of_date(options.get("as_of"), now=now)
         registry = SourceRegistry.load(settings.REPOSITORY_ROOT / "sources.yaml")
+        sync_registry_state(registry)
+        try:
+            collectible_entries = select_collectible_entries()
+        except CollectionGateError:
+            collectible_entries = ()
+        collectible_institution_ids = {
+            entry.registry_id for entry in collectible_entries
+        }
         targets = tuple(
             exhibition
             for exhibition in Exhibition.objects.select_related("institution")
-            if refresh_schedule_for(exhibition, now=now).is_due
+            if exhibition.institution.registry_id in collectible_institution_ids
+            and refresh_schedule_for(exhibition, now=now).is_due
         )
         if not targets:
             self.stdout.write("target=0 success=0 failure=0")

@@ -2,17 +2,25 @@ from collections.abc import Callable, Iterable
 from dataclasses import dataclass
 from datetime import date, datetime
 
+from django.db import transaction
+
 from backend.apps.catalog.models import Exhibition, ExhibitionSourceLink
 from backend.apps.data_quality.models import ExhibitionCandidate
-from backend.apps.sources.models import IngestionRun
+from backend.apps.sources.models import IngestionRun, InstitutionAllowlistEntry
+from backend.data_pipeline.collection_gate import (
+    CollectionGateError,
+    select_collectible_entries,
+)
 from backend.data_pipeline.freshness.state import (
     apply_time_based_freshness,
     record_refresh_failure,
     record_refresh_success,
 )
 from backend.data_pipeline.models import RawExhibitionRecord
+from backend.data_pipeline.institution_runs import record_institution_results
 from backend.data_pipeline.persistence import persist_records
 from backend.data_pipeline.registry import SourceRegistry
+from backend.data_pipeline.registry_state import sync_registry_state
 
 
 class RefreshExecutionError(RuntimeError):
@@ -39,6 +47,23 @@ def refresh_exhibitions(
     targets = tuple(exhibitions)
     if not targets:
         raise ValueError("at least one exhibition is required")
+
+    sync_registry_state(registry)
+    target_institution_ids = {
+        exhibition.institution.registry_id for exhibition in targets
+    }
+    institutions = select_collectible_entries(
+        institution_ids=target_institution_ids,
+    )
+    collectible_institution_ids = {
+        institution.registry_id for institution in institutions
+    }
+    blocked_institution_ids = target_institution_ids - collectible_institution_ids
+    if blocked_institution_ids:
+        raise CollectionGateError(
+            "no collectible institution for refresh target: "
+            f"{', '.join(sorted(blocked_institution_ids))}"
+        )
 
     target_by_id = {exhibition.pk: exhibition for exhibition in targets}
     links = tuple(
@@ -67,83 +92,117 @@ def refresh_exhibitions(
     apply_time_based_freshness(targets, now=now)
     try:
         collected = tuple(collect())
-        selected_records = tuple(
-            record
-            for record in collected
-            if (record.source_id, record.source_record_id) in target_identities
-        )
-        persist_records(
-            selected_records,
-            registry,
-            as_of=as_of,
-            command_name=command_name,
-            source_id=run.source_id,
-            run=run,
-        )
     except Exception as error:
-        _mark_run_failed(run, now=now, error=error)
-        for exhibition in targets:
-            record_refresh_failure(
-                exhibition,
-                ingestion_run=run,
-                checked_at=now,
-                error_message=str(error),
-            )
+        _record_failed_execution(
+            run,
+            targets,
+            institutions,
+            failed_institution_ids=target_institution_ids,
+            now=now,
+            error=error,
+        )
         raise RefreshExecutionError(str(error)) from error
 
-    valid_identities = set(
-        ExhibitionCandidate.objects.filter(
-            source_record__observations__ingestion_run=run,
-            core_result=ExhibitionCandidate.CoreResult.PASS,
-            eligibility=ExhibitionCandidate.Eligibility.VERIFIED,
-            quarantined=False,
-        ).values_list(
-            "source_record__source_id",
-            "source_record__source_record_id",
-        )
+    selected_records = tuple(
+        record
+        for record in collected
+        if (record.source_id, record.source_record_id) in target_identities
     )
     successful: list[Exhibition] = []
     failed: list[Exhibition] = []
-    successful_identity: dict[int, tuple[str, str]] = {}
-    for exhibition in targets:
-        identity = next(
-            (
-                candidate
-                for candidate in identities_by_exhibition[exhibition.pk]
-                if candidate in valid_identities
-            ),
-            None,
-        )
-        if identity is None:
-            failed.append(exhibition)
-        else:
-            successful.append(exhibition)
-            successful_identity[exhibition.pk] = identity
-
-    for exhibition in successful:
-        source_id, source_record_id = successful_identity[exhibition.pk]
-        record_refresh_success(
-            exhibition,
-            ingestion_run=run,
-            checked_at=now,
-            source_id=source_id,
-            source_record_id=source_record_id,
-        )
-
-    if failed:
-        failed_ids = ", ".join(str(exhibition.pk) for exhibition in failed)
-        error = RefreshExecutionError(
-            f"target records not returned or failed quality: {failed_ids}"
-        )
-        _mark_run_failed(run, now=now, error=error)
-        for exhibition in failed:
-            record_refresh_failure(
-                exhibition,
-                ingestion_run=run,
-                checked_at=now,
-                error_message=str(error),
+    execution_error: RefreshExecutionError | None = None
+    try:
+        with transaction.atomic():
+            persist_records(
+                selected_records,
+                registry,
+                as_of=as_of,
+                command_name=command_name,
+                source_id=run.source_id,
+                run=run,
             )
-        raise error
+            valid_identities = set(
+                ExhibitionCandidate.objects.filter(
+                    source_record__observations__ingestion_run=run,
+                    core_result=ExhibitionCandidate.CoreResult.PASS,
+                    eligibility=ExhibitionCandidate.Eligibility.VERIFIED,
+                    quarantined=False,
+                ).values_list(
+                    "source_record__source_id",
+                    "source_record__source_record_id",
+                )
+            )
+            successful_identity: dict[int, tuple[str, str]] = {}
+            for exhibition in targets:
+                identity = next(
+                    (
+                        candidate
+                        for candidate in identities_by_exhibition[exhibition.pk]
+                        if candidate in valid_identities
+                    ),
+                    None,
+                )
+                if identity is None:
+                    failed.append(exhibition)
+                else:
+                    successful.append(exhibition)
+                    successful_identity[exhibition.pk] = identity
+
+            for exhibition in successful:
+                source_id, source_record_id = successful_identity[exhibition.pk]
+                record_refresh_success(
+                    exhibition,
+                    ingestion_run=run,
+                    checked_at=now,
+                    source_id=source_id,
+                    source_record_id=source_record_id,
+                )
+
+            if failed:
+                failed_ids = ", ".join(
+                    str(exhibition.pk) for exhibition in failed
+                )
+                execution_error = RefreshExecutionError(
+                    "target records not returned or failed quality: "
+                    f"{failed_ids}"
+                )
+                _mark_run_failed(run, now=now, error=execution_error)
+                for exhibition in failed:
+                    record_refresh_failure(
+                        exhibition,
+                        ingestion_run=run,
+                        checked_at=now,
+                        error_message=str(execution_error),
+                    )
+                record_institution_results(
+                    run,
+                    institutions,
+                    failed_institution_ids={
+                        exhibition.institution.registry_id
+                        for exhibition in failed
+                    },
+                    error_message=str(execution_error),
+                    finished_at=run.finished_at,
+                )
+            else:
+                record_institution_results(
+                    run,
+                    institutions,
+                    finished_at=run.finished_at,
+                )
+    except Exception as error:
+        _record_failed_execution(
+            run,
+            targets,
+            institutions,
+            failed_institution_ids=target_institution_ids,
+            now=now,
+            error=error,
+        )
+        raise RefreshExecutionError(str(error)) from error
+
+    if execution_error is not None:
+        raise execution_error
 
     return RefreshExecutionSummary(
         run_id=run.pk,
@@ -163,3 +222,34 @@ def _mark_run_failed(
     run.finished_at = now
     run.error_message = f"{type(error).__name__}: {error}"[:2000]
     run.save(update_fields=("status", "finished_at", "error_message"))
+
+
+def _record_failed_execution(
+    run: IngestionRun,
+    targets: tuple[Exhibition, ...],
+    institutions: tuple[InstitutionAllowlistEntry, ...],
+    *,
+    failed_institution_ids: set[str],
+    now: datetime,
+    error: Exception,
+) -> None:
+    try:
+        with transaction.atomic():
+            _mark_run_failed(run, now=now, error=error)
+            for exhibition in targets:
+                record_refresh_failure(
+                    exhibition,
+                    ingestion_run=run,
+                    checked_at=now,
+                    error_message=str(error),
+                )
+            record_institution_results(
+                run,
+                institutions,
+                failed_institution_ids=failed_institution_ids,
+                error_message=str(error),
+                finished_at=run.finished_at,
+            )
+    except Exception:
+        _mark_run_failed(run, now=now, error=error)
+        raise

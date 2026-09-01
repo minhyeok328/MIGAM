@@ -175,6 +175,75 @@ class FieldEvidence(models.Model):
         ]
 
 
+class ChangeHistory(models.Model):
+    class ChangeType(models.TextChoices):
+        CREATED = "CREATED", "Created"
+        FIELD_CHANGED = "FIELD_CHANGED", "Field changed"
+
+    class MeaningfulType(models.TextChoices):
+        NONE = "NONE", "None"
+        NEW_EXHIBITION = "NEW_EXHIBITION", "New exhibition"
+        END_DATE_CHANGED = "END_DATE_CHANGED", "End date changed"
+        VENUE_CHANGED = "VENUE_CHANGED", "Venue changed"
+        CANCELED = "CANCELED", "Canceled"
+
+    exhibition = models.ForeignKey(
+        Exhibition,
+        on_delete=models.PROTECT,
+        related_name="change_history",
+    )
+    ingestion_run = models.ForeignKey(
+        "sources.IngestionRun",
+        on_delete=models.PROTECT,
+        related_name="canonical_changes",
+        null=True,
+        blank=True,
+    )
+    candidate = models.ForeignKey(
+        ExhibitionCandidate,
+        on_delete=models.PROTECT,
+        related_name="change_history",
+    )
+    source_record = models.ForeignKey(
+        SourceRecord,
+        on_delete=models.PROTECT,
+        related_name="change_history",
+    )
+    change_type = models.CharField(max_length=32, choices=ChangeType.choices)
+    field_name = models.CharField(max_length=64, blank=True)
+    old_value = models.JSONField(null=True, blank=True)
+    new_value = models.JSONField(null=True, blank=True)
+    rule_version = models.CharField(max_length=32)
+    meaningful_for_promotion = models.BooleanField(default=False)
+    meaningful_type = models.CharField(
+        max_length=32,
+        choices=MeaningfulType.choices,
+        default=MeaningfulType.NONE,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("created_at", "id")
+        constraints = [
+            models.UniqueConstraint(
+                fields=(
+                    "ingestion_run",
+                    "exhibition",
+                    "source_record",
+                    "change_type",
+                    "field_name",
+                ),
+                name="catalog_unique_canonical_change",
+            )
+        ]
+        indexes = [
+            models.Index(
+                fields=("ingestion_run", "meaningful_for_promotion"),
+                name="catalog_change_run_meaningful",
+            )
+        ]
+
+
 class SourceConflict(models.Model):
     class Status(models.TextChoices):
         OPEN = "OPEN", "Open"
