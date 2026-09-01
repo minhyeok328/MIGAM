@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 요구사항 추적성 매트릭스"
 status: DRAFT
-version: "0.3.0"
-last_updated: "2026-08-30"
+version: "0.3.3"
+last_updated: "2026-09-01"
 authoritative_for:
   - "P0 요구사항과 결정·화면·합격 기준·테스트의 연결"
   - "요구사항 누락과 고아 테스트의 식별"
@@ -30,7 +30,7 @@ related_documents:
 - 한 요구사항이 여러 계층에서 검증되면 관련 `TEST-###`를 모두 연결한다.
 - 운영자 영역처럼 일반 사용자 화면 ID가 없는 요구사항은 `해당 없음`으로 명시한다.
 - PRD 요구사항을 추가·변경할 때 같은 변경에서 이 매트릭스와 연결된 합격 기준·테스트를 갱신한다.
-- 구현 코드가 생기기 전에는 실제 테스트 파일 경로나 실행 명령을 만들지 않는다. 구현 후 검증 산출물 열을 추가할 때 실제 존재하는 경로만 기록한다.
+- 구현된 범위는 실제 존재하는 테스트 파일과 승인 작업 패킷을 아래 구현 증거에 연결한다. 문서상 계획만 있고 코드가 없는 범위는 구현 완료로 표시하지 않는다.
 
 ## 2. 공통 상태·홈
 
@@ -155,7 +155,19 @@ related_documents:
 | 다국어·작가 독립 탐색·임베딩 생성·저장·읽기·점수 사용·근거 없는 LLM 해설 | `P0-FR-039`, `P0-FR-058`, `P0-FR-063`, `P0-OUT-007`, `DEC-052` | `AC-007`, `AC-009`, `AC-010`, `AC-022`, `TEST-011`, `TEST-012`, `TEST-021`, `TEST-037` |
 | 권리·접근 통제가 불명확한 미디어 수집·표시 | `P0-FR-015`, `P0-NFR-007`, `P0-OUT-008` | `AC-015`, `AC-022`, `TEST-005`, `TEST-027`, `TEST-037` |
 
-## 11. 변경 통제
+## 11. 현재 구현 증거
+
+| 요구사항 | 작업 패킷 | 실제 테스트 파일 | 상태 |
+| --- | --- | --- | --- |
+| `P0-FR-015`, `P0-NFR-007` 미디어 권리·대체 | [`TP-003`](../07-execution/task-packets/TP-003-visit-information-and-media-rights.md) | `tests/persistence/test_media_rights.py` | `PARTIAL`: MediaAsset·MediaRights 이력과 안전한 인라인·링크·숨김 판정 구현, 내부 API와 텍스트형 프론트 대체는 미구현 |
+| `P0-FR-032`~`P0-FR-036`, `P0-FR-055`~`P0-FR-057`, `P0-FR-089` 선택 관람 정보 | [`TP-003`](../07-execution/task-packets/TP-003-visit-information-and-media-rights.md) | `tests/persistence/test_visit_information.py` | `PARTIAL`: 요금·예약·예상 관람시간·접근성·감각의 근거·`UNKNOWN`·확인된 부정 저장 구현, 승인 Source 수집 매핑·API·추천 필수조건 판정은 미구현 |
+| `P0-FR-088` 수집 전 게이트와 기관별 실행 결과 | [`TP-001`](../07-execution/task-packets/TP-001-institution-collection-gate.md), [`TP-002`](../07-execution/task-packets/TP-002-institution-active-promotion.md) | `tests/persistence/test_registry_state.py`, `test_collection_gate.py`, `test_sync_command.py`, `test_refresh_commands.py`, `test_institution_qualification.py` | `PARTIAL`: 로컬 세 변경 명령·자격 모드·성공 확정 전 Critical 재검사·원자성 구현, 배포 스케줄러·승격 진행 표시는 미구현 |
+| `P0-FR-091` lifecycle 서비스 적격성 | [`TP-001`](../07-execution/task-packets/TP-001-institution-collection-gate.md), [`TP-002`](../07-execution/task-packets/TP-002-institution-active-promotion.md) | `tests/persistence/test_collection_gate.py`, `test_institution_runs.py`, `test_change_history.py`, `test_institution_qualification.py`, `test_sync_command.py` | `PARTIAL`: 수집 자격, `ACTIVE` 실패·Critical 중단, 14일·서로 다른 서울 날짜 3회·의미 변경·최종 veto·PromotionEvidence 승격 구현, `SUSPENDED → PROVISIONAL` 복구 승인과 상태 화면은 미구현 |
+| `P0-FR-092` health·Critical scope·격리 | [`TP-001`](../07-execution/task-packets/TP-001-institution-collection-gate.md), [`TP-003`](../07-execution/task-packets/TP-003-visit-information-and-media-rights.md) | `tests/persistence/test_collection_gate.py`, `test_institution_runs.py`, `test_refresh_commands.py`, `test_visit_information.py` | `PARTIAL`: 기본 health·ENTRY/SOURCE 사전 차단·열린 Critical 결과와 선택값 `UNKNOWN` 정본 구현, 실행 중 자동 분류·기관별 재시도 telemetry·수집기 선택값 변환은 미구현 |
+
+현재 Django 실행 명령은 `uv run --project backend python backend/manage.py test tests --verbosity 1`이다.
+
+## 12. 변경 통제
 
 - 요구사항이 삭제되면 연결된 AC·TEST가 다른 요구사항을 검증하는지 확인하고 고아 항목을 제거하거나 재연결한다.
 - 요구사항이 추가되면 최소 하나의 `AC-###`와 하나의 검증 방법을 연결한다.
@@ -163,7 +175,7 @@ related_documents:
 - 테스트 구현 후 실제 테스트 파일 경로를 연결할 때는 존재 여부와 해당 요구사항 검증 내용을 함께 확인한다.
 - 매트릭스에 연결되지 않은 P0 요구사항이나 요구사항에 연결되지 않은 필수 테스트가 있으면 문서 세트를 승인하지 않는다.
 
-## 12. 열린 결정
+## 13. 열린 결정
 
 - `OD-003`: `RESOLVED`. `DEC-094`~`DEC-099`의 출처 계약은 [`sources.yaml`](../../sources.yaml)과 [`source-qualification.json`](../../fixtures/source-qualification.json)으로 추적하며, 계약 테스트는 3개 Source·5개 기관·24개 `PASS`·1개 격리를 기준으로 한다.
 - `OD-004`: 최종 워드마크·폰트 확정 후 해당 자산의 라이선스·로딩·렌더링 검증을 `P0-NFR-004`, `AC-020`, `TEST-030`·`TEST-034` 연결에 포함한다.

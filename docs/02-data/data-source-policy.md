@@ -1,8 +1,8 @@
 ---
 title: "미감(美感) Data Source Policy"
 status: DRAFT
-version: "0.3.0"
-last_updated: "2026-08-30"
+version: "0.3.1"
+last_updated: "2026-09-01"
 authoritative_for:
   - "전시·작품·기관 데이터에 사용할 수 있는 출처의 자격"
   - "출처 우선순위와 충돌 시 증거 보존 원칙"
@@ -81,6 +81,8 @@ P0 기관·출처 후보는 **데이터 품질**과 **반복 가능한 확보 �
 5. 승격 시점의 마지막 검증 실행이 `SUCCESS`이고 승격 대상 Source 운영 상태가 정상이며 미해결 구조적 `SourceConflict`가 0건이다.
 
 HTTP 요청이 일시적으로 실패해 재시도했더라도 허용 횟수 안에서 모든 핵심 대상 페이지를 끝까지 처리하고 해당 기관의 최종 상태가 `SUCCESS`이면 성공으로 인정한다. `request_retry_count > 0`만으로 연속 성공을 끊지 않는다. 반대로 `PROVISIONAL` 기관의 InstitutionRunResult가 `FAILED`이거나 핵심 대상 페이지를 끝내 수집하지 못했거나, 핵심 데이터가 미완성인 채 Canonical 데이터에 반영되거나 실행 중 Critical이 확인되면 연결된 InstitutionQualificationRun도 최종 `FAILED`로 기록하고 승격 연속 성공을 초기화한다. 공유 IngestionRun의 전체 상태가 다른 기관 때문에 `FAILED`여도 해당 기관의 InstitutionRunResult가 `SUCCESS`라면 그 기관의 QualificationRun을 실패로 바꾸지 않는다. 선택 필드만 제공하는 대상·selector 실패와 가져온 단일 불합격 레코드의 정상 격리는 이 실패 정의와 구분한다.
+
+승격 성공일은 명시적인 자격 검증 실행만 만든다. P0 구현에서는 `sync_exhibitions --qualification`이 승인 표본 수만큼 핵심 대상을 처리한 경우에만 InstitutionQualificationRun을 기록하며 일반 증분 sync와 단일·due 재확인은 승격 성공일에 포함하지 않는다.
 
 #### `ACTIVE` 수집 health와 `SUSPENDED` 판정
 

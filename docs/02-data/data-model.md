@@ -1,8 +1,8 @@
 ---
 title: "미감(美感) Data Model"
 status: DRAFT
-version: "0.3.0"
-last_updated: "2026-08-30"
+version: "0.3.3"
+last_updated: "2026-09-01"
 authoritative_for:
   - "공식 전시 데이터의 개념 엔터티와 관계"
   - "원본·정규화값·출처 증거·검증 이력의 분리"
@@ -109,6 +109,8 @@ Exhibition과 Institution 사이의 역할을 표현한다. 개최 장소, 운�
 
 요금, 예약, 관람시간, 접근성, 감각 정보는 값의 부재만으로 의미를 추측하지 않도록 근거 상태에 `UNKNOWN`을 명시할 수 있어야 한다. 물리 저장 방식이 null과 상태 필드를 조합하더라도 API·도메인 경계에서는 `UNKNOWN`과 확인된 부정·해당 없음·수집 실패를 구분한다.
 
+`TP-003`의 물리 정본은 다섯 선택 정보마다 Exhibition 또는 Institution 중 정확히 한 대상, SourceRecord와 확인 시각을 요구한다. 가격의 `CONFIRMED | UNKNOWN`, 예약의 8개 정본값, 관람시간의 `OFFICIAL | UNKNOWN`, 접근성·감각의 `CONFIRMED_POSITIVE | CONFIRMED_NEGATIVE | UNKNOWN`은 저장 단계부터 분리한다. `UNKNOWN` 행에는 금액·무료 여부·예약 링크·시간 범위처럼 확인된 사실로 오해할 값을 함께 저장하지 않는다. SourceRecord의 기관 식별자와 대상 기관이 다른 행은 정본 근거로 승인하지 않는다.
+
 ## 6. 분류와 설명 데이터
 
 ### TaxonomyTerm
@@ -131,13 +133,15 @@ Exhibition과 Institution 사이의 역할을 표현한다. 개최 장소, 운�
 
 `InstitutionAllowlistEntry`는 후보 심사, 기관과 실제 수집에 사용할 공식 Source 묶음을 연결하는 온보딩·allowlist 기록이다. 상태는 `CANDIDATE`, `PROVISIONAL`, `ACTIVE`, `SUSPENDED`이며 허용 전이는 `CANDIDATE → PROVISIONAL → ACTIVE → SUSPENDED → PROVISIONAL`이다. 심사를 통과해야 `CANDIDATE`에서 `PROVISIONAL`로 진행한다. `PROVISIONAL`과 `ACTIVE`는 모두 레코드별 최소 품질·권리·최신성·충돌 게이트를 통과한 데이터를 정본·검색·추천·일반 사용자 서비스에 사용할 수 있다. `ACTIVE`는 게시 권한의 단독 조건이 아니라 실제 신규·변경 처리까지 검증한 높은 기관 신뢰 상태다.
 
-`InstitutionAllowlistEntry`는 lifecycle·Source 운영 상태와 별도의 `health = HEALTHY | DEGRADED`, `health_changed_at`, 복수 `health_reasons`, `consecutive_final_failed_count`, `priority_reverify_at`, `priority_reverify_reason`을 가진다. `health`는 수집 가능한 `PROVISIONAL`과 `ACTIVE` 모두의 운영 신호지만, 연속 최종 실패 수와 2회 자동 중단 사다리는 `ACTIVE`에서만 계산한다. `PROVISIONAL`의 최종 실패는 health와 승격 검증에 반영하되 이 수치를 올리지 않는다. `ACTIVE`의 첫 최종 실패는 실패 수 1과 `DEGRADED`, 중간 성공 없는 서로 다른 IngestionRun의 두 번째 최종 실패는 `SUSPENDED` 전이 근거다. 최종 성공은 실패 수를 0으로 초기화하되 미해결 `STRUCTURAL_OPTIONAL`이 있으면 health는 `DEGRADED`로 남는다.
+`InstitutionAllowlistEntry`는 lifecycle·Source 운영 상태와 별도의 `health = HEALTHY | DEGRADED`, `health_changed_at`, 복수 `health_reasons`, `consecutive_final_failed_count`, `priority_reverify_at`, `priority_reverify_reason`과 승인 표본의 `qualification_target_count`를 가진다. `health`는 수집 가능한 `PROVISIONAL`과 `ACTIVE` 모두의 운영 신호지만, 연속 최종 실패 수와 2회 자동 중단 사다리는 `ACTIVE`에서만 계산한다. `PROVISIONAL`의 최종 실패는 health와 승격 검증에 반영하되 이 수치를 올리지 않는다. `ACTIVE`의 첫 최종 실패는 실패 수 1과 `DEGRADED`, 중간 성공 없는 서로 다른 IngestionRun의 두 번째 최종 실패는 `SUSPENDED` 전이 근거다. 최종 성공은 실패 수를 0으로 초기화하되 미해결 `STRUCTURAL_OPTIONAL`이 있으면 health는 `DEGRADED`로 남는다.
 
-또한 `promotion_validation_started_at`, 상태 변경 시각·사유·검토자, `SUSPENDED` 근거와 복구 승인을 추적한다. 미해결 Critical CollectionIssue는 별도 lifecycle 값을 만들지 않고 해당 영향 범위의 수집 적격성을 차단한다. `SUSPENDED → PROVISIONAL` 때 연속 최종 실패 수를 0으로 초기화하고 이전 승격 기간과 연속 성공을 재사용하지 않으며 새 검증 시작 시각부터 계산한다. 모든 lifecycle·health 변경과 승인 근거는 ChangeHistory에 남긴다.
+또한 `promotion_validation_started_at`, `lifecycle_changed_at`, `lifecycle_changed_by`, `lifecycle_change_reason`, `suspension_reason`, 복구 승인을 추적한다. 자동 전이는 `SYSTEM`을 변경 주체로 기록한다. 미해결 Critical CollectionIssue는 별도 lifecycle 값을 만들지 않고 해당 영향 범위의 수집 적격성을 차단한다. `SUSPENDED → PROVISIONAL` 때 연속 최종 실패 수를 0으로 초기화하고 이전 승격 기간과 연속 성공을 재사용하지 않으며 새 검증 시작 시각부터 계산한다. 모든 lifecycle·health 변경과 승인 근거는 ChangeHistory에 남긴다.
 
 ### Source
 
-승인 검토 대상인 공식 API, 데이터 파일, 웹페이지 또는 공지를 나타낸다. 책임 주체, 접근 방식, 이용조건·라이선스, 허용 필드, 정상·일시 중단·사용 중지의 운영 상태와 정책 검토를 연결하며 InstitutionAllowlistEntry가 허용한 기관·출처 범위 안에서만 사용한다. `CANDIDATE`·`PROVISIONAL`·`ACTIVE`·`SUSPENDED`는 Source 자체가 아니라 InstitutionAllowlistEntry의 상태다. 하나의 Source가 여러 기관에 공유되더라도 기관별 lifecycle과 Source 운영 상태를 함께 판정한다.
+승인 검토 대상인 공식 API, 데이터 파일, 웹페이지 또는 공지를 나타낸다. 책임 주체, 접근 방식, 이용조건·라이선스, 허용 필드, `NORMAL`·`PAUSED`·`DISABLED` 운영 상태와 정책 검토를 연결하며 InstitutionAllowlistEntry가 허용한 기관·출처 범위 안에서만 사용한다. `CANDIDATE`·`PROVISIONAL`·`ACTIVE`·`SUSPENDED`는 Source 자체가 아니라 InstitutionAllowlistEntry의 상태다. 하나의 Source가 여러 기관에 공유되더라도 기관별 lifecycle과 Source 운영 상태를 함께 판정한다.
+
+승인된 [`sources.yaml`](../../sources.yaml)은 Source·InstitutionAllowlistEntry·CollectionIssue의 최초 DB 부트스트랩 근거다. 반복 명령은 이름·연결 같은 정적 등록 정보를 동기화할 수 있지만 이미 DB에 쌓인 Source 운영 상태, 기관 lifecycle·health·연속 실패 수, CollectionIssue 해결 상태를 YAML의 최초값으로 되돌리지 않는다. 이후 운영 상태 변경은 staff 운영 경계와 감사 이력을 통해 수행한다.
 
 ### SourceRecord
 
@@ -151,6 +155,8 @@ Exhibition과 Institution 사이의 역할을 표현한다. 개최 장소, 운�
 
 이미지·음원·영상의 원본 위치와 표현 대상을 기록하고, 권리자·라이선스·필수 크레딧·허용 처리·확인 시각을 분리한다. 권리 미확인 또는 철회 상태는 콘텐츠 메타데이터의 존재 여부와 무관하게 표시 적격성을 제한한다.
 
+`TP-003`은 권리 판정을 `REUSE_ALLOWED`, `LINK_ONLY`, `RIGHTS_UNKNOWN`, `UNAVAILABLE_OR_WITHDRAWN`으로 고정한다. asset마다 권리 판정 이력을 누적하되 현재 판정은 한 건만 존재한다. 재사용 허용도 표시·복제·캐시·변환·핫링크 허용을 각각 명시하며, 현재 판정이 없거나 `LINK_ONLY`·`RIGHTS_UNKNOWN`·`UNAVAILABLE_OR_WITHDRAWN`이면 원본 미디어 URL을 인라인 사용자 응답으로 전달하지 않는다. 원본 이미지 핫링크는 `REUSE_ALLOWED`에서 표시와 핫링크가 모두 명시적으로 허용된 경우에만 가능하다. 링크 전용은 공식 원본 페이지 연결만 허용하고, P0의 실제 음원·전체 영상은 인라인 재생·재호스팅 대상으로 만들지 않는다.
+
 ### VisualEmbedding (P1 개념)
 
 `VisualEmbedding`은 P1에서만 권리 허용 이미지를 이용한 작품 시각 유사성 확장을 위해 둘 수 있는 개념 엔터티다. `object_id`, `model_name`, `model_version`, `embedding`, `generated_at`, `source_media_id`를 가진다. `source_media_id`는 재사용이 허용된 `MediaAsset`만 가리킬 수 있으며, 권리 철회·변경 시 해당 임베딩은 사용 중지할 수 있어야 한다. P0에서는 `VisualEmbedding`을 생성·저장·읽거나 점수에 사용하지 않는다.
@@ -162,12 +168,12 @@ Exhibition과 Institution 사이의 역할을 표현한다. 개최 장소, 운�
 | VerificationRecord | 어떤 공식 근거를 언제 재확인했고 어떤 결과였는지 기록 |
 | SourceConflict | 동일 의미의 원본값이 충돌한 상태, 영향 필드와 검토 결과 기록 |
 | DuplicateCandidate | 자동 합치기에 충분하지 않은 중복 의심 객체를 검토 대상으로 유지 |
-| IngestionRun | 명령 종류·출처 또는 정본 전시 범위·due 선택 근거, 요청별 재시도 수, 핵심·선택 target별 최종 결과와 실행 최종 `SUCCESS`·`FAILED`를 기록한다. 공유 Source 실행은 기관별 lifecycle, 성공·실패·건너뜀·처리량과 실행 중 발견한 `SourceConflict`를 따로 추적한다. 핵심 대상 페이지가 최종 미수집되거나 핵심 미완성 데이터가 Canonical에 반영되거나 실행 중 Critical이 확인된 기관이 하나라도 있으면 실행을 최종 `FAILED`로 고정한다. 선택 target 실패와 정상 단건 격리만 있으면 `SUCCESS`일 수 있다. |
-| InstitutionRunResult | 한 IngestionRun 안의 InstitutionAllowlistEntry별 결과다. `(ingestion_run_id, institution_allowlist_entry_id)`는 유일하며 최종 `SUCCESS`·`FAILED`, 핵심·선택 대상별 최종 결과, 재시도 수, 수집 문제 분류, 격리 레코드, health·연속 실패 수의 변경 전후를 기록한다. 같은 실행의 여러 HTTP 재시도는 연속 실패 수를 한 번만 갱신한다. 실행 중 Critical이 확인되면 영향 기관 결과는 `FAILED`다. 실행 밖 검토로 발견된 Critical을 위해 가상 결과를 만들지 않는다. |
-| InstitutionQualificationRun | `PROVISIONAL` 기관의 승격 검증 실행만 InstitutionRunResult와 IngestionRun에 연결하고 `finished_at`, `finished_at`을 `Asia/Seoul` 달력일로 환산한 서비스 기준 날짜, 최종 상태, 재시도 수, 최종 미수집 핵심 페이지, 구조적 핵심 필드 누락, 정책·접근 문제, 실행 종료 시 Source 운영 상태, 미해결 구조 충돌 수와 의미 있는 변경 근거를 기록한다. 한 실행 안에 여러 `PROVISIONAL` 기관 결과가 있으면 기관별로 별도 생성한다. 핵심 대상 페이지가 최종 미수집되거나 해당 기관의 핵심 미완성 데이터가 Canonical에 반영되거나 실행 중 Critical이 확인되면 최종 `FAILED`로 고정하고 승격 연속 성공을 초기화한다. `ACTIVE` 런타임 결과에는 생성하거나 과거 승격 증거를 다시 쓰지 않는다. |
+| IngestionRun | 명령 종류·출처 또는 정본 전시 범위·due 선택 근거, 자격 검증 여부, 요청별 재시도 수, 핵심·선택 target별 최종 결과와 실행 최종 `SUCCESS`·`FAILED`를 기록한다. 공유 Source 실행은 기관별 lifecycle, 성공·실패·건너뜀·처리량과 실행 중 발견한 `SourceConflict`를 따로 추적한다. 핵심 대상 페이지가 최종 미수집되거나 핵심 미완성 데이터가 Canonical에 반영되거나 실행 중 Critical이 확인된 기관이 하나라도 있으면 실행을 최종 `FAILED`로 고정한다. 선택 target 실패와 정상 단건 격리만 있으면 `SUCCESS`일 수 있다. |
+| InstitutionRunResult | 한 IngestionRun 안의 InstitutionAllowlistEntry별 결과다. `(ingestion_run_id, institution_allowlist_entry_id)`는 유일하며 최종 `SUCCESS`·`FAILED`, 핵심·선택 대상별 최종 결과, `CORE_PASS + VERIFIED + 비격리` 수, 승인된 단건 격리 수와 두 값을 합친 핵심 처리 완료 수, 재시도 수, 수집 문제 분류, 격리 레코드, health·연속 실패 수의 변경 전후를 기록한다. 기관 귀속 가능한 재시도 telemetry가 없는 실행의 재시도 수는 실제 0회로 기록하지 않고 `null`로 둔다. 같은 실행의 여러 HTTP 재시도는 연속 실패 수를 한 번만 갱신한다. 성공 확정 직전 영향 scope의 열린 Critical을 다시 확인하며 발견되면 성공 결과 생성을 거부한다. 실행 중 Critical이 확인되면 영향 기관 결과는 `FAILED`다. 실행 밖 검토로 발견된 Critical을 위해 가상 결과를 만들지 않는다. |
+| InstitutionQualificationRun | 명시적 자격 검증 IngestionRun에서 `PROVISIONAL` 기관의 InstitutionRunResult와 일대일로 연결하고 `finished_at`, `finished_at`을 `Asia/Seoul` 달력일로 환산한 서비스 기준 날짜, 최종 상태, 재시도 수, 검증·승인 단건 격리·핵심 처리 완료 수, 최종 미수집 핵심 페이지, 구조적 핵심 필드 누락, 정책·접근 문제, 실행 종료 시 Source 운영 상태, 미해결 구조 충돌 수와 의미 있는 변경 수를 기록한다. 승인된 단건 격리는 같은 기관·Source·source_record_id의 열린 `RECORD_EXCEPTION + ENTRY + QUARANTINE_RECORD` 근거가 일치할 때만 완료로 센다. 한 실행 안에 여러 `PROVISIONAL` 기관 결과가 있으면 기관별로 별도 생성한다. 핵심 대상 페이지가 최종 미수집되거나 해당 기관의 핵심 미완성 데이터가 Canonical에 반영되거나 실행 중 Critical이 확인되면 최종 `FAILED`로 고정하고 승격 연속 성공을 초기화한다. `ACTIVE` 런타임 결과에는 생성하거나 과거 PromotionEvidence를 다시 쓰지 않는다. |
 | CollectionIssue | `POLICY_BLOCK`, `ACCESS_BLOCK`, `STRUCTURAL_CRITICAL`, `STRUCTURAL_OPTIONAL`, `RECORD_EXCEPTION`과 영향 Source·기관·target·field·record, `scope = ENTRY | SOURCE`, 범위 확대 근거, 최초·마지막 확인 시각, 해결 상태와 근거를 기록한다. Critical은 기관·템플릿 범위 근거를, 단건 격리는 패턴이 아님을 추적한다. 미해결 Critical은 해당 scope의 수집 전 차단 게이트다. |
-| PromotionEvidence | 최초 검증 시작 시각, 서로 다른 날짜의 연속 `SUCCESS` 3건, 중간 `FAILED` 0건, 최소 1건의 의미 있는 ChangeHistory 연결과 승격 시점의 최종 조건을 묶어 `ACTIVE` 승인 근거로 보존한다. |
-| ChangeHistory | Canonical 값·상태·권리 판정과 InstitutionAllowlistEntry lifecycle·health·연속 실패 수의 변경 전후, SourceRecord·정규화 규칙 버전·검토자와 근거를 추적한다. 신규 Canonical 생성도 생성 이력으로 기록한다. |
+| PromotionEvidence | 최초 검증 시작 시각, 서로 다른 날짜의 연속 `SUCCESS` InstitutionQualificationRun 3건, 중간 `FAILED` 0건, 최소 1건의 의미 있는 ChangeHistory 연결과 승격 시점의 Source·충돌 상태를 묶어 `ACTIVE` 승인 근거로 보존한다. |
+| ChangeHistory | Canonical 생성·값 변경의 전후, SourceRecord·ExhibitionCandidate 정규화 규칙 버전·IngestionRun과 의미 변경 유형을 추적한다. 현재 Canonical 필드에서 신규 전시·종료일·장소·취소만 승격 의미 변경으로 표시하고 나머지 변경은 감사 이력으로만 보존한다. 전체 lifecycle·health 감사 확장은 후속 패킷에서 다룬다. |
 
 운영 이력은 사용자 행동 분석 로그가 아니다. 콘텐츠 정확성과 출처 운영을 감사하기 위한 데이터만 포함한다.
 

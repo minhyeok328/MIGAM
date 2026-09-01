@@ -1,8 +1,8 @@
 ---
 title: "미감(美感) Data Pipeline"
 status: DRAFT
-version: "0.3.0"
-last_updated: "2026-08-30"
+version: "0.3.2"
+last_updated: "2026-09-01"
 authoritative_for:
   - "공식 출처에서 정본·검색·추천 데이터로 이어지는 처리 단계"
   - "증분 수집·재시도·충돌·중복·실패 복구 원칙"
@@ -94,6 +94,8 @@ P0에서는 새 전시, 종료일 변경·연장, 요금 변경, 장소 변경, 
 
 모든 변경 명령은 공유 IngestionRun 안에서도 실제 실행 대상으로 확정된 InstitutionAllowlistEntry마다 InstitutionRunResult를 정확히 하나 만든다. `PROVISIONAL`과 `ACTIVE` 모두 health를 갱신하지만, 연속 최종 실패 수와 2회 자동 중단 사다리는 `ACTIVE`에만 적용하고 `PROVISIONAL`에서는 0으로 유지한다. 이 기관별 결과의 서로 다른 IngestionRun ID 카운터는 승격의 `Asia/Seoul` 기준 서로 다른 성공 날짜 3회와 별개다.
 
+정본·검증 결과·InstitutionRunResult·기관 health를 성공으로 확정하는 DB 변경은 같은 트랜잭션에서 완료한다. InstitutionRunResult 성공 확정 직전에 영향 scope의 열린 Critical을 다시 확인해 수집 전 판정 뒤 생긴 차단도 잡는다. Critical이나 결과 확정 실패가 확인되면 그 실행에서 만든 정본·후보·성공 검증·검증 시각을 롤백하고 IngestionRun과 실제 대상 기관 결과를 `FAILED`로 기록한다. 수집기에서 기관별 요청 재시도 telemetry를 제공하지 않은 실행은 `retry_count = null`로 남겨 실제 0회와 구분한다.
+
 - 재시도 후 핵심 대상을 모두 처리한 최종 `SUCCESS`는 `ACTIVE` 실패 수를 0으로 초기화한다. lifecycle과 관계없이 미해결 `STRUCTURAL_OPTIONAL`·Critical이 없으면 health를 `HEALTHY`, 있으면 `DEGRADED`로 계산한다.
 - 첫 최종 `FAILED`는 `ACTIVE`를 유지하고 health를 `DEGRADED`, 실패 수를 1로 만든 뒤 허용 호출 제한·backoff 안의 최우선 재검증 대상으로 올린다.
 - 중간 `SUCCESS` 없이 다음의 서로 다른 IngestionRun에서 다시 최종 `FAILED`이면 실패 수 2와 함께 `SUSPENDED`로 전환한다.
@@ -111,11 +113,13 @@ P0의 동기화·재확인 실행은 다음 명령 계약을 사용한다.
 uv run python manage.py sync_exhibitions
 uv run python manage.py refresh_due_exhibitions
 uv run python manage.py sync_exhibitions --source=<source_key>
+uv run python manage.py sync_exhibitions --qualification
 uv run python manage.py refresh_exhibition --id=<canonical_id>
 uv run python manage.py show_refresh_schedule
 ```
 
 - 인자 없는 `sync_exhibitions`는 `PROVISIONAL` 또는 `ACTIVE` InstitutionAllowlistEntry, 정상 Source, 영향 scope의 미해결 Critical CollectionIssue 0건을 모두 충족한 기관 범위를 증분 동기화한다. `--source=<source_key>`도 이 수집 전 게이트를 통과한 연결 기관이 하나 이상일 때만 시작한다. 알 수 없거나 미등록·일시 중단·사용 중지인 Source, `CANDIDATE`·`SUSPENDED`, 미해결 Critical 영향 범위는 네트워크 수집 전에 거부한다. `DEGRADED` health만으로 실행을 막지 않으며 우선 재검증 근거로 사용한다. 허용된 공유 Source가 반환한 각 레코드는 연결된 기관 lifecycle과 CollectionIssue scope를 다시 판정하고, `PROVISIONAL`과 `ACTIVE` 모두 같은 레코드 게이트와 정상 게시 경로를 사용한다.
+- `sync_exhibitions --qualification`은 승인 표본의 핵심 대상 수를 완전히 처리했는지 확인하는 명시적 승격 검증 실행이다. 이 모드에서만 `PROVISIONAL` 기관별 InstitutionQualificationRun과 승격 성공일을 만들며, 일반 sync와 전시 단위 refresh를 승격 증거로 세지 않는다. 기관별 `CORE_PASS + VERIFIED + 비격리` 대상과 같은 기관·Source·source_record_id의 열린 `RECORD_EXCEPTION + ENTRY + QUARANTINE_RECORD` 근거가 일치하는 승인 단건 격리를 합친 핵심 처리 완료 수가 `qualification_target_count`에 미달하면 그 기관 결과와 QualificationRun, 전체 자격 IngestionRun을 최종 `FAILED`로 기록한다. 승인된 단건 격리는 처리 완료로 인정하되 의미 변경 근거에서는 제외하고, 그 밖의 `CORE_FAIL`은 완료 수에 포함하지 않는다.
 - `refresh_due_exhibitions`는 상태·시작일·마지막 성공 공식 확인 시각과 출처별 허용 호출 조건으로 재확인 대상을 계산하고, 그 대상만 같은 수집·정규화·품질 흐름으로 처리한다.
 - `refresh_exhibition --id=<canonical_id>`는 운영자가 지정한 정본 전시의 공식 근거를 즉시 재확인하되, 연결 기관이 `PROVISIONAL` 또는 `ACTIVE`이고 Source가 정상이며 미해결 Critical 영향 범위 밖일 때만 사용한다. `CANDIDATE`·`SUSPENDED`, 미해결 Critical 또는 미등록·일시 중단·사용 중지 Source를 ID 지정으로 우회하지 않는다.
 - `show_refresh_schedule`은 현재 시점의 due 대상과 다음 재확인 근거를 읽기 전용으로 보여준다.
@@ -123,6 +127,8 @@ uv run python manage.py show_refresh_schedule
 - 배포 스케줄러는 `PROVISIONAL` 또는 `ACTIVE` InstitutionAllowlistEntry와 정상 Source가 함께 허용한 대상에 대해 `refresh_due_exhibitions`를 호출한다. 스케줄러가 수집기·정본을 별도 경로로 직접 변경해서는 안 된다.
 
 변경 명령과 스케줄러는 대상 선택 뒤 수집·정규화·품질·권리·정본 병합·파생본 생성 서비스를 공유한다. `PROVISIONAL`과 `ACTIVE`는 동일한 레코드 게이트를 통과하고 InstitutionRunResult·health를 기관별로 기록한다. `PROVISIONAL`은 InstitutionQualificationRun과 승격 증거를, `ACTIVE`는 연속 최종 실패 수를 별도로 갱신한다. `show_refresh_schedule`은 같은 due 선택기, 우선 재검증과 승격 검증 진행 상태를 읽기 전용으로 사용한다.
+
+P0 변경 명령은 승인된 [`sources.yaml`](../../sources.yaml)을 DB에 멱등 부트스트랩한 뒤 공용 수집 게이트를 사용한다. 부트스트랩은 기존 DB의 Source 운영 상태, InstitutionAllowlistEntry lifecycle·health·연속 실패 수, CollectionIssue 해결 상태를 최초 YAML 값으로 덮어쓰지 않는다. 게이트 판정은 외부 파일·네트워크 수집과 IngestionRun 생성 전에 끝나야 하며, `ENTRY` Critical은 해당 기관만, `SOURCE` Critical은 연결된 기관 전체를 차단한다.
 
 ### 2.4 P0 처리 우선순위
 

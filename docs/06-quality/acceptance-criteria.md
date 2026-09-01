@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 합격 기준"
 status: DRAFT
-version: "0.3.0"
-last_updated: "2026-08-30"
+version: "0.3.3"
+last_updated: "2026-09-01"
 authoritative_for:
   - "P0 기능·데이터·추천·접근성의 합격 판정"
   - "요구사항별 검증 가능한 완료 조건"
@@ -26,7 +26,7 @@ P0는 기능이 화면에 존재하는지만으로 합격하지 않는다. 대�
 - 각 `AC-###`의 조건을 모두 충족해야 해당 항목이 통과한다.
 - 자동 검증과 수동 검증이 함께 지정된 항목은 둘 다 통과해야 한다.
 - 외부 출처나 지도 제공자의 실패는 정상적인 저하 시나리오로 검증한다.
-- 아직 코드가 없으므로 테스트 러너와 옵션을 선언하지 않는다. P0 동기화 관리 명령의 이름·범위는 아래 `AC-023`으로 검증하며, 실제 테스트 실행 명령은 구현된 매니페스트를 확인한 뒤 기록한다.
+- 현재 Django 데이터 구현은 `uv run --project backend python backend/manage.py test tests --verbosity 1`로 검증한다. 아직 구현되지 않은 API·프론트·E2E는 각 승인 작업 패킷에서 실제 러너를 추가한다.
 - 아래 요구사항 ID는 `prd-p0.md`의 실제 `P0-FR-*`, `P0-NFR-*`, `P0-OUT-*`를 사용한다.
 
 ## 2. 무관용 불변식
@@ -222,6 +222,8 @@ P0는 기능이 화면에 존재하는지만으로 합격하지 않는다. 대�
 - 이미지가 없거나 실패해도 텍스트형 카드에서 상태·기간·기관·추천 이유와 상세·관심·비교 행동을 동일하게 제공한다.
 - 포스터 권리와 개별 작품 권리를 독립적으로 판정한다.
 
+`TP-003`의 백엔드 구현 증거는 `tests/persistence/test_media_rights.py`다. MediaAsset별 권리 이력·현재 판정 한 건, `REUSE_ALLOWED`의 명시적 표시·핫링크 허용, `LINK_ONLY`·`RIGHTS_UNKNOWN`·철회의 URL 차단과 음원·전체 영상 비인라인 판정을 검증한다. 카드·상세·취향 테스트의 실제 네트워크 요청 차단과 텍스트형 대체 UI는 후속 OpenAPI·프론트엔드 범위이므로 `AC-015` 전체 통과로 판정하지 않는다.
+
 ### `AC-016` 최신성·충돌·기능 저하
 
 **추적 요구사항:** `P0-NFR-006`, `P0-NFR-008`, `P0-NFR-009`, `P0-FR-059`
@@ -326,12 +328,14 @@ P0는 기능이 화면에 존재하는지만으로 합격하지 않는다. 대�
 
 **추적 요구사항:** `P0-FR-088`, `P0-NFR-006`, `P0-NFR-008`
 
-- 지원하는 관리 명령은 `uv run python manage.py sync_exhibitions`, `uv run python manage.py refresh_due_exhibitions`, `uv run python manage.py sync_exhibitions --source=<source_key>`, `uv run python manage.py refresh_exhibition --id=<canonical_id>`, `uv run python manage.py show_refresh_schedule`이다. 변경 명령은 source key와 canonical ID 범위를 넘는 레코드를 변경하지 않고, `show_refresh_schedule`은 어떤 레코드도 변경하지 않는다.
+- 지원하는 관리 명령은 `uv run python manage.py sync_exhibitions`, `uv run python manage.py refresh_due_exhibitions`, `uv run python manage.py sync_exhibitions --source=<source_key>`, `uv run python manage.py sync_exhibitions --qualification`, `uv run python manage.py refresh_exhibition --id=<canonical_id>`, `uv run python manage.py show_refresh_schedule`이다. 변경 명령은 source key와 canonical ID 범위를 넘는 레코드를 변경하지 않고, `show_refresh_schedule`은 어떤 레코드도 변경하지 않는다.
 - `sync_exhibitions --source=<source_key>`는 등록된 정상 Source와 연결되고 영향 scope의 미해결 Critical CollectionIssue가 없는 `PROVISIONAL` 또는 `ACTIVE` InstitutionAllowlistEntry가 없으면 네트워크 수집 전에 실패한다. 알 수 없는 source key, 미등록·일시 중단·사용 중지 Source와 `CANDIDATE`·`SUSPENDED`·Critical 차단 범위를 우회해 실행하지 않는다.
 - 변경 명령과 배포 환경의 스케줄러는 대상 선택 뒤 수집·정규화·품질·권리·정본 병합·파생본 생성 서비스를 공유한다. `PROVISIONAL`과 `ACTIVE`는 같은 레코드 게이트와 정상 서비스 경로를 사용하고 InstitutionRunResult·health를 기관별로 누적한다. `PROVISIONAL`은 InstitutionQualificationRun과 승격 증거를, `ACTIVE`는 연속 최종 실패 수를 별도로 갱신한다. `show_refresh_schedule`은 같은 due 선택기, 첫 실패·선택 구조 문제의 우선 재검증·Critical 차단 scope와 승격 진행 상태를 읽기 전용으로 사용하며, 어느 경로에도 별도 우회 갱신이 없다.
 - 현재 전시와 7일 이내 시작 전시는 매일 재확인 후보이고, 그보다 먼 예정 전시는 정확히 3일 간격의 재확인 후보로 계산한다. 일정 경계에서 누락·중복 실행하지 않는다.
 - 종료 전시는 정정·권리·충돌·운영자 요청이 있을 때만 재확인하며 일상 재확인 대상에 포함하지 않는다.
 - 어느 실행 경로에서 실패해도 마지막 검증 정본과 출처·확인 이력은 보존하고, 실행 결과·오류·대상 범위와 실행 중 발견한 출처 충돌은 운영자가 해당 `IngestionRun`에서 역추적할 수 있게 남긴다.
+
+`TP-001`의 구현 증거는 `tests/persistence/test_registry_state.py`, `test_collection_gate.py`, `test_institution_runs.py`, `test_sync_command.py`, `test_refresh_commands.py`다. `TP-002`의 구현 증거는 `test_change_history.py`, `test_institution_qualification.py`, `test_sync_command.py`다. 두 묶음은 registry·수집 게이트·기관별 결과·health 실패 사다리와 명시적 자격 실행, 승인 표본 처리, 의미 변경 allowlist, 14일·서울 날짜·실패 초기화, Source·Critical·충돌 veto, PromotionEvidence와 원자적 승격을 검증한다. 배포 스케줄러·승격 진행 상태 화면과 `SUSPENDED → PROVISIONAL` 복구 승인은 아직 구현되지 않아 `AC-023`·`AC-026` 전체 통과로 판정하지 않는다.
 
 ## 10. 전시 데이터 최소 품질
 
@@ -344,6 +348,8 @@ P0는 기능이 화면에 존재하는지만으로 합격하지 않는다. 대�
 - `ENDED`와 `CANCELED`는 최소 품질에는 합격할 수 있지만 현재·예정 추천에는 포함하지 않는다.
 - 요금, 예약, 예상 관람시간, 접근성, 감각 정보가 모두 `UNKNOWN`이어도 핵심 항목이 유효하면 최소 품질에는 합격한다. 각 값은 `UNKNOWN`으로 명시하며 추론해 채우지 않는다.
 - 사용자가 이 선택 정보 중 하나를 필수 방문 조건으로 지정하면 `UNKNOWN`은 해당 조건을 충족하지 않는다. 선호로 지정한 예약·예상 관람시간의 `UNKNOWN`은 중립이며 필수조건으로 자동 승격하지 않는다.
+
+`TP-003`의 저장 계층 구현 증거는 `tests/persistence/test_visit_information.py`다. 요금·예약·예상 관람시간·접근성·감각의 명시적 `UNKNOWN`, 확인된 긍정·부정 분리, 값 혼입 금지, SourceRecord 기관 일치와 선택 정보가 기존 Exhibition eligibility를 바꾸지 않는 불변식을 검증한다. 승인 Source의 실제 선택 필드 수집·정규화와 추천 필수조건 판정은 후속 패킷 범위이므로 `AC-024` 전체 통과로 판정하지 않는다.
 
 ## 11. 기관 allowlist 온보딩
 

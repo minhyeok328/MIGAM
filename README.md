@@ -6,9 +6,16 @@
 
 ## 현재 상태
 
-이 저장소는 현재 **문서 설계·승인 단계**입니다. Project Brief와 Domain Rules는 `APPROVED 1.0.0`이고 P0 PRD와 데이터·추천·UX·기술·품질·실행 문서는 계속 검토 중입니다. 아직 애플리케이션 코드나 실행 가능한 개발 환경은 없습니다.
+이 저장소는 현재 **P0 데이터 신뢰 기반 구현 단계**입니다. Project Brief와 Domain Rules, Source Qualification, Source Registry, [`TP-001 기관 운영 상태와 수집 전 게이트`](docs/07-execution/task-packets/TP-001-institution-collection-gate.md), [`TP-002 기관 ACTIVE 승격 증거와 자동 전이`](docs/07-execution/task-packets/TP-002-institution-active-promotion.md), [`TP-003 선택 관람 정보와 미디어 권리 모델`](docs/07-execution/task-packets/TP-003-visit-information-and-media-rights.md)이 승인됐고 나머지 P0 PRD·추천·UX·기술·품질 문서는 계속 검토 중입니다.
 
-- 구현 기준으로 사용할 수 있는 문서는 `APPROVED` 이상인 문서뿐이며, 실제 작업에는 해당 범위를 직접 정의·검증하는 관련 상·하위 문서와 승인된 작업 패킷이 함께 필요합니다.
+- Django 기반으로 승인 Source 3개·기관 5곳의 수집, 최소 품질 검사·격리, 원본·후보 보존, 정본 병합·충돌 증거, 전시 최신성 재확인이 구현돼 있습니다.
+- Source·기관 운영 상태와 CollectionIssue를 DB에 멱등 부트스트랩하고, `PROVISIONAL`·`ACTIVE` + 정상 Source + 미해결 Critical 없음 조건을 세 변경 명령이 수집 전과 성공 확정 직전에 공통으로 검사합니다.
+- 기관별 실행 결과와 `ACTIVE` 첫 실패 `DEGRADED`·두 번째 실패 또는 Critical 즉시 `SUSPENDED`, 전이 근거, `PROVISIONAL` 실패 counter 0, 성공 복구와 성공 확정의 원자성이 구현돼 있습니다.
+- `sync_exhibitions --qualification`은 승인 표본 처리 결과와 Canonical ChangeHistory를 기관별 QualificationRun에 묶고, 14일·서로 다른 서울 날짜 3회 연속 성공·의미 변경·최종 veto를 통과한 기관만 PromotionEvidence와 함께 `ACTIVE`로 승격합니다.
+- TP-003은 요금·예약·예상 관람시간·접근성·감각 정보의 `UNKNOWN` 정본과 미디어 권리 이력·안전한 이미지 노출 판정을 구현합니다.
+- 자동 테스트는 외부 API 키 없이 `uv run --project backend python backend/manage.py test tests --verbosity 1`로 실행합니다.
+- 아직 내부 OpenAPI·SearchService·추천·staff Admin 상태 화면·React 프론트엔드는 구현되지 않았습니다.
+- 후속 구현도 해당 범위를 직접 정의·검증하는 승인 작업 패킷이 필요합니다.
 - 열린 결정은 [결정 등록부](docs/00-governance/decision-register.md)에 기록합니다.
 - 전체 문서와 권한은 [문서 인덱스](docs/00-index.md)에서 확인할 수 있습니다.
 
