@@ -6,7 +6,7 @@
 
 ## 현재 상태
 
-이 저장소는 현재 **P0 데이터 신뢰·내부 검색 구현 단계**입니다. Project Brief와 Domain Rules, Source Qualification, Source Registry, [`TP-001 기관 운영 상태와 수집 전 게이트`](docs/07-execution/task-packets/TP-001-institution-collection-gate.md), [`TP-002 기관 ACTIVE 승격 증거와 자동 전이`](docs/07-execution/task-packets/TP-002-institution-active-promotion.md), [`TP-003 선택 관람 정보와 미디어 권리 모델`](docs/07-execution/task-packets/TP-003-visit-information-and-media-rights.md), [`TP-004 내부 OpenAPI와 FTS5 검색`](docs/07-execution/task-packets/TP-004-internal-search-openapi.md)이 승인됐고 나머지 P0 PRD·추천·UX·기술·품질 문서는 계속 검토 중입니다.
+이 저장소는 현재 **P0 데이터 신뢰·내부 검색·추천 구현 단계**입니다. Project Brief와 Domain Rules, Source Qualification, Source Registry, [`TP-001 기관 운영 상태와 수집 전 게이트`](docs/07-execution/task-packets/TP-001-institution-collection-gate.md), [`TP-002 기관 ACTIVE 승격 증거와 자동 전이`](docs/07-execution/task-packets/TP-002-institution-active-promotion.md), [`TP-003 선택 관람 정보와 미디어 권리 모델`](docs/07-execution/task-packets/TP-003-visit-information-and-media-rights.md), [`TP-004 내부 OpenAPI와 FTS5 검색`](docs/07-execution/task-packets/TP-004-internal-search-openapi.md), [`TP-005 조건 보존 설명형 추천`](docs/07-execution/task-packets/TP-005-explainable-recommendation.md)이 승인됐고 나머지 포괄 P0 PRD·추천·UX·기술·품질 문서는 계속 검토 중입니다.
 
 - Django 기반으로 승인 Source 3개·기관 5곳의 수집, 최소 품질 검사·격리, 원본·후보 보존, 정본 병합·충돌 증거, 전시 최신성 재확인이 구현돼 있습니다.
 - Source·기관 운영 상태와 CollectionIssue를 DB에 멱등 부트스트랩하고, `PROVISIONAL`·`ACTIVE` + 정상 Source + 미해결 Critical 없음 조건을 세 변경 명령이 수집 전과 성공 확정 직전에 공통으로 검사합니다.
@@ -14,8 +14,9 @@
 - `sync_exhibitions --qualification`은 승인 표본 처리 결과와 Canonical ChangeHistory를 기관별 QualificationRun에 묶고, 14일·서로 다른 서울 날짜 3회 연속 성공·의미 변경·최종 veto를 통과한 기관만 PromotionEvidence와 함께 `ACTIVE`로 승격합니다.
 - TP-003은 요금·예약·예상 관람시간·접근성·감각 정보의 `UNKNOWN` 정본과 미디어 권리 이력·안전한 이미지 노출 판정을 구현합니다.
 - TP-004는 전시·기관 `SearchService`, SQLite FTS5 파생 인덱스, `/api/internal/v1/search/`와 [`OpenAPI 3.1 계약`](openapi/internal-v1.yaml)을 구현합니다. 정본화 성공 시 인덱스가 자동 갱신되며 `uv run --project backend python backend/manage.py rebuild_search_index`로 전체 재구축할 수 있습니다.
+- TP-005는 근거별 `ContentFeatureSnapshot`, 방문정보의 보수적 현재값 판정, 하드 조건 우선 `RecommendationService`와 `/api/internal/v1/recommendations/`를 구현합니다. 숫자 점수 없이 정성 등급·실제 기여 이유를 반환하고 가격·예약·시간 미확인만 주요 추천과 분리합니다.
 - 자동 테스트는 외부 API 키 없이 `uv run --project backend python backend/manage.py test tests --verbosity 1`로 실행합니다.
-- 아직 작품·작가 정본과 검색, 추천, staff Admin 상태 화면, React 프론트엔드는 구현되지 않았습니다.
+- 아직 작품·작가 정본과 검색, 운영시간·휴관일, 외부 Source의 추천 특성 자동 정규화·백필, staff Admin 상태 화면, React 프론트엔드는 구현되지 않았습니다.
 - 후속 구현도 해당 범위를 직접 정의·검증하는 승인 작업 패킷이 필요합니다.
 - 열린 결정은 [결정 등록부](docs/00-governance/decision-register.md)에 기록합니다.
 - 전체 문서와 권한은 [문서 인덱스](docs/00-index.md)에서 확인할 수 있습니다.

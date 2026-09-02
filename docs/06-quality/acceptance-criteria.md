@@ -142,6 +142,8 @@ P0는 기능이 화면에 존재하는지만으로 합격하지 않는다. 대�
 - 사용자 화면에 내부 점수 퍼센트를 노출하지 않는다.
 - 카드는 가장 강한 실제 이유 1개, 상세는 존재하는 실제 이유를 최대 3개까지만 보여준다.
 
+`TP-005`의 서비스·API 구현 증거는 `tests/discovery/test_recommendation_service.py`, `tests/discovery/test_recommendation_api.py`, `tests/discovery/test_content_features.py`다. 콜드 스타트·명시 특성·관심 전시/기관·선호 방문정보, 결정적 다양성·연결된 탐색, 최대 3개 실제 contribution 이유와 점수 비노출을 검증한다. 취향 테스트 UI·브라우저 프로필 변환과 실제 Source 분류 snapshot 백필은 후속 범위이므로 `AC-008` 전체 화면 흐름 완료로 판정하지 않는다.
+
 ### `AC-009` 전시 상세의 방문 판단 정보
 
 **추적 요구사항:** `P0-FR-053`~`P0-FR-060`
@@ -349,7 +351,7 @@ P0는 기능이 화면에 존재하는지만으로 합격하지 않는다. 대�
 - 요금, 예약, 예상 관람시간, 접근성, 감각 정보가 모두 `UNKNOWN`이어도 핵심 항목이 유효하면 최소 품질에는 합격한다. 각 값은 `UNKNOWN`으로 명시하며 추론해 채우지 않는다.
 - 사용자가 이 선택 정보 중 하나를 필수 방문 조건으로 지정하면 `UNKNOWN`은 해당 조건을 충족하지 않는다. 선호로 지정한 예약·예상 관람시간의 `UNKNOWN`은 중립이며 필수조건으로 자동 승격하지 않는다.
 
-`TP-003`의 저장 계층 구현 증거는 `tests/persistence/test_visit_information.py`다. 요금·예약·예상 관람시간·접근성·감각의 명시적 `UNKNOWN`, 확인된 긍정·부정 분리, 값 혼입 금지, SourceRecord 기관 일치와 선택 정보가 기존 Exhibition eligibility를 바꾸지 않는 불변식을 검증한다. 승인 Source의 실제 선택 필드 수집·정규화와 추천 필수조건 판정은 후속 패킷 범위이므로 `AC-024` 전체 통과로 판정하지 않는다.
+`TP-003`의 저장 계층 구현 증거는 `tests/persistence/test_visit_information.py`다. `TP-005`의 추천 판정 증거는 `tests/discovery/test_visit_conditions.py`와 `tests/discovery/test_recommendation_service.py`이며, 최신 공식 전시 근거 우선·기관 fallback·상충값 보수 처리와 필수 예산·예약·시간·접근성·감각 `UNKNOWN`의 정상 추천 통과 0건을 검증한다. 승인 Source의 실제 선택 필드 수집·정규화와 OperatingSchedule 기반 휴관일 판정은 후속 범위이므로 `AC-024` 전체 데이터 흐름 통과로 판정하지 않는다.
 
 ## 11. 기관 allowlist 온보딩
 

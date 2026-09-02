@@ -1,8 +1,8 @@
 ---
 title: "미감 추천 품질 평가 명세"
 status: DRAFT
-version: "0.3.0"
-last_updated: "2026-08-30"
+version: "0.3.1"
+last_updated: "2026-09-02"
 authoritative_for:
   - "추천 품질 평가 시나리오와 통과 게이트"
   - "추천 이유·다양성·안전성 검증 방식"
@@ -222,3 +222,9 @@ decision:
 P0 추천 평가는 외부 클릭률, 체류시간, 전환율을 필요로 하지 않는다. 향후 최소 행동 측정이 승인되더라도 해당 이벤트는 제품 흐름 평가용이며 취향 학습 신호로 사용하지 않는다.
 
 `OD-003`은 해결됐으며 실제 출처의 지역·기관 편중 평가는 [`source-qualification.json`](../../fixtures/source-qualification.json)의 서울 4개 기관·경기 1개 기관 구성을 기준으로 시작한다. `OD-006`이 해결되기 전에는 운영 트래픽 기반 성능 목표를 이 문서에서 확정하지 않는다.
+
+## 11. TP-005 자동 평가 증거
+
+`tests/discovery/test_recommendation_service.py`는 `REC-GATE-001`~`005`, `007`~`011`의 서비스 경계를 고정 fixture로 검증한다. `tests/discovery/test_recommendation_api.py`는 공식 출처·권리 안전 presentation, 점수 비노출, 요청 신호 비영속과 정상 0건을 검증하고, `tests/discovery/test_content_features.py`는 이유의 입력이 되는 현재 feature assertion의 출처·규칙 이력을 검증한다. 같은 입력의 순서·등급·이유 재현성과 12개 후보의 고정 쿼리 상한도 자동 확인한다.
+
+OperatingSchedule이 아직 없어 공식 휴관일을 포함한 실제 관람 가능일 시나리오, 외부 Source에서 만든 전체 feature snapshot 백필, 대표 300~500건 데이터셋과 사람 문구 검토는 완료 근거에 포함하지 않는다. 따라서 TP-005는 승인 패킷 범위의 자동 게이트를 구현하지만 P0 전체 추천 평가의 최종 `PASS`를 뜻하지 않는다.
