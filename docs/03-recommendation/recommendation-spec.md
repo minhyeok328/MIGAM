@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 추천 명세"
 status: DRAFT
-version: "0.3.0"
-last_updated: "2026-08-30"
+version: "0.3.1"
+last_updated: "2026-09-02"
 authoritative_for:
   - "추천 후보 생성과 제외 규칙"
   - "개인화 신호와 점진적 개인화"
@@ -215,6 +215,12 @@ P0 작품 유사성은 시대, 작가·문화권, 매체, 재료·기법, 주제
 - 권리 허용 이미지 없음: 결과는 유지하고 텍스트 대체 카드 사용
 - 후보 부족: 같은 전시를 중복 채우지 않고 실제 개수만 표시
 - 추천 서비스 실패: 필수 조건을 적용한 비개인화 기본 정렬로 안전하게 전환
+
+### 11.1 TP-005 물리 계약
+
+`TP-005`는 추천을 `POST /api/internal/v1/recommendations/`의 일회성 요청으로 구현한다. 현재·예정, `VERIFIED`, `FRESH | STALE`, 공식 SourceRecord, 미해결 충돌 없음이 후보 입구 조건이며, 하드 필터가 점수보다 먼저 실행된다. 가격·예약·관람시간의 필수값 미확인은 안전 조건과 알려진 조건을 통과한 경우에만 주요 추천과 분리된 `needs_verification`으로 반환할 수 있다. 접근성·감각 미확인은 이 별도 후보군으로도 우회하지 않는다.
+
+콘텐츠 특성은 Exhibition별 현재 `ContentFeatureSnapshot`의 근거 있는 assertion만 사용한다. snapshot이 없거나 선택하지 않은 축은 중립이다. 응답은 알고리즘 버전, 정성 등급과 실제 양의 기여 이유를 제공하지만 내부 점수·퍼센트를 제공하지 않는다. 정확한 요청 필드, 근거 선택, 점수·다양성 상수와 제외 범위는 승인 작업 패킷 [`TP-005`](../07-execution/task-packets/TP-005-explainable-recommendation.md)가 정한다.
 
 ## 12. 열린 결정 영향
 

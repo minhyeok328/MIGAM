@@ -1,8 +1,8 @@
 ---
 title: "미감 API 가이드라인"
 status: DRAFT
-version: "0.2.0"
-last_updated: "2026-08-30"
+version: "0.2.1"
+last_updated: "2026-09-02"
 authoritative_for:
   - "P0 내부 API 계약 원칙"
   - "OpenAPI와 생성 클라이언트 경계"
@@ -39,6 +39,7 @@ API는 표시하는 핵심 사실마다 출처·마지막 확인 시점·불확�
 - 취향·관심 신호는 클라이언트가 명시적으로 보낸 현재 요청의 입력일 뿐이다. 사용자 ID, 세션 기반 장기 프로필, 암묵적 행동 신호를 계약에 추가하지 않는다.
 - 검색은 전시 중심 통합 검색을 지원하되, 원문 검색어를 장기 저장·분석하는 계약을 만들지 않는다.
 - 페이지네이션·정렬·필터는 허용 목록과 상한을 명시해 과도한 조회와 모호한 기본값을 피한다.
+- `TP-005` 추천은 `POST /api/internal/v1/recommendations/`에 일회성 JSON으로 전달한다. 요청 body를 URL·DB·파일·분석 이벤트·일반 로그에 복제하지 않고, 배열·문자열·결과 개수 상한을 OpenAPI와 서버 serializer에 함께 둔다.
 
 ## 응답 규칙
 
@@ -49,6 +50,7 @@ API는 표시하는 핵심 사실마다 출처·마지막 확인 시점·불확�
 - 기관 lifecycle과 health는 사용자 응답의 단독 포함·제외 기준이 아니다. 정상 Source에 연결된 `PROVISIONAL`과 `ACTIVE`의 레코드는 `HEALTHY`·`DEGRADED`와 관계없이 같은 품질·권리·최신성·충돌 게이트로 포함하며, `CANDIDATE`·`SUSPENDED`에서 새로 수집·반영된 데이터는 포함하지 않는다. `SUSPENDED`나 Critical 확인만으로 마지막 정상 정본을 일괄 제외하지 않고 DataEligibility를 다시 계산하되, Critical 근거가 현재 핵심값의 신뢰를 훼손한 영향 레코드는 `EXCLUDED`다. lifecycle·health·연속 실패 수·CollectionIssue와 scope는 staff 전용 sources·data_quality 계약에 두고, 일반 사용자에게는 선택 필드 `UNKNOWN`·이미지 대체·최신성만 노출한다.
 - 이미지 URL은 권리 상태가 확인된 경우에만 제공하며, 이미지 부재도 정상 응답으로 취급한다.
 - 지도용 데이터는 필요한 화면에 최소화한다. 정확 좌표를 장기 로그에 보내거나 응답 기록으로 축적하지 않는다.
+- 추천은 주요 추천과 비안전 선택 정보의 `needs_verification`을 별도 배열로 반환한다. 내부 점수·퍼센트는 반환하지 않고 알고리즘 버전, 정성 등급, 실제 기여 trace와 1~3개 이유만 제공한다.
 
 ## 오류와 안전한 저하
 

@@ -1,8 +1,8 @@
 ---
 title: "미감(美感) Data Model"
 status: DRAFT
-version: "0.3.3"
-last_updated: "2026-09-01"
+version: "0.3.4"
+last_updated: "2026-09-02"
 authoritative_for:
   - "공식 전시 데이터의 개념 엔터티와 관계"
   - "원본·정규화값·출처 증거·검증 이력의 분리"
@@ -186,6 +186,8 @@ Exhibition과 Institution 사이의 역할을 표현한다. 개최 장소, 운�
 ### ContentFeatureSnapshot
 
 추천에 사용할 승인된 콘텐츠 특성의 버전 있는 스냅샷이다. P0에서는 매체·주제·분위기·감상 방식·방문 조건과 근거 상태만 담을 수 있다. 추천 알고리즘과 가중치는 이 모델이 아니라 추천 명세가 정하며, P0는 시각 임베딩을 이 스냅샷에 넣지 않는다.
+
+`TP-005`의 물리 모델은 Exhibition별 snapshot 이력을 누적하고 현재 snapshot을 최대 한 건으로 제한한다. snapshot 안의 각 `ContentFeatureAssertion`은 분류축, 안정적인 특성 코드, `DIRECT | DERIVED` 근거 방식, 공식 SourceRecord와 선택적인 승인 규칙 버전을 따로 가진다. 직접 근거는 SourceRecord가 필수이고, 파생 근거는 SourceRecord와 비어 있지 않은 규칙 버전이 모두 필요하다. SourceRecord 기관과 Exhibition 기관이 다르면 assertion을 승인하지 않는다. feature가 없거나 현재 snapshot이 없는 상태는 비선호가 아니라 추천 점수의 중립이다.
 
 ### RecommendationRequestContext
 
