@@ -2,8 +2,15 @@ from datetime import date, datetime, timezone as datetime_timezone
 
 from django.test import TestCase
 
-from backend.apps.catalog.models import Exhibition, Institution, VerificationRecord
-from backend.apps.sources.models import IngestionRun
+from backend.apps.catalog.models import (
+    Exhibition,
+    ExhibitionSourceLink,
+    Institution,
+    VerificationRecord,
+)
+from backend.apps.discovery.models import SearchDocument
+from backend.apps.discovery.projection import rebuild_search_documents
+from backend.apps.sources.models import IngestionRun, SourceRecord
 from backend.data_pipeline.freshness.state import (
     apply_time_based_freshness,
     record_refresh_failure,
@@ -236,4 +243,58 @@ class RefreshStateTests(TestCase):
                 VerificationRecord.Outcome.FAILED,
                 VerificationRecord.Outcome.SUCCESS,
             ],
+        )
+
+    def test_search_projection_tracks_unverified_and_recovered_transitions(
+        self,
+    ) -> None:
+        source_record = SourceRecord.objects.create(
+            source_id="official-source",
+            institution_id=self.exhibition.institution.registry_id,
+            source_record_id="record-1",
+            source_owner=self.exhibition.institution.name,
+            payload={"title": self.exhibition.title},
+            content_hash="a" * 64,
+        )
+        ExhibitionSourceLink.objects.create(
+            exhibition=self.exhibition,
+            source_id=source_record.source_id,
+            source_record_id=source_record.source_record_id,
+            latest_source_record=source_record,
+        )
+        rebuild_search_documents()
+        self.assertEqual(SearchDocument.objects.count(), 2)
+
+        first_run = self.ingestion_run(IngestionRun.Status.FAILED)
+        second_run = self.ingestion_run(IngestionRun.Status.FAILED)
+        record_refresh_failure(
+            self.exhibition,
+            ingestion_run=first_run,
+            checked_at=datetime(2026, 8, 29, 3, 0, tzinfo=UTC),
+            error_message="first failure",
+        )
+        record_refresh_failure(
+            self.exhibition,
+            ingestion_run=second_run,
+            checked_at=datetime(2026, 8, 30, 3, 0, tzinfo=UTC),
+            error_message="second failure",
+        )
+
+        self.assertEqual(SearchDocument.objects.count(), 0)
+
+        success_run = self.ingestion_run(IngestionRun.Status.SUCCESS)
+        record_refresh_success(
+            self.exhibition,
+            ingestion_run=success_run,
+            checked_at=datetime(2026, 8, 31, 3, 0, tzinfo=UTC),
+            source_id=source_record.source_id,
+            source_record_id=source_record.source_record_id,
+        )
+
+        self.assertEqual(
+            set(SearchDocument.objects.values_list("result_type", flat=True)),
+            {
+                SearchDocument.ResultType.EXHIBITION,
+                SearchDocument.ResultType.INSTITUTION,
+            },
         )

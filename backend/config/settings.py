@@ -14,6 +14,7 @@ INSTALLED_APPS = [
     "backend.apps.sources",
     "backend.apps.data_quality",
     "backend.apps.catalog",
+    "backend.apps.discovery",
 ]
 
 DATABASES = {

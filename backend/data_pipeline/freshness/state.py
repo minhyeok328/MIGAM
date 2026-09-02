@@ -4,6 +4,7 @@ from datetime import datetime
 from django.db import transaction
 
 from backend.apps.catalog.models import Exhibition, VerificationRecord
+from backend.apps.discovery.projection import rebuild_search_documents
 from backend.apps.sources.models import IngestionRun
 from backend.data_pipeline.freshness.schedule import refresh_schedule_for
 
@@ -61,6 +62,7 @@ def record_refresh_failure(
         exhibition.save(
             update_fields=("freshness", "eligibility", "updated_at")
         )
+        rebuild_search_documents()
     return record
 
 
@@ -87,8 +89,12 @@ def record_refresh_success(
     exhibition.last_verified_at = checked_at
     exhibition.freshness = Exhibition.Freshness.FRESH
     update_fields: list[str] = ["last_verified_at", "freshness", "updated_at"]
+    eligibility_restored = False
     if exhibition.eligibility == Exhibition.Eligibility.DISCOVERY_ONLY:
         exhibition.eligibility = Exhibition.Eligibility.VERIFIED
         update_fields.append("eligibility")
+        eligibility_restored = True
     exhibition.save(update_fields=tuple(update_fields))
+    if eligibility_restored:
+        rebuild_search_documents()
     return record

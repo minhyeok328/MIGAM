@@ -1,9 +1,12 @@
+from dataclasses import replace
 from datetime import date
 from pathlib import Path
 
 from django.test import TestCase
 
 from backend.apps.data_quality.models import ExhibitionCandidate
+from backend.apps.discovery.models import SearchDocument
+from backend.apps.discovery.search import SearchQuery, get_search_service
 from backend.apps.sources.models import (
     IngestionObservation,
     IngestionRun,
@@ -114,3 +117,41 @@ class PersistenceServiceTests(TestCase):
         self.assertEqual(IngestionRun.objects.count(), 1)
         run.refresh_from_db()
         self.assertEqual(run.status, IngestionRun.Status.SUCCESS)
+
+    def test_successful_canonicalization_refreshes_search_projection(self) -> None:
+        persist_records(
+            [valid_record()],
+            self.registry,
+            as_of=date(2026, 8, 30),
+            command_name="sync_exhibitions",
+        )
+
+        document = SearchDocument.objects.get(
+            result_type=SearchDocument.ResultType.EXHIBITION
+        )
+        self.assertEqual(document.title, "제3회 호반미술상")
+        self.assertEqual(
+            get_search_service().search(SearchQuery(query="호반")).total,
+            1,
+        )
+
+        updated = replace(
+            valid_record(),
+            title="푸른 정원으로 바뀐 전시",
+            raw={"PERFORM_IDX": "37607", "TITLE": "푸른 정원으로 바뀐 전시"},
+        )
+        persist_records(
+            [updated],
+            self.registry,
+            as_of=date(2026, 9, 2),
+            command_name="sync_exhibitions",
+        )
+
+        document = SearchDocument.objects.get(
+            result_type=SearchDocument.ResultType.EXHIBITION
+        )
+        self.assertEqual(document.title, "푸른 정원으로 바뀐 전시")
+        self.assertEqual(
+            get_search_service().search(SearchQuery(query="푸른")).total,
+            1,
+        )

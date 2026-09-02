@@ -8,6 +8,7 @@ from django.db import transaction
 from django.utils import timezone
 
 from backend.apps.data_quality.models import ExhibitionCandidate
+from backend.apps.discovery.projection import rebuild_search_documents
 from backend.apps.sources.models import (
     IngestionObservation,
     IngestionRun,
@@ -81,6 +82,7 @@ def persist_records(
                 registry=registry,
                 ingestion_run=run,
             )
+            rebuild_search_documents()
 
             run.received_count = len(processed)
             run.verified_count = sum(
