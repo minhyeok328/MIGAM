@@ -5,6 +5,7 @@ requires-python = ">=3.11"
 dependencies = [
     "Django>=5.2.12,<5.3",
     "PyYAML>=6.0.3,<7",
+    "djangorestframework>=3.18,<3.19",
 ]
 
 [tool.uv]

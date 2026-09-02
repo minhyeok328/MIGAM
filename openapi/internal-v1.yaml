@@ -1,0 +1,261 @@
+openapi: 3.1.0
+info:
+  title: 미감 내부 API
+  version: 1.0.0
+  description: 로컬 프론트엔드와 후속 챗봇이 사용하는 비공개 내부 계약입니다.
+paths:
+  /api/internal/v1/search/:
+    get:
+      operationId: searchDiscovery
+      summary: 전시와 기관 검색
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [EXHIBITION, INSTITUTION, ALL]
+            default: EXHIBITION
+        - name: lifecycle
+          in: query
+          required: false
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum: [CURRENT, UPCOMING, ENDED, CANCELED]
+        - name: region_area
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+        - name: region_district
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 100
+        - name: sort
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [RELEVANCE, LATEST_START, ENDING_SOON, UPCOMING_START]
+            default: RELEVANCE
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+        - name: page_size
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 24
+            default: 24
+      responses:
+        "200":
+          description: 검색 성공. 결과가 없으면 results는 빈 배열입니다.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchResponse"
+        "400":
+          description: 검색 조건 오류
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchError"
+        "503":
+          description: SQLite FTS5 검색 백엔드 사용 불가
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchError"
+components:
+  schemas:
+    SearchResponse:
+      type: object
+      additionalProperties: false
+      required: [total, page, page_size, has_more, results]
+      properties:
+        total:
+          type: integer
+          minimum: 0
+        page:
+          type: integer
+          minimum: 1
+        page_size:
+          type: integer
+          minimum: 1
+          maximum: 24
+        has_more:
+          type: boolean
+        results:
+          type: array
+          items:
+            oneOf:
+              - $ref: "#/components/schemas/ExhibitionSearchResult"
+              - $ref: "#/components/schemas/InstitutionSearchResult"
+            discriminator:
+              propertyName: type
+              mapping:
+                EXHIBITION: "#/components/schemas/ExhibitionSearchResult"
+                INSTITUTION: "#/components/schemas/InstitutionSearchResult"
+    ExhibitionSearchResult:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - id
+        - title
+        - institution
+        - lifecycle
+        - start_date
+        - end_date
+        - venue
+        - region
+        - official_url
+        - freshness
+        - eligibility
+        - last_verified_at
+        - source
+        - media
+      properties:
+        type:
+          type: string
+          enum: [EXHIBITION]
+        id:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        institution:
+          $ref: "#/components/schemas/InstitutionReference"
+        lifecycle:
+          type: string
+          enum: [CURRENT, UPCOMING, ENDED, CANCELED]
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        venue:
+          type: string
+        region:
+          $ref: "#/components/schemas/Region"
+        official_url:
+          type: string
+          format: uri
+        freshness:
+          type: string
+          enum: [FRESH, STALE]
+        eligibility:
+          type: string
+          enum: [VERIFIED]
+        last_verified_at:
+          type: string
+          format: date-time
+        source:
+          $ref: "#/components/schemas/SourceEvidence"
+        media:
+          $ref: "#/components/schemas/MediaPresentation"
+    InstitutionSearchResult:
+      type: object
+      additionalProperties: false
+      required: [type, id, name, region, searchable_exhibition_count]
+      properties:
+        type:
+          type: string
+          enum: [INSTITUTION]
+        id:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+        region:
+          $ref: "#/components/schemas/Region"
+        searchable_exhibition_count:
+          type: integer
+          minimum: 1
+    InstitutionReference:
+      type: object
+      additionalProperties: false
+      required: [id, name]
+      properties:
+        id:
+          type: integer
+          minimum: 1
+        name:
+          type: string
+    Region:
+      type: object
+      additionalProperties: false
+      required: [area, district]
+      properties:
+        area:
+          type: string
+        district:
+          type: string
+    SourceEvidence:
+      type: object
+      additionalProperties: false
+      required: [source_id, source_record_id, source_owner, last_seen_at]
+      properties:
+        source_id:
+          type: string
+        source_record_id:
+          type: string
+        source_owner:
+          type: string
+        last_seen_at:
+          type: string
+          format: date-time
+    MediaPresentation:
+      type: object
+      additionalProperties: false
+      required: [status, media_url, page_url, credit_line]
+      properties:
+        status:
+          type: string
+          enum: [INLINE, LINK_ONLY, HIDDEN]
+        media_url:
+          type: [string, "null"]
+          format: uri
+        page_url:
+          type: [string, "null"]
+          format: uri
+        credit_line:
+          type: [string, "null"]
+    SearchError:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, details]
+          properties:
+            code:
+              type: string
+              enum: [INVALID_SEARCH_QUERY, SEARCH_BACKEND_UNAVAILABLE]
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
