@@ -29,27 +29,7 @@ def present_search_hits(hits: Iterable[SearchHit]) -> list[dict[str, object]]:
         if hit.result_type == SearchResultType.INSTITUTION
     ]
 
-    exhibitions = {
-        exhibition.pk: exhibition
-        for exhibition in Exhibition.objects.filter(pk__in=exhibition_ids)
-        .select_related("institution")
-        .prefetch_related(
-            Prefetch(
-                "source_links",
-                queryset=ExhibitionSourceLink.objects.select_related(
-                    "latest_source_record"
-                ).order_by("-updated_at", "-id"),
-                to_attr="search_source_links",
-            ),
-            Prefetch(
-                "mediaasset_records",
-                queryset=MediaAsset.objects.prefetch_related(
-                    "rights_history"
-                ).order_by("id"),
-                to_attr="search_media_assets",
-            ),
-        )
-    }
+    exhibitions = _load_exhibitions(exhibition_ids)
     searchable_exhibition_filter = (
         Q(exhibitions__eligibility=Exhibition.Eligibility.VERIFIED)
         & ~Q(exhibitions__freshness=Exhibition.Freshness.UNVERIFIED)
@@ -71,7 +51,7 @@ def present_search_hits(hits: Iterable[SearchHit]) -> list[dict[str, object]]:
         if hit.result_type == SearchResultType.EXHIBITION:
             exhibition = exhibitions.get(hit.object_id)
             if exhibition is not None:
-                results.append(_present_exhibition(exhibition))
+                results.append(present_exhibition(exhibition))
         else:
             institution = institutions.get(hit.object_id)
             if institution is not None:
@@ -79,7 +59,45 @@ def present_search_hits(hits: Iterable[SearchHit]) -> list[dict[str, object]]:
     return results
 
 
-def _present_exhibition(exhibition: Exhibition) -> dict[str, object]:
+def present_exhibitions_by_id(
+    ordered_ids: Iterable[int],
+) -> list[dict[str, object]]:
+    ids = tuple(ordered_ids)
+    exhibitions = _load_exhibitions(ids)
+    return [
+        present_exhibition(exhibitions[exhibition_id])
+        for exhibition_id in ids
+        if exhibition_id in exhibitions
+    ]
+
+
+def _load_exhibitions(
+    exhibition_ids: Iterable[int],
+) -> dict[int, Exhibition]:
+    return {
+        exhibition.pk: exhibition
+        for exhibition in Exhibition.objects.filter(pk__in=exhibition_ids)
+        .select_related("institution")
+        .prefetch_related(
+            Prefetch(
+                "source_links",
+                queryset=ExhibitionSourceLink.objects.select_related(
+                    "latest_source_record"
+                ).order_by("-updated_at", "-id"),
+                to_attr="search_source_links",
+            ),
+            Prefetch(
+                "mediaasset_records",
+                queryset=MediaAsset.objects.prefetch_related(
+                    "rights_history"
+                ).order_by("id"),
+                to_attr="search_media_assets",
+            ),
+        )
+    }
+
+
+def present_exhibition(exhibition: Exhibition) -> dict[str, object]:
     source_links = getattr(exhibition, "search_source_links", ())
     source_record = (
         source_links[0].latest_source_record if source_links else None

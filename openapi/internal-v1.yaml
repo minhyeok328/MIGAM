@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: 미감 내부 API
-  version: 1.0.0
+  version: 1.1.0
   description: 로컬 프론트엔드와 후속 챗봇이 사용하는 비공개 내부 계약입니다.
 paths:
   /api/internal/v1/search/:
@@ -85,8 +85,385 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/SearchError"
+  /api/internal/v1/recommendations/:
+    post:
+      operationId: recommendExhibitions
+      summary: 조건과 명시적 취향에 맞는 전시 추천
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecommendationRequest"
+      responses:
+        "200":
+          description: 추천 성공. 후보가 없으면 두 결과 배열은 비어 있습니다.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationResponse"
+        "400":
+          description: 추천 조건 오류
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationError"
 components:
   schemas:
+    RecommendationRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        region:
+          $ref: "#/components/schemas/RecommendationRegion"
+        visit_dates:
+          $ref: "#/components/schemas/VisitDateRange"
+        max_budget_krw:
+          type: integer
+          minimum: 0
+        required_accessibility:
+          type: array
+          maxItems: 100
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - WHEELCHAIR_ACCESS
+              - MOBILITY_ACCESS
+              - CAPTIONS
+              - SIGN_LANGUAGE
+              - AUDIO_DESCRIPTION
+              - AGE_CONDITION
+        avoided_sensory:
+          type: array
+          maxItems: 100
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - LOUD_SOUND
+              - SUDDEN_SOUND
+              - FLASHING_LIGHTS
+              - DARK_SPACE
+              - NARROW_OR_ENCLOSED_SPACE
+        reservation:
+          $ref: "#/components/schemas/ReservationPreferenceRequest"
+        duration:
+          $ref: "#/components/schemas/DurationPreferenceRequest"
+        preferred_features:
+          type: array
+          maxItems: 100
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/FeaturePreference"
+        liked_exhibition_ids:
+          type: array
+          maxItems: 100
+          uniqueItems: true
+          items:
+            type: integer
+            minimum: 1
+        liked_institution_ids:
+          type: array
+          maxItems: 100
+          uniqueItems: true
+          items:
+            type: integer
+            minimum: 1
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 24
+          default: 6
+    RecommendationRegion:
+      type: object
+      additionalProperties: false
+      required: [area]
+      properties:
+        area:
+          type: string
+          minLength: 1
+          maxLength: 100
+        district:
+          type: string
+          maxLength: 100
+    VisitDateRange:
+      type: object
+      additionalProperties: false
+      required: [start, end]
+      properties:
+        start:
+          type: string
+          format: date
+        end:
+          type: string
+          format: date
+    ReservationPreferenceRequest:
+      type: object
+      additionalProperties: false
+      required: [mode, types]
+      properties:
+        mode:
+          type: string
+          enum: [REQUIRED, PREFERRED]
+        types:
+          type: array
+          minItems: 1
+          maxItems: 100
+          uniqueItems: true
+          items:
+            type: string
+            enum:
+              - NOT_REQUIRED
+              - REQUIRED
+              - RECOMMENDED
+              - TIMED_ENTRY
+              - ON_SITE
+              - FIRST_COME
+              - PROGRAM_ONLY
+    DurationPreferenceRequest:
+      type: object
+      additionalProperties: false
+      required: [mode]
+      anyOf:
+        - required: [minimum_minutes]
+        - required: [maximum_minutes]
+      properties:
+        mode:
+          type: string
+          enum: [REQUIRED, PREFERRED]
+        minimum_minutes:
+          type: integer
+          minimum: 1
+        maximum_minutes:
+          type: integer
+          minimum: 1
+    FeaturePreference:
+      type: object
+      additionalProperties: false
+      required: [axis, value]
+      properties:
+        axis:
+          type: string
+          enum:
+            - MEDIA_GROUP
+            - MEDIA_DETAIL
+            - THEME
+            - MOOD
+            - EXPERIENCE
+            - SPACE_TYPE
+            - EVENT_FORMAT
+        value:
+          type: string
+          minLength: 1
+          maxLength: 64
+          pattern: "^[A-Z0-9][A-Z0-9_:-]{0,63}$"
+    RecommendationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - algorithm_version
+        - candidate_count
+        - recommendations
+        - needs_verification
+      properties:
+        algorithm_version:
+          type: string
+        candidate_count:
+          type: integer
+          minimum: 0
+        recommendations:
+          type: array
+          maxItems: 24
+          items:
+            $ref: "#/components/schemas/ExhibitionRecommendation"
+        needs_verification:
+          type: array
+          maxItems: 24
+          items:
+            $ref: "#/components/schemas/VerificationCandidate"
+    ExhibitionRecommendation:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - id
+        - title
+        - institution
+        - lifecycle
+        - start_date
+        - end_date
+        - venue
+        - region
+        - official_url
+        - freshness
+        - eligibility
+        - last_verified_at
+        - source
+        - media
+        - match_level
+        - is_exploration
+        - reasons
+      properties:
+        type:
+          type: string
+          enum: [EXHIBITION]
+        id:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        institution:
+          $ref: "#/components/schemas/InstitutionReference"
+        lifecycle:
+          type: string
+          enum: [CURRENT, UPCOMING]
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        venue:
+          type: string
+        region:
+          $ref: "#/components/schemas/Region"
+        official_url:
+          type: string
+          format: uri
+        freshness:
+          type: string
+          enum: [FRESH, STALE]
+        eligibility:
+          type: string
+          enum: [VERIFIED]
+        last_verified_at:
+          type: string
+          format: date-time
+        source:
+          $ref: "#/components/schemas/SourceEvidence"
+        media:
+          $ref: "#/components/schemas/MediaPresentation"
+        match_level:
+          type: string
+          enum: [VERY_CLOSE, GOOD_MATCH, SOME_MATCH, GENERAL, EXPLORATION]
+        is_exploration:
+          type: boolean
+        reasons:
+          type: array
+          minItems: 1
+          maxItems: 3
+          items:
+            $ref: "#/components/schemas/RecommendationReason"
+    VerificationCandidate:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - id
+        - title
+        - institution
+        - lifecycle
+        - start_date
+        - end_date
+        - venue
+        - region
+        - official_url
+        - freshness
+        - eligibility
+        - last_verified_at
+        - source
+        - media
+        - verification_reasons
+      properties:
+        type:
+          type: string
+          enum: [EXHIBITION]
+        id:
+          type: integer
+          minimum: 1
+        title:
+          type: string
+        institution:
+          $ref: "#/components/schemas/InstitutionReference"
+        lifecycle:
+          type: string
+          enum: [CURRENT, UPCOMING]
+        start_date:
+          type: string
+          format: date
+        end_date:
+          type: string
+          format: date
+        venue:
+          type: string
+        region:
+          $ref: "#/components/schemas/Region"
+        official_url:
+          type: string
+          format: uri
+        freshness:
+          type: string
+          enum: [FRESH, STALE]
+        eligibility:
+          type: string
+          enum: [VERIFIED]
+        last_verified_at:
+          type: string
+          format: date-time
+        source:
+          $ref: "#/components/schemas/SourceEvidence"
+        media:
+          $ref: "#/components/schemas/MediaPresentation"
+        verification_reasons:
+          type: array
+          minItems: 1
+          maxItems: 3
+          uniqueItems: true
+          items:
+            type: string
+            enum: [PRICE_UNKNOWN, RESERVATION_UNKNOWN, DURATION_UNKNOWN]
+    RecommendationReason:
+      type: object
+      additionalProperties: false
+      required: [code, text, feature]
+      properties:
+        code:
+          type: string
+          enum:
+            - PREFERRED_FEATURE
+            - LIKED_EXHIBITION_FEATURE
+            - LIKED_INSTITUTION
+            - PREFERRED_RESERVATION
+            - PREFERRED_DURATION
+            - FRESH_OFFICIAL_INFORMATION
+            - OFFICIAL_INFORMATION
+            - EXPLORATION_CONNECTION
+            - EXPLORATION_NOVELTY
+        text:
+          type: string
+        feature:
+          oneOf:
+            - $ref: "#/components/schemas/FeaturePreference"
+            - type: "null"
+    RecommendationError:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, details]
+          properties:
+            code:
+              type: string
+              enum: [INVALID_RECOMMENDATION_REQUEST]
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
     SearchResponse:
       type: object
       additionalProperties: false

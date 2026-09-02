@@ -73,3 +73,133 @@ class InternalOpenAPIContractTests(SimpleTestCase):
             schemas["SearchError"]["properties"]["error"]["required"],
             ["code", "message", "details"],
         )
+
+    def test_document_defines_recommendation_post_request_contract(self) -> None:
+        self.assertEqual(self.document["info"]["version"], "1.1.0")
+        operation = self.document["paths"][
+            "/api/internal/v1/recommendations/"
+        ]["post"]
+
+        self.assertEqual(operation["operationId"], "recommendExhibitions")
+        self.assertEqual(
+            operation["requestBody"]["content"]["application/json"]["schema"],
+            {"$ref": "#/components/schemas/RecommendationRequest"},
+        )
+        self.assertEqual(set(operation["responses"]), {"200", "400"})
+
+        request = self.document["components"]["schemas"][
+            "RecommendationRequest"
+        ]
+        self.assertFalse(request["additionalProperties"])
+        self.assertEqual(
+            set(request["properties"]),
+            {
+                "region",
+                "visit_dates",
+                "max_budget_krw",
+                "required_accessibility",
+                "avoided_sensory",
+                "reservation",
+                "duration",
+                "preferred_features",
+                "liked_exhibition_ids",
+                "liked_institution_ids",
+                "limit",
+            },
+        )
+        self.assertEqual(request["properties"]["limit"]["default"], 6)
+        self.assertEqual(request["properties"]["limit"]["maximum"], 24)
+        for field in (
+            "required_accessibility",
+            "avoided_sensory",
+            "preferred_features",
+            "liked_exhibition_ids",
+            "liked_institution_ids",
+        ):
+            self.assertEqual(request["properties"][field]["maxItems"], 100)
+            self.assertTrue(request["properties"][field]["uniqueItems"])
+        self.assertEqual(
+            self.document["components"]["schemas"]["FeaturePreference"][
+                "properties"
+            ]["axis"]["enum"],
+            [
+                "MEDIA_GROUP",
+                "MEDIA_DETAIL",
+                "THEME",
+                "MOOD",
+                "EXPERIENCE",
+                "SPACE_TYPE",
+                "EVENT_FORMAT",
+            ],
+        )
+
+    def test_recommendation_response_has_qualitative_trace_without_score(self) -> None:
+        schemas = self.document["components"]["schemas"]
+        response = schemas["RecommendationResponse"]
+        self.assertEqual(
+            set(response["required"]),
+            {
+                "algorithm_version",
+                "candidate_count",
+                "recommendations",
+                "needs_verification",
+            },
+        )
+        recommendation = schemas["ExhibitionRecommendation"]
+        self.assertEqual(
+            set(recommendation["required"]),
+            {
+                "type",
+                "id",
+                "title",
+                "institution",
+                "lifecycle",
+                "start_date",
+                "end_date",
+                "venue",
+                "region",
+                "official_url",
+                "freshness",
+                "eligibility",
+                "last_verified_at",
+                "source",
+                "media",
+                "match_level",
+                "is_exploration",
+                "reasons",
+            },
+        )
+        self.assertNotIn("score", recommendation["properties"])
+        self.assertNotIn("percentage", recommendation["properties"])
+        self.assertEqual(
+            recommendation["properties"]["match_level"]["enum"],
+            ["VERY_CLOSE", "GOOD_MATCH", "SOME_MATCH", "GENERAL", "EXPLORATION"],
+        )
+        self.assertEqual(recommendation["properties"]["reasons"]["minItems"], 1)
+        self.assertEqual(recommendation["properties"]["reasons"]["maxItems"], 3)
+        self.assertEqual(
+            schemas["RecommendationReason"]["properties"]["code"]["enum"],
+            [
+                "PREFERRED_FEATURE",
+                "LIKED_EXHIBITION_FEATURE",
+                "LIKED_INSTITUTION",
+                "PREFERRED_RESERVATION",
+                "PREFERRED_DURATION",
+                "FRESH_OFFICIAL_INFORMATION",
+                "OFFICIAL_INFORMATION",
+                "EXPLORATION_CONNECTION",
+                "EXPLORATION_NOVELTY",
+            ],
+        )
+        self.assertEqual(
+            schemas["VerificationCandidate"]["properties"][
+                "verification_reasons"
+            ]["items"]["enum"],
+            ["PRICE_UNKNOWN", "RESERVATION_UNKNOWN", "DURATION_UNKNOWN"],
+        )
+        self.assertEqual(
+            schemas["RecommendationError"]["properties"]["error"][
+                "properties"
+            ]["code"]["enum"],
+            ["INVALID_RECOMMENDATION_REQUEST"],
+        )
