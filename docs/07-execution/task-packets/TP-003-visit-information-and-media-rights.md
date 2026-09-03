@@ -1,8 +1,8 @@
 ---
 title: "TP-003 선택 관람 정보와 미디어 권리 모델"
 status: APPROVED
-version: "1.0.0"
-last_updated: "2026-09-01"
+version: "1.0.1"
+last_updated: "2026-09-03"
 authoritative_for:
   - "요금·예약·예상 관람시간·접근성·감각 정보의 정본 저장 계약"
   - "MediaAsset·MediaRights의 권리 이력과 안전한 이미지 노출 판정"
@@ -25,7 +25,7 @@ related_documents:
 ## 목적과 승인 근거
 
 - 지원하는 P0 과업: 전시의 요금·예약·예상 관람시간·접근성·감각 정보를 근거와 함께 비교하고, 권리가 확인된 이미지만 안전하게 표시할 수 있는 정본 기반을 만든다.
-- 승인 근거: 2026-09-01 사용자의 `선택 정보·권리 모델 확장 → 내부 OpenAPI/검색 → 추천 → 프론트엔드` 순서 확인과 후속 작업 진행 지시, `DEC-064`, `DEC-065`, `DEC-086`, `DEC-087`, `P0-FR-032`~`P0-FR-036`, `P0-FR-055`~`P0-FR-057`, `P0-FR-089`, `AC-015`, `AC-024`.
+- 승인일: 2026-09-01. 구현 순서는 `선택 정보·권리 모델 확장 → 내부 OpenAPI/검색 → 추천 → 프론트엔드`다. 관련 결정·합격 기준: `DEC-064`, `DEC-065`, `DEC-086`, `DEC-087`, `P0-FR-032`~`P0-FR-036`, `P0-FR-055`~`P0-FR-057`, `P0-FR-089`, `AC-015`, `AC-024`.
 - 선행 구현: [`TP-001`](TP-001-institution-collection-gate.md)의 SourceRecord·기관 수집 게이트와 [`TP-002`](TP-002-institution-active-promotion.md)의 Canonical·ChangeHistory 기반.
 
 ## 범위

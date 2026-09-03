@@ -1,8 +1,8 @@
 ---
 title: "TP-004 내부 OpenAPI와 FTS5 검색"
 status: APPROVED
-version: "1.0.0"
-last_updated: "2026-09-02"
+version: "1.0.1"
+last_updated: "2026-09-03"
 authoritative_for:
   - "전시·기관 내부 검색 API v1 계약"
   - "SearchService 경계와 SQLite FTS5 구현"
@@ -23,7 +23,7 @@ related_documents:
 ## 목적과 승인 근거
 
 - 지원하는 P0 과업: 계정 없이 현재 정본 전시와 기관을 키워드·상태·지역으로 찾고 후속 추천·프론트엔드가 같은 내부 계약을 사용하게 한다.
-- 승인 근거: 2026-09-02 사용자의 로컬 실행, 외부 API 키·`.env` 불필요, 전시·기관 우선 구현 결정과 즉시 진행 지시, `DEC-104`, `DEC-105`, `DEC-107`, `P0-FR-038`, `P0-FR-040`~`P0-FR-046`, `P0-FR-089`.
+- 승인일: 2026-09-02. 로컬 실행을 기준으로 외부 API 키·`.env` 없이 전시·기관 검색을 우선 구현한다. 관련 결정·요구사항: `DEC-104`, `DEC-105`, `DEC-107`, `P0-FR-038`, `P0-FR-040`~`P0-FR-046`, `P0-FR-089`.
 - 선행 구현: [`TP-001`](TP-001-institution-collection-gate.md)~[`TP-003`](TP-003-visit-information-and-media-rights.md)의 정본·적격성·출처·최신성·권리 모델.
 
 ## 범위

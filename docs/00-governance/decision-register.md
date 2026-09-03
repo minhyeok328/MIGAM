@@ -1,10 +1,10 @@
 ---
 title: "미감 결정 등록부"
 status: DRAFT
-version: "0.4.0"
-last_updated: "2026-08-30"
+version: "0.4.1"
+last_updated: "2026-09-03"
 authoritative_for:
-  - "기획 대화에서 확정·폐기·미확정된 결정의 추적"
+  - "제품 기획의 확정·폐기·미확정 결정 추적"
   - "후반 결정이 대체한 초기안 기록"
 related_documents:
   - "./document-policy.md"
@@ -16,11 +16,11 @@ related_documents:
 
 ## 1. 사용법
 
-이 등록부는 전체 기획 대화의 결정을 주제별로 묶어 추적한다. 한 항목이 대화의 질문 하나와 반드시 일치하지는 않는다. 같은 주제를 여러 번 논의했으면 **가장 나중에 명시적으로 확정된 결정**을 `CURRENT`로 기록하고, 이전 안은 `SUPERSEDED`로 남긴다.
+이 등록부는 제품 기획의 결정을 주제별로 묶어 추적한다. 한 항목에는 같은 주제의 논의 결과를 모은다. 여러 번 논의한 주제는 가장 나중에 명시적으로 확정된 결정을 `CURRENT`로 기록하고, 이전 안은 `SUPERSEDED`로 남긴다.
 
 - `CURRENT`: 현재 문서가 따라야 하는 결정
 - `SUPERSEDED`: 후반 결정으로 폐기된 안
-- `OPEN`: 사용자 결정이나 외부 검증이 더 필요한 항목
+- `OPEN`: 제품 책임자의 결정이나 외부 검증이 더 필요한 항목
 - `RESOLVED`: 열린 결정이 해소되어 소유 문서에 반영된 상태
 
 ## 2. 현재 제품 결정
@@ -165,7 +165,7 @@ related_documents:
 | OD-004 | `OPEN` | 타이포그래피형 워드마크와 별도 로고 중 무엇을 채택하고 Serif·Sans 최종 폰트를 무엇으로 할지 | UI Guidelines |
 | OD-005 | `OPEN` | P0 API를 내부 소비 전용으로 유지할지 제3자 공개 API까지 제공할지 | API Guidelines, Security & Privacy |
 | OD-006 | `OPEN` | P1 호스팅 대상, 월 비용 한도, 도메인, 오류 모니터링과 최소 분석 허용 범위 | Roadmap, System Architecture |
-| OD-007 | `OPEN` | 구현 마감일, 동시 작업 에이전트 수, 브랜치·리뷰·병합 방식 | Implementation Readiness |
+| OD-007 | `OPEN` | 구현 마감일, 병렬 작업 규모, 브랜치·리뷰·병합 방식 | Implementation Readiness |
 
 열린 결정은 현재 초안 작성을 막지 않지만 관련 문서를 `APPROVED`로 올리기 전에 해결해야 한다.
 

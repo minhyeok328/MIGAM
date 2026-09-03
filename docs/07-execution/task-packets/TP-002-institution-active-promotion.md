@@ -1,8 +1,8 @@
 ---
 title: "TP-002 기관 ACTIVE 승격 증거와 자동 전이"
 status: APPROVED
-version: "1.0.1"
-last_updated: "2026-09-01"
+version: "1.0.2"
+last_updated: "2026-09-03"
 authoritative_for:
   - "PROVISIONAL 기관의 승격 검증 실행과 QualificationRun 기록"
   - "Canonical ChangeHistory와 P0 의미 변경 증거"
@@ -24,7 +24,7 @@ related_documents:
 ## 목적과 승인 근거
 
 - 지원하는 P0 과업: 승인 기관의 실제 수집·변경 처리 안정성을 검증해 고신뢰 `ACTIVE` 상태로 승격한다.
-- 승인 근거: 2026-09-01 사용자의 후속 작업 진행 지시와 `DEC-098`, `P0-FR-091`, `AC-026`.
+- 승인일: 2026-09-01. 관련 결정·합격 기준: `DEC-098`, `P0-FR-091`, `AC-026`.
 - 선행 구현: [`TP-001`](TP-001-institution-collection-gate.md)의 Source·기관 운영 상태, 공용 수집 게이트, InstitutionRunResult와 원자적 성공 확정.
 
 ## 범위

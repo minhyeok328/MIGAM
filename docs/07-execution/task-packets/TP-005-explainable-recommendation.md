@@ -1,8 +1,8 @@
 ---
 title: "TP-005 조건 보존 설명형 추천"
 status: APPROVED
-version: "1.0.0"
-last_updated: "2026-09-02"
+version: "1.0.1"
+last_updated: "2026-09-03"
 authoritative_for:
   - "P0 RecommendationService 후보·필터·점수·다양성·이유 계약"
   - "ContentFeatureSnapshot과 근거 assertion의 물리 모델"
@@ -26,7 +26,7 @@ related_documents:
 ## 목적과 승인 근거
 
 - 지원하는 P0 과업: 계정 없이 현재 요청의 방문 조건과 명시적 취향 신호만 사용해, 실제로 갈 수 있는 현재·예정 전시를 근거와 함께 추천한다.
-- 승인 근거: 2026-09-02 사용자의 `선택 정보·권리 → 내부 OpenAPI/검색 → 추천 → 프론트엔드` 순서와 TP-005 즉시 진행 지시, `DEC-043`~`DEC-053`, `DEC-096`, `DEC-107`, `DEC-110`, `DEC-112`, `P0-FR-032`~`P0-FR-037`, `P0-FR-047`~`P0-FR-052`.
+- 승인일: 2026-09-02. 구현 순서는 `선택 정보·권리 → 내부 OpenAPI/검색 → 추천 → 프론트엔드`다. 관련 결정·요구사항: `DEC-043`~`DEC-053`, `DEC-096`, `DEC-107`, `DEC-110`, `DEC-112`, `P0-FR-032`~`P0-FR-037`, `P0-FR-047`~`P0-FR-052`.
 - 선행 구현: [`TP-003`](TP-003-visit-information-and-media-rights.md)의 방문 정보·권리 정본과 [`TP-004`](TP-004-internal-search-openapi.md)의 내부 DRF/OpenAPI·정본 presenter 경계.
 
 ## 범위
@@ -35,7 +35,7 @@ related_documents:
 
 - `backend/apps/discovery/`에 기술 독립적인 `RecommendationService` 인터페이스와 P0 ORM 구현을 둔다. 서비스는 요청 검증, 후보 게이트, 하드 조건, 점수, 다양성, 연결된 탐색, 이유 생성을 순서대로 적용한다.
 - 추천 후보는 `CURRENT | UPCOMING`, `eligibility = VERIFIED`, `freshness = FRESH | STALE`, 최신 공식 SourceRecord 연결, 미해결 SourceConflict 없음 조건을 모두 만족하는 Exhibition 정본에서만 시작한다.
-- 지역은 시·도 전체 또는 시·군·구까지 정확히 비교하고, 날짜를 받은 경우 사용자 하루·기간과 전시 기간이 한 날 이상 겹쳐야 한다. 운영시간·휴관일 모델이 아직 없으므로 이번 판정은 전시 시작일·종료일과 취소 상태까지만 증명하며 특정 날짜의 개관·회차·잔여석을 주장하지 않는다.
+- 지역은 시·도 전체 또는 시·군·구까지 정확히 비교하고, 날짜를 받은 경우 사용자 하루·기간과 전시 기간이 한 날 이상 겹쳐야 한다. 운영시간·휴관일 모델이 아직 없으므로 전시 시작일·종료일과 취소 상태만 판정한다. 특정 날짜의 개관·회차·잔여석은 확인하지 않는다.
 - 일반 성인 기본권 최대 예산, 필수 접근성, 회피 감각, 필수 예약 유형, 필수 예상 관람시간을 하드 조건으로 처리한다. 확인된 불일치는 제외하고 `UNKNOWN`·근거 없음·상충값은 충족으로 바꾸지 않는다.
 - 접근성 필수조건은 `CONFIRMED_POSITIVE`, 감각 회피는 해당 자극의 `CONFIRMED_NEGATIVE`만 통과한다. 두 안전 조건의 `UNKNOWN`은 별도 후보군으로도 우회하지 않는다.
 - 가격·예약·관람시간의 `UNKNOWN`은 해당 값이 필수인 요청에서 주요 추천에 섞지 않는다. 다른 안전 조건과 알려진 조건을 통과한 경우에만 `needs_verification`으로 분리하고 이유 코드를 제공한다.

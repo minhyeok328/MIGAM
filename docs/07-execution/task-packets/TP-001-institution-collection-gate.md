@@ -1,8 +1,8 @@
 ---
 title: "TP-001 기관 운영 상태와 수집 전 게이트"
 status: APPROVED
-version: "1.0.2"
-last_updated: "2026-09-01"
+version: "1.0.3"
+last_updated: "2026-09-03"
 authoritative_for:
   - "승인 Source와 기관 allowlist의 DB 운영 상태 부트스트랩"
   - "P0 변경 명령의 lifecycle·Source 상태·Critical 수집 전 차단"
@@ -21,7 +21,7 @@ related_documents:
 ## 목적과 승인 근거
 
 - 지원하는 P0 과업: 승인 출처 데이터만 안전하게 수집·재확인하고 마지막 정상 정본을 보존한다.
-- 승인 근거: 2026-09-01 사용자의 "다음 작업 진행" 지시와 `DEC-097`~`DEC-099`, `P0-FR-088`, `P0-FR-091`, `P0-FR-092`.
+- 승인일: 2026-09-01. 관련 결정·요구사항: `DEC-097`~`DEC-099`, `P0-FR-088`, `P0-FR-091`, `P0-FR-092`.
 - 제품·엔지니어링 근거: Data Model 7~8절, Data Pipeline 2.2.4·2.3절, `AC-023`, `AC-026`, `AC-027`.
 
 ## 범위
