@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 요구사항 추적성 매트릭스"
 status: DRAFT
-version: "0.3.3"
-last_updated: "2026-09-01"
+version: "0.3.4"
+last_updated: "2026-09-03"
 authoritative_for:
   - "P0 요구사항과 결정·화면·합격 기준·테스트의 연결"
   - "요구사항 누락과 고아 테스트의 식별"
@@ -159,13 +159,21 @@ related_documents:
 
 | 요구사항 | 작업 패킷 | 실제 테스트 파일 | 상태 |
 | --- | --- | --- | --- |
-| `P0-FR-015`, `P0-NFR-007` 미디어 권리·대체 | [`TP-003`](../07-execution/task-packets/TP-003-visit-information-and-media-rights.md) | `tests/persistence/test_media_rights.py` | `PARTIAL`: MediaAsset·MediaRights 이력과 안전한 인라인·링크·숨김 판정 구현, 내부 API와 텍스트형 프론트 대체는 미구현 |
+| `P0-FR-015`, `P0-NFR-007` 미디어 권리·대체 | [`TP-003`](../07-execution/task-packets/TP-003-visit-information-and-media-rights.md), [`TP-006`](../07-execution/task-packets/TP-006-frontend-discovery.md) | `tests/persistence/test_media_rights.py`, `frontend/src/shared/api/client.test.ts`, `frontend/src/app/App.test.tsx` | `PARTIAL`: 저장·API 경계·발견 카드의 안전한 이미지·텍스트 대체 구현, 상세·취향 테스트·실제 브라우저 검수는 미구현 |
 | `P0-FR-032`~`P0-FR-036`, `P0-FR-055`~`P0-FR-057`, `P0-FR-089` 선택 관람 정보 | [`TP-003`](../07-execution/task-packets/TP-003-visit-information-and-media-rights.md) | `tests/persistence/test_visit_information.py` | `PARTIAL`: 요금·예약·예상 관람시간·접근성·감각의 근거·`UNKNOWN`·확인된 부정 저장 구현, 승인 Source 수집 매핑·API·추천 필수조건 판정은 미구현 |
 | `P0-FR-088` 수집 전 게이트와 기관별 실행 결과 | [`TP-001`](../07-execution/task-packets/TP-001-institution-collection-gate.md), [`TP-002`](../07-execution/task-packets/TP-002-institution-active-promotion.md) | `tests/persistence/test_registry_state.py`, `test_collection_gate.py`, `test_sync_command.py`, `test_refresh_commands.py`, `test_institution_qualification.py` | `PARTIAL`: 로컬 세 변경 명령·자격 모드·성공 확정 전 Critical 재검사·원자성 구현, 배포 스케줄러·승격 진행 표시는 미구현 |
 | `P0-FR-091` lifecycle 서비스 적격성 | [`TP-001`](../07-execution/task-packets/TP-001-institution-collection-gate.md), [`TP-002`](../07-execution/task-packets/TP-002-institution-active-promotion.md) | `tests/persistence/test_collection_gate.py`, `test_institution_runs.py`, `test_change_history.py`, `test_institution_qualification.py`, `test_sync_command.py` | `PARTIAL`: 수집 자격, `ACTIVE` 실패·Critical 중단, 14일·서로 다른 서울 날짜 3회·의미 변경·최종 veto·PromotionEvidence 승격 구현, `SUSPENDED → PROVISIONAL` 복구 승인과 상태 화면은 미구현 |
 | `P0-FR-092` health·Critical scope·격리 | [`TP-001`](../07-execution/task-packets/TP-001-institution-collection-gate.md), [`TP-003`](../07-execution/task-packets/TP-003-visit-information-and-media-rights.md) | `tests/persistence/test_collection_gate.py`, `test_institution_runs.py`, `test_refresh_commands.py`, `test_visit_information.py` | `PARTIAL`: 기본 health·ENTRY/SOURCE 사전 차단·열린 Critical 결과와 선택값 `UNKNOWN` 정본 구현, 실행 중 자동 분류·기관별 재시도 telemetry·수집기 선택값 변환은 미구현 |
 
-현재 Django 실행 명령은 `uv run --project backend python backend/manage.py test tests --verbosity 1`이다.
+TP-006의 추가 구현 증거:
+
+| 요구사항 | 실제 테스트 파일 | 상태 |
+| --- | --- | --- |
+| `P0-FR-022`~`P0-FR-037`, `P0-FR-046`, `P0-FR-049`~`P0-FR-050` 조건·미확인·이유 | `frontend/src/features/discovery/forms.test.ts`, `frontend/src/app/App.test.tsx`, `tests/discovery/test_demo_api.py` | `PARTIAL`: 방문 입력·안전·모드·0건·적용 조건 표시·추천 이유 구현, 휴관일·위치·나머지 선호 축과 전체 홈은 제외 |
+| `P0-FR-038`, `P0-FR-040`~`P0-FR-045` 검색·추가 로딩 | `frontend/src/app/App.test.tsx`, `frontend/src/shared/api/client.test.ts` | `PARTIAL`: 전시·기관 검색·상태·정렬·페이지 교체/추가·경합/오류 회복 구현, 작품·상세와 URL/새로고침 복원은 제외 |
+| `P0-FR-003`~`P0-FR-004`, `P0-NFR-001`~`P0-NFR-004` 개인정보·포커스·상태 | `frontend/src/app/App.test.tsx`, `frontend/src/test/dev-log.test.ts` | `PARTIAL`: 입력 비영속·안전 로그·조건 보존·텍스트 상태·ESC 포커스 복귀 검증, 실제 브라우저·확대·스크린리더 검수는 미실행 |
+
+현재 Django 실행 명령은 `uv run --project backend python backend/manage.py test tests --verbosity 1`, 프론트는 `frontend`의 `npm test`·`npm run api:check`·`npm run build`다. TP-006의 원문 입력 비영속 계약을 우선하며 포괄 문서의 URL 복원 요구 전체 완료로 판정하지 않는다.
 
 ## 12. 변경 통제
 

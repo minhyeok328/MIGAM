@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 합격 기준"
 status: DRAFT
-version: "0.3.3"
-last_updated: "2026-09-01"
+version: "0.3.4"
+last_updated: "2026-09-03"
 authoritative_for:
   - "P0 기능·데이터·추천·접근성의 합격 판정"
   - "요구사항별 검증 가능한 완료 조건"
@@ -26,7 +26,9 @@ P0는 기능이 화면에 존재하는지만으로 합격하지 않는다. 대�
 - 각 `AC-###`의 조건을 모두 충족해야 해당 항목이 통과한다.
 - 자동 검증과 수동 검증이 함께 지정된 항목은 둘 다 통과해야 한다.
 - 외부 출처나 지도 제공자의 실패는 정상적인 저하 시나리오로 검증한다.
-- 현재 Django 데이터 구현은 `uv run --project backend python backend/manage.py test tests --verbosity 1`로 검증한다. 아직 구현되지 않은 API·프론트·E2E는 각 승인 작업 패킷에서 실제 러너를 추가한다.
+- 현재 Django 구현은 `uv run --project backend python backend/manage.py test tests --verbosity 1`, TP-006 프론트는 `frontend`의 `npm test`, `npm run api:check`, `npm run build`로 검증한다. 아직 구현되지 않은 E2E는 각 승인 작업 패킷에서 실제 러너를 추가한다.
+
+TP-006은 `AC-004`~`AC-008` 중 검색·방문 조건 입력·필수/선호 구분·별도 확인 후보·실제 이유 카드, `AC-014`·`AC-015`·`AC-018` 중 비영속 입력·안전한 미디어·오류 회복과 Radix 포커스의 첫 프론트 범위를 검증한다. 생성 계약은 `frontend/src/test/contract.typecheck.ts`, 요청은 `frontend/src/features/discovery/forms.test.ts`, 응답은 `frontend/src/shared/api/client.test.ts`, 화면 상호작용은 `frontend/src/app/App.test.tsx`, 프록시 로그는 `frontend/src/test/dev-log.test.ts`, 실제 API 데모는 `tests/discovery/test_demo_api.py`에 연결한다. TP-006의 입력 비영속 계약에 따라 원문 조건은 URL에 복제하지 않으며 새로고침 복원은 구현하지 않는다. 위치·휴관일·상세·취향 테스트와 실제 브라우저·스크린리더 검수는 제외되어 위 AC 전체 통과를 의미하지 않는다.
 - 아래 요구사항 ID는 `prd-p0.md`의 실제 `P0-FR-*`, `P0-NFR-*`, `P0-OUT-*`를 사용한다.
 
 ## 2. 무관용 불변식
@@ -224,7 +226,7 @@ P0는 기능이 화면에 존재하는지만으로 합격하지 않는다. 대�
 - 이미지가 없거나 실패해도 텍스트형 카드에서 상태·기간·기관·추천 이유와 상세·관심·비교 행동을 동일하게 제공한다.
 - 포스터 권리와 개별 작품 권리를 독립적으로 판정한다.
 
-`TP-003`의 백엔드 구현 증거는 `tests/persistence/test_media_rights.py`다. MediaAsset별 권리 이력·현재 판정 한 건, `REUSE_ALLOWED`의 명시적 표시·핫링크 허용, `LINK_ONLY`·`RIGHTS_UNKNOWN`·철회의 URL 차단과 음원·전체 영상 비인라인 판정을 검증한다. 카드·상세·취향 테스트의 실제 네트워크 요청 차단과 텍스트형 대체 UI는 후속 OpenAPI·프론트엔드 범위이므로 `AC-015` 전체 통과로 판정하지 않는다.
+`TP-003`의 백엔드 구현 증거는 `tests/persistence/test_media_rights.py`다. MediaAsset별 권리 이력·현재 판정 한 건, `REUSE_ALLOWED`의 명시적 표시·핫링크 허용, `LINK_ONLY`·`RIGHTS_UNKNOWN`·철회의 URL 차단과 음원·전체 영상 비인라인 판정을 검증한다. TP-006은 경계에서 허용되지 않은 이미지 URL 제거와 발견 카드의 텍스트 대체·이미지 오류 처리를 검증한다. 상세·취향 테스트와 실제 브라우저 네트워크 검수는 남아 있어 `AC-015` 전체 통과로 판정하지 않는다.
 
 ### `AC-016` 최신성·충돌·기능 저하
 

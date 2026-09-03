@@ -1,8 +1,8 @@
 ---
 title: "미감 구현 준비도"
 status: DRAFT
-version: "0.3.4"
-last_updated: "2026-09-02"
+version: "0.3.5"
+last_updated: "2026-09-03"
 authoritative_for:
   - "P0 구현 착수 전 확인 항목"
   - "확정 결정과 미결정 의존성의 구분"
@@ -22,7 +22,9 @@ related_documents:
 
 P0의 방향·기술 경계·개인정보 금지 조건은 작업 단위로 분해할 준비가 되었다. 그러나 이 문서는 전체 구현 계획이나 일정표가 아니다. 실제 구현 착수는 각 작업 패킷이 관련 제품·엔지니어링 기준과 아래 입구 조건을 충족하는지 확인한 뒤에만 진행한다.
 
-현재 승인된 구현 단위는 [`TP-001 기관 운영 상태와 수집 전 게이트`](task-packets/TP-001-institution-collection-gate.md), [`TP-002 기관 ACTIVE 승격 증거와 자동 전이`](task-packets/TP-002-institution-active-promotion.md), [`TP-003 선택 관람 정보와 미디어 권리 모델`](task-packets/TP-003-visit-information-and-media-rights.md), [`TP-004 내부 OpenAPI와 FTS5 검색`](task-packets/TP-004-internal-search-openapi.md), [`TP-005 조건 보존 설명형 추천`](task-packets/TP-005-explainable-recommendation.md)이다. 다섯 패킷은 Source·기관 운영 상태, 공용 게이트, 기관별 결과·health, 자격 실행의 ChangeHistory·QualificationRun·PromotionEvidence·`PROVISIONAL → ACTIVE` 자동 승격, 선택 정보·권리 정본, 전시·기관 내부 검색과 근거 있는 전시 추천 계약까지 승인한다. 후보 심사 자동화·복구 승인·Admin·작품·작가·운영시간·지도·UI와 추천 특성의 외부 Source 자동 백필은 포함하지 않는다.
+현재 승인된 구현 단위는 [`TP-001 기관 운영 상태와 수집 전 게이트`](task-packets/TP-001-institution-collection-gate.md), [`TP-002 기관 ACTIVE 승격 증거와 자동 전이`](task-packets/TP-002-institution-active-promotion.md), [`TP-003 선택 관람 정보와 미디어 권리 모델`](task-packets/TP-003-visit-information-and-media-rights.md), [`TP-004 내부 OpenAPI와 FTS5 검색`](task-packets/TP-004-internal-search-openapi.md), [`TP-005 조건 보존 설명형 추천`](task-packets/TP-005-explainable-recommendation.md), [`TP-006 프론트엔드 기반과 검색·추천 연동`](task-packets/TP-006-frontend-discovery.md)이다. 여섯 패킷은 Source·기관 운영 상태, 공용 게이트, 기관별 결과·health, 자격 실행의 ChangeHistory·QualificationRun·PromotionEvidence·`PROVISIONAL → ACTIVE` 자동 승격, 선택 정보·권리 정본, 전시·기관 내부 검색과 근거 있는 전시 추천, 첫 React 발견 화면과 키 없는 격리 데모까지 승인한다. 후보 심사 자동화·복구 승인·Admin·작품·작가·운영시간·지도·취향 테스트·상세·비교·관심 저장과 추천 특성의 외부 Source 자동 백필은 포함하지 않는다.
+
+TP-006의 프론트 자동 테스트와 빌드·백엔드 회귀·로컬 API 연결은 구현 증거로 기록하며 실제 브라우저·확대·스크린리더 검수는 아직 남아 있다. 이는 전체 P0 UX 승인이나 공개 배포 준비 완료를 뜻하지 않는다.
 
 ## 확정된 구현 기준
 

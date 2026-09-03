@@ -1,8 +1,8 @@
 ---
 title: "미감 시스템 아키텍처"
 status: DRAFT
-version: "0.2.0"
-last_updated: "2026-08-30"
+version: "0.2.1"
+last_updated: "2026-09-03"
 authoritative_for:
   - "P0 시스템 경계와 런타임 구성"
   - "저장소 구조와 기술 선택"
@@ -46,6 +46,8 @@ related_documents:
 - 문서·예제·테스트는 외부 API 키 없이 동작해야 한다.
 
 ## 프론트엔드 경계
+
+TP-006은 Radix 직접 사용과 npm lockfile을 선택한다. TanStack Query는 비영속 서버 응답, Zustand는 현재 탭의 draft/적용 입력만 소유한다. 브라우저 영속 저장은 아직 구현하지 않는다. 로컬 API 전용 설정은 loopback host만 허용하고 request access log를 끈다. 데모 실행기는 임시 DB를 사용하며 기존 `backend/db.sqlite3`를 수정하지 않는다.
 
 프론트엔드는 다음 구조를 따른다.
 

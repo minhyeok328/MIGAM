@@ -1,8 +1,8 @@
 ---
 title: "미감 API 가이드라인"
 status: DRAFT
-version: "0.2.1"
-last_updated: "2026-09-02"
+version: "0.2.2"
+last_updated: "2026-09-03"
 authoritative_for:
   - "P0 내부 API 계약 원칙"
   - "OpenAPI와 생성 클라이언트 경계"
@@ -57,6 +57,10 @@ API는 표시하는 핵심 사실마다 출처·마지막 확인 시점·불확�
 오류는 기계 판별 가능한 코드와 사용자가 이해할 수 있는 한국어 메시지를 제공한다. 입력 오류, 결과 없음, 데이터 최신성·품질 문제, 외부 지도 비가용을 구분한다. 외부 API 키 또는 지도 SDK가 없어도 검색·상세·비교·데모 테스트가 실패해서는 안 된다.
 
 ## 테스트 계약
+
+TP-006 프론트는 `npm run api:generate`로 OpenAPI 타입을 만들고 `npm run api:check`로 재현성을 검사한다. 생성 타입 기반 openapi-fetch 뒤에서 Zod가 응답·URL·이미지 상태를 검증한 후 UI 모델을 만든다. 브라우저 URL에 입력을 쓰지 않고 `/api` loopback 프록시만 사용한다. 가상 데모도 별도 알고리즘 없이 임시 SQLite의 실제 Django API를 호출한다.
+
+OpenAPI 1.1.1은 관람시간 최소/최대 중 하나 이상을 요구하는 동작을 유지하되 `anyOf` 각 분기에 mode와 숫자 속성·추가 속성 금지를 완전하게 명시한다. required-only 분기가 생성 타입을 `unknown`으로 약화시키지 않도록 타입 검사에서 모드 오타·범위 없는 입력을 거부하는지 확인한다.
 
 명세 검증, 생성 클라이언트, Zod 어댑터, 필수 조건 불변성, 추천 이유-계산 근거 일치를 함께 검증한다. 데모 fixture는 최소 품질 핵심 항목을 하나씩 누락한 전시, 선택 방문 정보의 `UNKNOWN`, 권리 미확인 이미지, 출처 충돌, 종료 전시, 사용자 응답에 포함되는 `PROVISIONAL`·`ACTIVE + DEGRADED` CORE_PASS와 제외되는 불합격·격리·`CANDIDATE`·`SUSPENDED` 신규 데이터 사례를 포함한다. 마지막 정상 정본은 기관 상태만으로 일괄 제외되지 않고 DataEligibility 재계산 결과를 따르는 사례도 둔다. staff 계약은 health·`ACTIVE` 실패 수·우선 재검증·CollectionIssue scope와 수집 전 차단을 검증한다.
 

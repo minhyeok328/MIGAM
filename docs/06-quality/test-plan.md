@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 테스트 계획"
 status: DRAFT
-version: "0.3.3"
-last_updated: "2026-09-01"
+version: "0.3.4"
+last_updated: "2026-09-03"
 authoritative_for:
   - "P0 계층별 테스트 전략과 검증 범위"
   - "데이터·추천·백엔드·프론트·E2E·브라우저·접근성 테스트 시나리오"
@@ -171,6 +171,12 @@ P0 대표 데모 데이터는 전시 300~500, 작품 500~1,000, 기관 약 100�
 `TP-001`은 `TEST-039` 중 registry 부트스트랩, `PROVISIONAL`·`ACTIVE`·`DEGRADED` 허용, `CANDIDATE`·`SUSPENDED`·비정상 Source·ENTRY/SOURCE Critical 수집 전 차단과 성공 확정 전 재검사, 세 변경 명령의 기관별 결과와 성공 확정 원자성을 구현했다. `TEST-043` 중 같은 실행 중복 결과 방지, `ACTIVE` 첫·두 번째 실패와 성공 복구, 열린 Critical을 반영한 즉시 중단·전이 근거, `PROVISIONAL` counter 0, 선택 구조 issue가 열린 동안 `DEGRADED` 유지도 구현했다. `TP-002`는 `TEST-042` 중 명시적 자격 실행, 승인 표본 처리 완료와 정상 단건 격리, Canonical ChangeHistory allowlist, 14일 미만·정확한 경계·서울 자정·같은 날짜 중복, 마지막 실패 이후 연속 성공, 의미 변경·Source·Critical·충돌 veto와 PromotionEvidence 승격을 구현했다. `TP-003`은 `TEST-005`의 권리 상태·처리 허용·현재 이력과 안전한 인라인 판정, `TEST-040`의 선택 정보 `UNKNOWN`·확인된 부정 분리·핵심 적격성 독립을 저장 계층에서 구현했다. `TP-004`는 `TEST-010`·`TEST-011` 중 전시·기관 FTS5 검색과 내부 GET 계약을 구현했다. `TP-005`는 `TEST-006`~`TEST-009`, `TEST-012` 중 현재·예정 추천 후보 게이트, 필수조건·`UNKNOWN`, 명시 신호, 결정적 점수·다양성·연결 탐색·실제 이유와 내부 POST 계약을 구현했다. 배포 스케줄러·복구 승인·실행 중 Critical 자동 분류·기관별 재시도 telemetry·선택 필드와 추천 특성의 실제 수집기 변환·OperatingSchedule·Admin·상세/비교 API·프론트 표시는 아직 부분 미구현이다.
 
 ## 5. 실행 환경
+
+### TP-006 구현 범위
+
+`frontend/src/shared/api/client.test.ts`는 출처·날짜·URL·권리·계약 오류, `forms.test.ts`는 예산 0·방문 조건·최대 3개 분위기·draft/적용 분리, `frontend/src/app/App.test.tsx`는 검색·더 보기·늦은 응답·오류/0건·별도 확인 후보·적용 조건 표시·Radix ESC 포커스·이미지 대체를 검증한다. `frontend/src/test/dev-log.test.ts`는 Vite 프록시 query 제거, `contract.typecheck.ts`는 OpenAPI 관람시간 입력의 생성 타입을 검증한다. `tests/discovery/test_demo_api.py`는 가상 seed 보호와 실제 검색·추천 서비스의 필수/UNKNOWN/0건 결과를 검증한다.
+
+TP-006은 `TEST-017`·`TEST-018`·`TEST-027`의 일부를 컴포넌트 수준에서 검증한 것이며 브라우저 E2E 통과가 아니다. 아래 전체 P0의 Chromium·Firefox·WebKit·실제 모바일·확대·스크린리더 검증은 아직 실행하지 않았다. 키 없는 로컬 실행은 [Frontend README](../../frontend/README.md), 실행 시점·수치·제외 사항은 [TP-006](../07-execution/task-packets/TP-006-frontend-discovery.md)에 기록한다.
 
 ### 5.1 기본 모드
 
