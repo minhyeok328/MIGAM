@@ -75,7 +75,7 @@ class InternalOpenAPIContractTests(SimpleTestCase):
         )
 
     def test_document_defines_recommendation_post_request_contract(self) -> None:
-        self.assertEqual(self.document["info"]["version"], "1.1.0")
+        self.assertEqual(self.document["info"]["version"], "1.1.1")
         operation = self.document["paths"][
             "/api/internal/v1/recommendations/"
         ]["post"]

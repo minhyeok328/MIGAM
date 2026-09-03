@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: 미감 내부 API
-  version: 1.1.0
+  version: 1.1.1
   description: 로컬 프론트엔드와 후속 챗봇이 사용하는 비공개 내부 계약입니다.
 paths:
   /api/internal/v1/search/:
@@ -222,22 +222,33 @@ components:
               - FIRST_COME
               - PROGRAM_ONLY
     DurationPreferenceRequest:
-      type: object
-      additionalProperties: false
-      required: [mode]
       anyOf:
-        - required: [minimum_minutes]
-        - required: [maximum_minutes]
-      properties:
-        mode:
-          type: string
-          enum: [REQUIRED, PREFERRED]
-        minimum_minutes:
-          type: integer
-          minimum: 1
-        maximum_minutes:
-          type: integer
-          minimum: 1
+        - type: object
+          additionalProperties: false
+          required: [mode, minimum_minutes]
+          properties:
+            mode:
+              type: string
+              enum: [REQUIRED, PREFERRED]
+            minimum_minutes:
+              type: integer
+              minimum: 1
+            maximum_minutes:
+              type: integer
+              minimum: 1
+        - type: object
+          additionalProperties: false
+          required: [mode, maximum_minutes]
+          properties:
+            mode:
+              type: string
+              enum: [REQUIRED, PREFERRED]
+            minimum_minutes:
+              type: integer
+              minimum: 1
+            maximum_minutes:
+              type: integer
+              minimum: 1
     FeaturePreference:
       type: object
       additionalProperties: false
