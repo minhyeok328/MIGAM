@@ -1,0 +1,635 @@
+@import 'tailwindcss';
+
+@theme {
+  --color-paper: #f7f5f0;
+  --color-surface: #fcfbf8;
+  --color-ink: #25221f;
+  --color-muted: #716b64;
+  --color-line: #ddd8d0;
+  --color-accent: #755a46;
+  --font-sans: 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  --font-serif: 'Batang', 'AppleMyungjo', 'Noto Serif CJK KR', Georgia, serif;
+}
+
+@layer base {
+  :root {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background: var(--color-paper);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+  button,
+  a,
+  input,
+  select,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  a,
+  summary {
+    cursor: pointer;
+  }
+  button:disabled {
+    cursor: wait;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 5px;
+  }
+  ::selection {
+    background: #d8cabc;
+    color: var(--color-ink);
+  }
+  input,
+  select {
+    border-radius: 0;
+    min-width: 0;
+  }
+  input[type='checkbox'] {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--color-accent);
+    flex-shrink: 0;
+  }
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
+  fieldset {
+    min-width: 0;
+  }
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+}
+
+@layer components {
+  .page-width {
+    @apply mx-auto w-full max-w-[1440px] px-8 lg:px-16;
+  }
+  .site-header {
+    @apply border-b border-line;
+  }
+  .header-inner {
+    @apply flex min-h-24 items-center justify-between gap-8;
+  }
+  .wordmark {
+    @apply flex items-center gap-4;
+  }
+  .wordmark-hanja {
+    @apply font-serif text-4xl tracking-[-0.08em];
+  }
+  .wordmark > span:last-child {
+    @apply flex flex-col border-l border-line pl-4 text-sm;
+  }
+  .wordmark small {
+    @apply text-xs tracking-[0.2em] text-muted;
+  }
+  .header-note {
+    @apply text-sm text-muted;
+  }
+  .edition-label {
+    @apply text-xs tracking-widest text-muted;
+  }
+  .editorial-label {
+    @apply text-xs font-medium tracking-[0.16em] text-muted;
+  }
+  .intro {
+    @apply grid grid-cols-12 items-end gap-10 py-12 lg:py-14;
+  }
+  .intro > div:first-child {
+    @apply col-span-8;
+  }
+  .intro-label {
+    @apply mb-5;
+  }
+  .intro h1 {
+    @apply font-serif text-[clamp(2.3rem,4.3vw,4.25rem)] leading-[1.35] tracking-[-0.055em];
+  }
+  .intro h1 span {
+    @apply text-accent;
+  }
+  .intro-note {
+    @apply col-span-4 border-l border-line pl-8 pb-2;
+  }
+  .intro-note svg {
+    @apply mb-4 text-accent;
+  }
+  .intro-note p {
+    @apply mb-3 text-base leading-7;
+  }
+  .intro-note small {
+    @apply text-sm text-muted;
+  }
+  .discovery-tabs {
+    @apply flex gap-8 border-b border-ink;
+  }
+  .discovery-tabs button {
+    @apply flex min-h-16 items-center gap-2 border-b-2 border-transparent px-1 text-base text-muted;
+  }
+  .discovery-tabs button[data-state='active'] {
+    @apply border-ink font-semibold text-ink;
+  }
+  .search-form {
+    @apply border-b border-line py-8;
+  }
+  .search-bar {
+    @apply flex items-center gap-4 border-b border-ink pb-3;
+  }
+  .search-bar > svg {
+    @apply shrink-0 text-accent;
+  }
+  .search-bar input {
+    @apply w-full bg-transparent py-3 text-lg outline-none;
+  }
+  .search-bar input:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 0;
+  }
+  .primary-button {
+    @apply inline-flex min-h-12 shrink-0 items-center justify-center gap-3 border border-accent bg-accent px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-ink hover:border-ink;
+  }
+  .secondary-button {
+    @apply inline-flex min-h-12 items-center justify-center gap-3 border border-line bg-transparent px-6 py-3 text-sm transition-colors hover:border-accent hover:bg-surface;
+  }
+  .text-button {
+    @apply inline-flex min-h-11 shrink-0 items-center gap-2 text-sm underline underline-offset-4;
+  }
+  .icon-button {
+    @apply flex h-11 w-11 items-center justify-center;
+  }
+  .filter-grid {
+    @apply grid gap-5;
+  }
+  .search-filters {
+    @apply mt-6 grid-cols-[0.7fr_0.8fr_0.8fr_1.5fr_1fr];
+  }
+  .field {
+    @apply flex min-w-0 flex-col gap-2 text-sm text-muted;
+  }
+  .field input,
+  .field select {
+    @apply min-h-12 w-full border border-line bg-surface px-3 py-2 text-sm text-ink;
+  }
+  .field input:disabled {
+    @apply bg-paper text-muted;
+    cursor: not-allowed;
+  }
+  .results-section {
+    @apply pt-10;
+  }
+  .section-heading {
+    @apply mb-5 flex items-end justify-between gap-6;
+  }
+  .section-heading h2 {
+    @apply mt-2 font-serif text-[1.8rem] tracking-[-0.04em];
+  }
+  .section-heading > p {
+    @apply shrink-0 pb-1 text-sm text-muted;
+  }
+  .applied-tags {
+    @apply mb-7 flex flex-wrap gap-x-3 gap-y-2 text-sm text-muted;
+  }
+  .applied-tags span {
+    @apply border-b border-line pb-1;
+  }
+  .results-grid {
+    @apply grid grid-cols-3 gap-x-7 gap-y-12;
+  }
+  .exhibition-card {
+    @apply min-w-0;
+  }
+  .card-cover {
+    @apply relative flex aspect-[1.25] flex-col overflow-hidden border border-line bg-surface p-5;
+  }
+  .cover-top {
+    @apply relative z-10 flex items-start justify-between gap-3;
+  }
+  .status-tag {
+    @apply border border-line bg-surface px-2 py-1 text-xs;
+  }
+  .status-ended,
+  .status-canceled {
+    @apply bg-paper text-muted;
+  }
+  .cover-title {
+    @apply relative z-10 my-auto pt-6;
+  }
+  .cover-rule {
+    @apply mb-4 block w-8 border-t border-accent;
+  }
+  .cover-title p {
+    @apply mb-2 text-sm text-muted;
+  }
+  .cover-title h3 {
+    @apply break-keep font-serif text-[clamp(1.7rem,2.4vw,2.4rem)] leading-[1.4] tracking-[-0.05em];
+    overflow-wrap: anywhere;
+  }
+  .cover-folio {
+    @apply absolute -bottom-6 right-2 font-serif text-[6rem] tracking-[-0.1em] text-line opacity-35;
+  }
+  .card-cover.has-image {
+    @apply p-4;
+  }
+  .card-cover img {
+    @apply absolute inset-0 h-full w-full object-cover;
+  }
+  .has-image .editorial-label {
+    @apply bg-surface px-2 py-1;
+  }
+  .card-body {
+    @apply pt-5;
+  }
+  .image-card-title {
+    @apply mb-4 font-serif text-2xl;
+  }
+  .match-label {
+    @apply mb-2 text-sm font-medium text-accent;
+  }
+  .reason {
+    @apply mb-4 text-sm leading-6;
+  }
+  .card-meta {
+    @apply mb-2 flex items-start gap-2 text-sm leading-6 text-muted;
+  }
+  .card-meta svg {
+    @apply mt-1 shrink-0;
+  }
+  .freshness-warning {
+    @apply mt-3 border-l-2 border-accent pl-3 text-sm text-accent;
+  }
+  .source-details {
+    @apply mt-4 text-xs text-muted;
+  }
+  .source-details summary {
+    @apply flex min-h-11 items-center text-sm underline decoration-line underline-offset-4;
+  }
+  .source-details p {
+    @apply py-2 leading-6;
+  }
+  .source-details a {
+    @apply inline-block min-h-11 py-2 underline;
+  }
+  .card-footer {
+    @apply mt-2 flex min-h-12 items-center border-t border-line;
+  }
+  .card-footer a {
+    @apply flex min-h-11 w-full items-center justify-between gap-2 text-sm;
+  }
+  .card-footer a:hover {
+    @apply text-accent;
+  }
+  .demo-card-note,
+  .credit {
+    @apply text-xs text-muted;
+  }
+  .verification-labels {
+    @apply mb-4 grid gap-1 text-sm text-accent;
+  }
+  .verification-labels li {
+    @apply flex items-center gap-2;
+  }
+  .institution-card {
+    @apply border border-line bg-surface p-7;
+  }
+  .institution-card h3 {
+    @apply mt-12 mb-4 font-serif text-3xl;
+  }
+  .institution-card > p {
+    @apply text-sm text-muted;
+  }
+  .institution-count {
+    @apply mt-8 flex justify-between border-t border-line pt-5;
+  }
+  .load-more {
+    @apply mt-12 flex justify-center;
+  }
+  .feedback {
+    @apply my-6 flex items-start gap-4 border border-line bg-surface p-6;
+  }
+  .feedback svg {
+    @apply shrink-0;
+  }
+  .feedback p {
+    @apply mt-1 text-sm text-muted;
+  }
+  .feedback .text-button {
+    @apply ml-auto;
+  }
+  .empty-state {
+    @apply flex flex-col items-center border-y border-line py-20 text-center;
+  }
+  .empty-state h3 {
+    @apply mt-5 mb-3 font-serif text-2xl;
+  }
+  .empty-state p {
+    @apply text-sm leading-7 text-muted;
+  }
+  .skeleton-card {
+    @apply aspect-[1.25] border border-line bg-line/30 motion-safe:animate-pulse;
+  }
+  .loading-label {
+    @apply mb-5 text-sm text-muted;
+  }
+  .form-error {
+    @apply mt-5 border-l-2 border-accent pl-4 text-sm text-accent;
+  }
+  .recommend-form {
+    @apply border-b border-line py-8;
+  }
+  .form-section-label {
+    @apply mb-6 flex flex-wrap items-baseline gap-x-5 gap-y-2;
+  }
+  .form-section-label h2 {
+    @apply text-lg;
+  }
+  .form-section-label > span:last-child {
+    @apply ml-auto text-sm text-muted;
+  }
+  .recommendation-filters {
+    @apply grid-cols-5;
+  }
+  .helper-note {
+    @apply mt-4 text-sm leading-6 text-muted;
+  }
+  .mood-section {
+    @apply mt-8 border-t border-line pt-7;
+  }
+  .mood-section legend {
+    @apply flex flex-wrap items-baseline gap-5 pr-5 text-lg;
+  }
+  .mood-section > p {
+    @apply mb-5 flex flex-wrap justify-between gap-2 text-sm text-muted;
+  }
+  .mood-grid {
+    @apply grid grid-cols-3 gap-3;
+  }
+  .mood-option {
+    @apply flex min-h-20 cursor-pointer items-start gap-3 border border-line px-4 py-4;
+  }
+  .mood-option input {
+    @apply mt-1;
+  }
+  .mood-option strong {
+    @apply mb-1 block text-sm font-medium;
+  }
+  .mood-option small {
+    @apply block text-sm leading-5 text-muted;
+  }
+  .mood-option.selected {
+    @apply border-accent bg-surface;
+  }
+  .mood-option:has(input:disabled) {
+    cursor: not-allowed;
+  }
+  .mood-option:has(input:disabled) small {
+    @apply opacity-75;
+  }
+  .recommend-actions {
+    @apply mt-7 flex items-center gap-5;
+  }
+  .recommend-actions p {
+    @apply text-xs leading-5 text-muted;
+  }
+  .recommend-actions > .primary-button {
+    @apply ml-auto;
+  }
+  .condition-count {
+    @apply flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs text-white;
+  }
+  .dialog-overlay {
+    @apply fixed inset-0 z-40 bg-ink/40;
+  }
+  .condition-dialog {
+    @apply fixed inset-y-0 right-0 z-50 w-full max-w-xl overflow-y-auto bg-paper px-8 pb-8 pt-6;
+  }
+  .dialog-heading {
+    @apply flex items-center justify-between;
+  }
+  .condition-dialog h2 {
+    @apply mt-4 mb-3 font-serif text-3xl;
+  }
+  .condition-dialog > p {
+    @apply text-sm leading-7 text-muted;
+  }
+  .condition-group {
+    @apply mt-8 border-t border-line pt-5;
+  }
+  .condition-group legend {
+    @apply pr-4 text-lg;
+  }
+  .condition-group > p {
+    @apply mb-4 text-sm leading-6 text-muted;
+  }
+  .check-grid {
+    @apply grid grid-cols-2 gap-x-3;
+  }
+  .check-grid label {
+    @apply flex min-h-12 cursor-pointer items-center gap-3 text-sm;
+  }
+  .two-fields {
+    @apply grid-cols-2;
+  }
+  .dialog-done {
+    @apply mt-8 w-full;
+  }
+  .result-caution {
+    @apply mb-7 text-sm leading-6 text-muted;
+  }
+  .verification-section {
+    @apply mt-14 border-t border-line pt-10;
+  }
+  .site-footer {
+    @apply mt-20 grid grid-cols-3 items-end gap-8 border-t border-line py-10;
+  }
+  .footer-mark {
+    @apply font-serif text-3xl;
+  }
+  .site-footer p {
+    @apply mt-3 text-xs leading-6 text-muted;
+  }
+  .site-footer > span {
+    @apply text-right;
+  }
+  .demo-banner {
+    @apply bg-ink px-6 py-2 text-center text-sm text-paper;
+  }
+  .skip-link {
+    @apply sr-only;
+  }
+  .skip-link:focus {
+    @apply fixed left-4 top-4 z-[60] h-auto w-auto bg-ink px-5 py-3 text-white;
+    clip: auto;
+  }
+}
+
+@media (max-width: 1100px) {
+  .search-filters,
+  .recommendation-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .intro-note {
+    padding-left: 1.5rem;
+  }
+  .cover-title h3 {
+    font-size: 2rem;
+  }
+  .header-note {
+    display: none;
+  }
+}
+@media (max-width: 700px) {
+  .page-width {
+    padding-inline: 1.25rem;
+  }
+  .header-inner {
+    min-height: 5rem;
+  }
+  .wordmark-hanja {
+    font-size: 1.9rem;
+  }
+  .intro {
+    display: block;
+    padding-block: 2rem;
+  }
+  .intro h1 {
+    font-size: 2.5rem;
+  }
+  .intro-note {
+    margin-top: 1.4rem;
+    padding: 0;
+    border: 0;
+  }
+  .intro-note svg,
+  .intro-note small {
+    display: none;
+  }
+  .intro-note p {
+    font-size: 0.875rem;
+  }
+  .intro-note br {
+    display: none;
+  }
+  .discovery-tabs {
+    gap: 1.25rem;
+  }
+  .discovery-tabs button {
+    font-size: 0.875rem;
+    gap: 0.4rem;
+  }
+  .search-bar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .search-bar > svg {
+    display: none;
+  }
+  .search-bar input {
+    font-size: 1rem;
+    flex-basis: 100%;
+  }
+  .search-bar .primary-button {
+    width: 100%;
+  }
+  .search-filters,
+  .recommendation-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+  .search-filters > :last-child,
+  .recommendation-filters > :last-child {
+    grid-column: 1 / -1;
+  }
+  .results-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.5rem;
+  }
+  .section-heading {
+    align-items: start;
+    gap: 1rem;
+  }
+  .section-heading h2 {
+    font-size: 1.5rem;
+  }
+  .section-heading > p {
+    padding-top: 0.15rem;
+  }
+  .cover-title h3 {
+    font-size: 2.2rem;
+  }
+  .form-section-label {
+    display: grid;
+    gap: 0.5rem;
+  }
+  .form-section-label > span:last-child {
+    margin: 0;
+  }
+  .mood-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .mood-option {
+    min-height: 4.5rem;
+  }
+  .mood-section legend {
+    gap: 0.5rem;
+    font-size: 1rem;
+  }
+  .recommend-actions {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .recommend-actions > .primary-button {
+    width: 100%;
+  }
+  .condition-dialog {
+    top: auto;
+    max-height: 92dvh;
+    padding: 1.25rem;
+    border-top: 3px solid var(--color-accent);
+  }
+  .feedback {
+    flex-wrap: wrap;
+    padding: 1.25rem;
+  }
+  .feedback > div {
+    flex: 1;
+  }
+  .feedback .text-button {
+    margin-left: 2rem;
+  }
+  .site-footer {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-top: 3.5rem;
+  }
+  .site-footer > span {
+    text-align: left;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
