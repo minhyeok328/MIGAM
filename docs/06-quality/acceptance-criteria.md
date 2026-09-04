@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 합격 기준"
 status: DRAFT
-version: "0.3.4"
-last_updated: "2026-09-03"
+version: "0.3.5"
+last_updated: "2026-09-04"
 authoritative_for:
   - "P0 기능·데이터·추천·접근성의 합격 판정"
   - "요구사항별 검증 가능한 완료 조건"
@@ -28,7 +28,7 @@ P0는 기능이 화면에 존재하는지만으로 합격하지 않는다. 대�
 - 외부 출처나 지도 제공자의 실패는 정상적인 저하 시나리오로 검증한다.
 - 현재 Django 구현은 `uv run --project backend python backend/manage.py test tests --verbosity 1`, TP-006 프론트는 `frontend`의 `npm test`, `npm run api:check`, `npm run build`로 검증한다. 아직 구현되지 않은 E2E는 각 승인 작업 패킷에서 실제 러너를 추가한다.
 
-TP-006은 `AC-004`~`AC-008` 중 검색·방문 조건 입력·필수/선호 구분·별도 확인 후보·실제 이유 카드, `AC-014`·`AC-015`·`AC-018` 중 비영속 입력·안전한 미디어·오류 회복과 Radix 포커스의 첫 프론트 범위를 검증한다. 생성 계약은 `frontend/src/test/contract.typecheck.ts`, 요청은 `frontend/src/features/discovery/forms.test.ts`, 응답은 `frontend/src/shared/api/client.test.ts`, 화면 상호작용은 `frontend/src/app/App.test.tsx`, 프록시 로그는 `frontend/src/test/dev-log.test.ts`, 실제 API 데모는 `tests/discovery/test_demo_api.py`에 연결한다. TP-006의 입력 비영속 계약에 따라 원문 조건은 URL에 복제하지 않으며 새로고침 복원은 구현하지 않는다. 위치·휴관일·상세·취향 테스트와 실제 브라우저·스크린리더 검수는 제외되어 위 AC 전체 통과를 의미하지 않는다.
+TP-006은 `AC-001`의 계정 없는 홈과 탐색 진입 일부, `AC-004`~`AC-008` 중 검색·방문 조건 입력·필수/선호 구분·별도 확인 후보·실제 이유 카드, `AC-014`·`AC-015`·`AC-018`·`AC-020` 중 비영속 입력·안전한 미디어·오류 회복·Radix 포커스·reduced-motion의 첫 프론트 범위를 검증한다. 생성 계약은 `frontend/src/test/contract.typecheck.ts`, 요청은 `frontend/src/features/discovery/forms.test.ts`, 응답은 `frontend/src/shared/api/client.test.ts`, 화면 상호작용은 `frontend/src/app/App.test.tsx`, 프록시 로그는 `frontend/src/test/dev-log.test.ts`, 실제 API 데모는 `tests/discovery/test_demo_api.py`에 연결한다. `/`는 API를 호출하지 않고 `/discover`만 입력과 API를 소유한다. TP-006의 입력 비영속 계약에 따라 원문 조건은 URL에 복제하지 않으며 `/discover#recommend`의 고정 탭 식별자를 제외한 새로고침 복원은 구현하지 않는다. 실제 취향 테스트·홈 추천 6개·위치·휴관일·상세와 실제 스크린리더 검수는 제외되어 위 AC 전체 통과를 의미하지 않는다.
 - 아래 요구사항 ID는 `prd-p0.md`의 실제 `P0-FR-*`, `P0-NFR-*`, `P0-OUT-*`를 사용한다.
 
 ## 2. 무관용 불변식
@@ -62,6 +62,8 @@ TP-006은 `AC-004`~`AC-008` 중 검색·방문 조건 입력·필수/선호 구�
 - `내 취향부터 알아보기`와 `지금 갈 전시 찾기`가 같은 화면에서 같은 위계의 주요 행동으로 제공된다.
 - 어느 경로를 선택해도 현재·예정 전시 후보까지 도달할 수 있다.
 - 한 경로를 완료하지 않아도 다른 경로와 통합검색을 사용할 수 있다.
+
+`TP-006`은 이 기준 중 로그인 없는 브랜드 홈, 검색 진입과 조건 추천 진입만 구현한다. 홈의 두 실제 링크는 `/discover`와 `/discover#recommend`로 이동하며 실제 취향 테스트와 현재·예정 후보까지의 전체 흐름은 후속 범위다.
 
 ### `AC-002` 적응형 취향 테스트
 
@@ -215,6 +217,8 @@ TP-006은 `AC-004`~`AC-008` 중 검색·방문 조건 입력·필수/선호 구�
 - 개발·테스트 전용 익명 이벤트는 다음 이름과 속성만 허용한다. 속성이 없는 이벤트는 빈 객체를 사용한다: `TASTE_TEST_STARTED`, `EXHIBITION_VIEWED`, `EXHIBITION_INTEREST_ADDED`, `EXHIBITION_INTEREST_REMOVED`, `ARTWORK_INTEREST_ADDED`, `INSTITUTION_INTEREST_ADDED`, `MAP_OPENED`, `OFFICIAL_LINK_CLICKED`, `LOCAL_DATA_RESET`; `TASTE_TEST_COMPLETED`는 `answered_count`·`skipped_count`(0 이상 정수), `EXHIBITION_SEARCHED`는 `result_count`(0 이상 정수)·`has_date_filter`·`has_region_filter`·`has_taste_profile`(불리언), `COMPARE_OPENED`는 `comparison_count`(1~3 정수)만 사용한다.
 - 위 이벤트는 개발·테스트에서만 일시적으로 확인하며 외부 네트워크 요청·분석 SDK·서버 DB·브라우저 `localStorage` 영속은 모두 0건이고, 운영 빌드에서는 no-op이다. 사용자·세션·기기 식별자, 원문 검색어, 정확 좌표, 전시·작품·기관 ID, 추천·취향 payload는 이벤트에 넣지 않는다.
 
+TP-006에서는 검색어·필터·추천 payload를 URL query, history state, localStorage 또는 sessionStorage에 쓰지 않는다. `/discover#recommend`는 사용자 입력이 아닌 고정 탭 식별자이므로 허용한다.
+
 ## 6. 데이터·권리·회복성
 
 ### `AC-015` 이미지 권리와 화면 대체
@@ -225,6 +229,8 @@ TP-006은 `AC-004`~`AC-008` 중 검색·방문 조건 입력·필수/선호 구�
 - `LINK_ONLY`와 `RIGHTS_UNKNOWN` URL로 브라우저 이미지 요청을 보내지 않는다.
 - 이미지가 없거나 실패해도 텍스트형 카드에서 상태·기간·기관·추천 이유와 상세·관심·비교 행동을 동일하게 제공한다.
 - 포스터 권리와 개별 작품 권리를 독립적으로 판정한다.
+
+자체 생성 홈 필름과 poster는 실제 전시 미디어와 분리된 장식 자산으로 관리하고 `MediaAsset` 또는 추천 근거로 표시하지 않는다. 실존 인물·작품·기관·브랜드·읽을 수 있는 문구를 포함하지 않으며 영상이 실패해도 poster와 HTML 제목·링크가 남는다.
 
 `TP-003`의 백엔드 구현 증거는 `tests/persistence/test_media_rights.py`다. MediaAsset별 권리 이력·현재 판정 한 건, `REUSE_ALLOWED`의 명시적 표시·핫링크 허용, `LINK_ONLY`·`RIGHTS_UNKNOWN`·철회의 URL 차단과 음원·전체 영상 비인라인 판정을 검증한다. TP-006은 경계에서 허용되지 않은 이미지 URL 제거와 발견 카드의 텍스트 대체·이미지 오류 처리를 검증한다. 상세·취향 테스트와 실제 브라우저 네트워크 검수는 남아 있어 `AC-015` 전체 통과로 판정하지 않는다.
 
@@ -264,6 +270,9 @@ TP-006은 `AC-004`~`AC-008` 중 검색·방문 조건 입력·필수/선호 구�
 - 관심·취향·최근 본 전시 저장소는 컴포넌트 직접 접근 없이 버전과 마이그레이션·손상 복구를 검증할 수 있다.
 - 카드, 필터, 관심, 비교, 대화상자, 바텀시트의 로딩·빈·오류·선택 상태가 컴포넌트 수준에서 재현된다.
 - 대화상자·바텀시트·팝오버·선택·탭·툴팁·아코디언·체크박스는 접근성 primitive의 이름·역할·키보드 동작과 포커스 진입·유지·복귀 계약을 보존하고, 서비스 고유의 시각 표현이 그 행동을 깨지 않는다.
+- `/`와 `/discover`는 각각 `main`과 페이지 `h1`을 정확히 하나씩 가지며 skip link는 현재 문서의 `#main-content`를 가리킨다. `/`에서는 discovery provider와 `/api/` 요청이 0건이어야 한다.
+
+`TP-006`의 2026-09-04 분리 경로 증거는 `frontend/src/app/App.test.tsx`의 경로·fragment·비영속·film fallback 테스트와 Chrome 1440×1000·390×844 device metrics 검수다. 두 폭에서 가로 넘침이 없고 홈 API 0건, 모바일/reduced-motion video 0개와 독립 poster, 키보드 첫 포커스의 가시적 skip link를 확인했다. 실제 스크린리더·200% 확대·Chromium 외 브라우저 검수는 남아 있으므로 `AC-018` 전체 통과로 확대 해석하지 않는다.
 
 ## 7. 전체 흐름·접근성·호환성
 
@@ -295,6 +304,7 @@ TP-006은 `AC-004`~`AC-008` 중 검색·방문 조건 입력·필수/선호 구�
 - 하트·현재·예정·종료·오류·확인 필요를 색상이나 아이콘 없이도 텍스트로 이해한다.
 - 정보 이미지의 대체 텍스트, 장식 이미지의 빈 대체 텍스트, 폼 레이블과 상태 알림이 의미에 맞는다.
 - 모션 감소, 화면 확대, 터치 입력에서도 핵심 정보와 행동이 사라지거나 겹치지 않는다.
+- `prefers-reduced-motion: reduce`에서는 홈 video 요소를 렌더링하지 않고 poster를 표시하며, 다른 비필수 전환과 transform도 제거한다.
 - Chromium에서 전체 E2E가, Firefox와 WebKit에서 핵심 스모크 흐름이 통과한다.
 - 최신 Chrome·Edge·Firefox·Safari, Android Chrome·iOS Safari에서 핵심 과업을 완료한다.
 - 자동 접근성 검사 결과와 수동 키보드·확대·스크린리더 검토에서 해결되지 않은 핵심 과업 차단 문제가 없다.
