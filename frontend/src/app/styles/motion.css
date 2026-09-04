@@ -1,0 +1,95 @@
+@layer components {
+  .primary-button,
+  .secondary-button,
+  .inverse-button,
+  .header-nav a,
+  .header-nav a::after,
+  .card-footer a,
+  .card-cover,
+  .home-entry-link,
+  .home-entry-link svg {
+    transition-duration: 220ms;
+    transition-property: color, background-color, border-color, transform;
+    transition-timing-function: ease-out;
+  }
+
+  .primary-button:hover {
+    border-color: var(--color-ink);
+    background: var(--color-ink);
+  }
+
+  .secondary-button:hover {
+    border-color: var(--color-accent);
+    background: var(--color-surface);
+  }
+
+  .home-film .primary-button:hover {
+    border-color: #d5d7d0;
+    background: #d5d7d0;
+  }
+
+  .home-film .secondary-button:hover {
+    border-color: var(--color-paper);
+    background: rgb(242 240 233 / 12%);
+  }
+
+  .inverse-button:hover {
+    background: var(--color-paper);
+    color: var(--color-ink);
+  }
+
+  .header-nav a:hover,
+  .header-nav a:focus-visible,
+  .card-footer a:hover {
+    color: var(--color-accent);
+  }
+
+  .site-header-ink .header-nav a:hover,
+  .site-header-ink .header-nav a:focus-visible {
+    color: var(--color-paper);
+  }
+
+  .header-nav a:hover::after,
+  .header-nav a:focus-visible::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .home-entry-link:hover,
+  .home-entry-link:focus-visible {
+    color: #d2d9d7;
+  }
+
+  .home-entry-link:hover svg,
+  .home-entry-link:focus-visible svg {
+    transform: translateX(0.4rem);
+  }
+
+  .home-film-video {
+    animation: home-film-ready 700ms ease-out both;
+  }
+
+  @keyframes home-film-ready {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

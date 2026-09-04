@@ -2,7 +2,11 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useStore } from 'zustand';
 import { createDiscoveryApi, type DiscoveryApi } from '../shared/api/client';
-import { createDiscoveryStore, type DiscoveryStore } from '../features/discovery/store';
+import {
+  createDiscoveryStore,
+  type DiscoveryStore,
+  type DiscoveryTab,
+} from '../features/discovery/store';
 
 const Context = createContext<{ api: DiscoveryApi; store: DiscoveryStore; demo: boolean } | null>(
   null,
@@ -11,12 +15,14 @@ export function Providers({
   children,
   api,
   demo = false,
+  initialTab = 'search',
 }: {
   children: ReactNode;
   api?: DiscoveryApi;
   demo?: boolean;
+  initialTab?: DiscoveryTab;
 }) {
-  const [store] = useState(createDiscoveryStore);
+  const [store] = useState(() => createDiscoveryStore(initialTab));
   const [client] = useState(
     () =>
       new QueryClient({

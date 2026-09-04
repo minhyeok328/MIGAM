@@ -1,0 +1,179 @@
+@layer components {
+  .page-width {
+    @apply mx-auto w-full max-w-[1440px] px-8 lg:px-16;
+  }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    border-bottom: 1px solid rgb(214 211 201 / 82%);
+    background: rgb(242 240 233 / 92%);
+    backdrop-filter: blur(14px);
+  }
+
+  .site-header-ink {
+    border-color: rgb(242 240 233 / 15%);
+    background: rgb(37 41 35 / 94%);
+    color: var(--color-paper);
+  }
+
+  .header-inner {
+    @apply flex min-h-24 items-center justify-between gap-8;
+  }
+
+  .wordmark {
+    @apply flex shrink-0 items-center gap-4;
+  }
+
+  .wordmark-hanja {
+    @apply font-serif text-4xl tracking-[-0.08em];
+  }
+
+  .wordmark > span:last-child {
+    @apply flex flex-col border-l border-line pl-4 text-sm;
+  }
+
+  .site-header-ink .wordmark > span:last-child {
+    border-color: rgb(242 240 233 / 28%);
+  }
+
+  .wordmark small {
+    @apply text-xs tracking-[0.2em] text-muted;
+  }
+
+  .header-nav {
+    @apply flex items-center gap-8;
+  }
+
+  .header-nav a {
+    @apply inline-flex min-h-11 items-center border-0 bg-transparent px-1 text-sm text-muted;
+    position: relative;
+  }
+
+  .site-header-ink .header-nav a,
+  .site-header-ink .edition-label,
+  .site-header-ink .wordmark small {
+    color: #c6c9c1;
+  }
+
+  .header-nav a::after {
+    position: absolute;
+    right: 0;
+    bottom: 0.45rem;
+    left: 0;
+    height: 1px;
+    background: var(--color-ink);
+    content: '';
+    transform: scaleX(0);
+    transform-origin: right;
+  }
+
+  .site-header-ink .header-nav a::after {
+    background: var(--color-paper);
+  }
+
+  .header-nav a[aria-current='page'] {
+    color: var(--color-ink);
+  }
+
+  .site-header-ink .header-nav a[aria-current='page'] {
+    color: var(--color-paper);
+  }
+
+  .header-nav a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
+  .edition-label {
+    @apply shrink-0 text-xs tracking-widest text-muted;
+  }
+
+  .site-footer-shell {
+    border-top: 1px solid rgb(247 245 240 / 18%);
+  }
+
+  .site-footer {
+    @apply grid grid-cols-3 items-end gap-8 py-12;
+  }
+
+  .footer-mark {
+    @apply font-serif text-4xl tracking-[-0.06em];
+  }
+
+  .site-footer p {
+    @apply mt-3 text-xs leading-6;
+    color: #bfc3bb;
+  }
+
+  .site-footer > span {
+    @apply text-right;
+  }
+
+  .demo-banner {
+    @apply bg-ink px-6 py-2 text-center text-sm text-paper;
+  }
+
+  .skip-link {
+    @apply sr-only;
+  }
+
+  .skip-link:focus {
+    @apply fixed left-4 top-4 z-[60] h-auto w-auto bg-ink px-5 py-3 text-white;
+    clip: auto;
+    clip-path: none;
+    margin: 0;
+    overflow: visible;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 900px) {
+  .header-nav {
+    gap: 1.25rem;
+  }
+
+  .edition-label {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .page-width {
+    padding-inline: 1.25rem;
+  }
+
+  .header-inner {
+    min-height: 4.5rem;
+    gap: 1rem;
+  }
+
+  .wordmark-hanja {
+    font-size: 1.9rem;
+  }
+
+  .wordmark > span:last-child {
+    display: none;
+  }
+
+  .header-nav {
+    margin-left: auto;
+  }
+
+  .header-nav a {
+    font-size: 0.75rem;
+  }
+
+  .header-nav a:last-child {
+    display: none;
+  }
+
+  .site-footer {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .site-footer > span {
+    text-align: left;
+  }
+}

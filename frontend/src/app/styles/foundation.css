@@ -1,0 +1,150 @@
+@theme {
+  --color-paper: #f2f0e9;
+  --color-surface: #faf8f2;
+  --color-ink: #252923;
+  --color-ink-soft: #333832;
+  --color-muted: #6f716b;
+  --color-line: #d6d3c9;
+  --color-accent: #66777a;
+  --color-limestone: #d9d4c9;
+  --color-earth: #9b8874;
+  --font-sans: 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  --font-serif: 'Batang', 'AppleMyungjo', 'Noto Serif CJK KR', Georgia, serif;
+}
+
+@layer base {
+  :root {
+    font-family: var(--font-sans);
+    color: var(--color-ink);
+    background: var(--color-paper);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    background: var(--color-paper);
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+
+  button,
+  input,
+  select {
+    font: inherit;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  summary {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  a,
+  summary {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: wait;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 5px;
+  }
+
+  ::selection {
+    background: #cdd6d5;
+    color: var(--color-ink);
+  }
+
+  input,
+  select {
+    min-width: 0;
+    border-radius: 0;
+  }
+
+  input[type='checkbox'] {
+    width: 1.1rem;
+    height: 1.1rem;
+    flex-shrink: 0;
+    accent-color: var(--color-accent);
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  fieldset {
+    min-width: 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  p {
+    margin: 0;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+  }
+}
+
+@layer components {
+  .editorial-label {
+    @apply text-xs font-medium tracking-[0.16em] text-muted;
+  }
+
+  .theme-ink {
+    background: var(--color-ink);
+    color: var(--color-paper);
+  }
+
+  .theme-ink .editorial-label {
+    color: #bfc3bb;
+  }
+
+  .theme-ink :focus-visible,
+  .site-page-ink :focus-visible {
+    outline-color: var(--color-paper);
+  }
+
+  .primary-button,
+  .secondary-button,
+  .inverse-button {
+    @apply inline-flex min-h-12 items-center justify-center gap-3 px-6 py-3 text-sm font-medium;
+  }
+
+  .primary-button {
+    @apply shrink-0 border border-accent bg-accent text-white;
+  }
+
+  .secondary-button {
+    @apply border border-line bg-transparent;
+  }
+
+  .inverse-button {
+    border: 1px solid rgb(242 240 233 / 45%);
+    color: var(--color-paper);
+  }
+
+  .text-button {
+    @apply inline-flex min-h-11 shrink-0 items-center gap-2 text-sm underline underline-offset-4;
+  }
+
+  .icon-button {
+    @apply flex h-11 w-11 items-center justify-center;
+  }
+}

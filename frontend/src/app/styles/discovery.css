@@ -1,0 +1,459 @@
+@layer components {
+  .discovery-page {
+    min-height: 70svh;
+    background: var(--color-paper);
+  }
+
+  .discovery-workspace {
+    padding-block: clamp(4.5rem, 7vw, 7rem) clamp(6rem, 10vw, 10rem);
+    scroll-margin-top: 7rem;
+  }
+
+  .discovery-intro {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 2rem;
+    align-items: end;
+    border-top: 1px solid var(--color-ink);
+    padding-top: 1.25rem;
+  }
+
+  .discovery-intro .editorial-label {
+    grid-column: 1 / -1;
+  }
+
+  .discovery-intro h1 {
+    grid-column: 1 / span 8;
+    margin-top: clamp(2.5rem, 5vw, 5rem);
+    font-family: var(--font-serif);
+    font-size: clamp(3rem, 5.5vw, 6rem);
+    font-weight: 400;
+    letter-spacing: -0.065em;
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  .discovery-intro > p {
+    grid-column: 10 / -1;
+    padding-bottom: 0.5rem;
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    line-height: 1.8;
+  }
+
+  .discovery-tabs {
+    @apply flex gap-8 border-b border-ink;
+    margin-top: clamp(4rem, 8vw, 8rem);
+  }
+
+  .discovery-tabs button {
+    @apply flex min-h-16 items-center gap-2 border-b-2 border-transparent px-1 text-base text-muted;
+  }
+
+  .discovery-tabs button[data-state='active'] {
+    @apply border-ink font-semibold text-ink;
+  }
+
+  .search-form,
+  .recommend-form {
+    @apply border-b border-line py-8;
+  }
+
+  .search-bar {
+    @apply flex items-center gap-4 border-b border-ink pb-3;
+  }
+
+  .search-bar > svg {
+    @apply shrink-0 text-accent;
+  }
+
+  .search-bar input {
+    @apply w-full bg-transparent py-3 text-lg outline-none;
+  }
+
+  .search-bar input:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 0;
+  }
+
+  .filter-grid {
+    @apply grid gap-5;
+  }
+
+  .search-filters {
+    @apply mt-6 grid-cols-[0.7fr_0.8fr_0.8fr_1.5fr_1fr];
+  }
+
+  .recommendation-filters {
+    @apply grid-cols-5;
+  }
+
+  .field {
+    @apply flex min-w-0 flex-col gap-2 text-sm text-muted;
+  }
+
+  .field input,
+  .field select {
+    @apply min-h-12 w-full border border-line bg-surface px-3 py-2 text-sm text-ink;
+  }
+
+  .field input:disabled {
+    @apply bg-paper text-muted;
+    cursor: not-allowed;
+  }
+
+  .results-section {
+    @apply pt-10;
+  }
+
+  .section-heading {
+    @apply mb-5 flex items-end justify-between gap-6;
+  }
+
+  .section-heading h2 {
+    @apply mt-2 font-serif text-[1.8rem] tracking-[-0.04em];
+  }
+
+  .section-heading > p {
+    @apply shrink-0 pb-1 text-sm text-muted;
+  }
+
+  .applied-tags {
+    @apply mb-7 flex flex-wrap gap-x-3 gap-y-2 text-sm text-muted;
+  }
+
+  .applied-tags span {
+    @apply border-b border-line pb-1;
+  }
+
+  .results-grid {
+    @apply grid grid-cols-3 gap-x-7 gap-y-12;
+  }
+
+  .load-more {
+    @apply mt-12 flex justify-center;
+  }
+
+  .feedback {
+    @apply my-6 flex items-start gap-4 border border-line bg-surface p-6;
+  }
+
+  .feedback svg {
+    @apply shrink-0;
+  }
+
+  .feedback p {
+    @apply mt-1 text-sm text-muted;
+  }
+
+  .feedback .text-button {
+    @apply ml-auto;
+  }
+
+  .empty-state {
+    @apply flex flex-col items-center border-y border-line py-20 text-center;
+  }
+
+  .empty-state h3 {
+    @apply mt-5 mb-3 font-serif text-2xl;
+  }
+
+  .empty-state p {
+    @apply text-sm leading-7 text-muted;
+  }
+
+  .skeleton-card {
+    @apply aspect-[1.25] border border-line bg-line/30 motion-safe:animate-pulse;
+  }
+
+  .loading-label {
+    @apply mb-5 text-sm text-muted;
+  }
+
+  .form-error {
+    @apply mt-5 border-l-2 border-accent pl-4 text-sm text-accent;
+  }
+
+  .form-section-label {
+    @apply mb-6 flex flex-wrap items-baseline gap-x-5 gap-y-2;
+  }
+
+  .form-section-label h2 {
+    @apply text-lg;
+  }
+
+  .form-section-label > span:last-child {
+    @apply ml-auto text-sm text-muted;
+  }
+
+  .helper-note {
+    @apply mt-4 text-sm leading-6 text-muted;
+  }
+
+  .mood-section {
+    @apply mt-8 border-t border-line pt-7;
+  }
+
+  .mood-section legend {
+    @apply flex flex-wrap items-baseline gap-5 pr-5 text-lg;
+  }
+
+  .mood-section > p {
+    @apply mb-5 flex flex-wrap justify-between gap-2 text-sm text-muted;
+  }
+
+  .mood-grid {
+    @apply grid grid-cols-3 gap-3;
+  }
+
+  .mood-option {
+    @apply flex min-h-20 cursor-pointer items-start gap-3 border border-line px-4 py-4;
+  }
+
+  .mood-option input {
+    @apply mt-1;
+  }
+
+  .mood-option strong {
+    @apply mb-1 block text-sm font-medium;
+  }
+
+  .mood-option small {
+    @apply block text-sm leading-5 text-muted;
+  }
+
+  .mood-option.selected {
+    @apply border-accent bg-surface;
+  }
+
+  .mood-option:has(input:disabled) {
+    cursor: not-allowed;
+  }
+
+  .mood-option:has(input:disabled) small {
+    @apply opacity-75;
+  }
+
+  .recommend-actions {
+    @apply mt-7 flex items-center gap-5;
+  }
+
+  .recommend-actions p {
+    @apply text-xs leading-5 text-muted;
+  }
+
+  .recommend-actions > .primary-button {
+    @apply ml-auto;
+  }
+
+  .condition-count {
+    @apply flex h-5 w-5 items-center justify-center rounded-full bg-accent text-xs text-white;
+  }
+
+  .dialog-overlay {
+    @apply fixed inset-0 z-40 bg-ink/40;
+  }
+
+  .condition-dialog {
+    @apply fixed inset-y-0 right-0 z-50 w-full max-w-xl overflow-y-auto bg-paper px-8 pb-8 pt-6;
+  }
+
+  .dialog-heading {
+    @apply flex items-center justify-between;
+  }
+
+  .condition-dialog h2 {
+    @apply mt-4 mb-3 font-serif text-3xl;
+  }
+
+  .condition-dialog > p {
+    @apply text-sm leading-7 text-muted;
+  }
+
+  .condition-group {
+    @apply mt-8 border-t border-line pt-5;
+  }
+
+  .condition-group legend {
+    @apply pr-4 text-lg;
+  }
+
+  .condition-group > p {
+    @apply mb-4 text-sm leading-6 text-muted;
+  }
+
+  .check-grid {
+    @apply grid grid-cols-2 gap-x-3;
+  }
+
+  .check-grid label {
+    @apply flex min-h-12 cursor-pointer items-center gap-3 text-sm;
+  }
+
+  .two-fields {
+    @apply grid-cols-2;
+  }
+
+  .dialog-done {
+    @apply mt-8 w-full;
+  }
+
+  .result-caution {
+    @apply mb-7 text-sm leading-6 text-muted;
+  }
+
+  .verification-section {
+    @apply mt-14 border-t border-line pt-10;
+  }
+}
+
+@media (max-width: 1100px) {
+  .search-filters,
+  .recommendation-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mood-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .discovery-workspace {
+    padding-block: 3.5rem 6rem;
+  }
+
+  .discovery-intro {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+  }
+
+  .discovery-intro .editorial-label,
+  .discovery-intro h1,
+  .discovery-intro > p {
+    grid-column: 1;
+  }
+
+  .discovery-intro h1 {
+    margin-top: 2rem;
+    font-size: clamp(2.75rem, 12vw, 4rem);
+  }
+
+  .discovery-intro > p {
+    padding-bottom: 0;
+  }
+
+  .discovery-tabs {
+    margin-top: 4rem;
+  }
+
+  .results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .discovery-tabs {
+    gap: 1.25rem;
+  }
+
+  .discovery-tabs button {
+    gap: 0.4rem;
+    font-size: 0.875rem;
+  }
+
+  .search-bar {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .search-bar > svg {
+    display: none;
+  }
+
+  .search-bar input {
+    flex-basis: 100%;
+    font-size: 1rem;
+  }
+
+  .search-bar .primary-button {
+    width: 100%;
+  }
+
+  .search-filters,
+  .recommendation-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .search-filters > :last-child,
+  .recommendation-filters > :last-child {
+    grid-column: 1 / -1;
+  }
+
+  .section-heading {
+    align-items: start;
+    gap: 1rem;
+  }
+
+  .section-heading h2 {
+    font-size: 1.5rem;
+  }
+
+  .section-heading > p {
+    padding-top: 0.15rem;
+  }
+
+  .form-section-label {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .form-section-label > span:last-child {
+    margin: 0;
+  }
+
+  .mood-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .mood-option {
+    min-height: 4.5rem;
+  }
+
+  .mood-section legend {
+    gap: 0.5rem;
+    font-size: 1rem;
+  }
+
+  .recommend-actions {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .recommend-actions > .primary-button {
+    width: 100%;
+  }
+
+  .condition-dialog {
+    top: auto;
+    max-height: 92dvh;
+    border-top: 3px solid var(--color-accent);
+    padding: 1.25rem;
+  }
+
+  .feedback {
+    flex-wrap: wrap;
+    padding: 1.25rem;
+  }
+
+  .feedback > div {
+    flex: 1;
+  }
+
+  .feedback .text-button {
+    margin-left: 2rem;
+  }
+}

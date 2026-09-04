@@ -207,9 +207,15 @@ export function RecommendationPanel() {
         {query.isPending && <LoadingState />}
         {query.isError && <ErrorNotice error={query.error} retry={() => void query.refetch()} />}
         {query.data && !query.data.recommendations.length && <EmptyState recommendation />}
-        <div className="results-grid">
+        <div className="results-grid editorial-results-grid">
           {query.data?.recommendations.map((item, index) => (
-            <ExhibitionCard key={item.id} item={item} index={index} demo={demo} />
+            <ExhibitionCard
+              key={item.id}
+              item={item}
+              index={index}
+              demo={demo}
+              variant="editorial"
+            />
           ))}
         </div>
       </section>
@@ -226,9 +232,15 @@ export function RecommendationPanel() {
             가격·예약·시간 정보가 부족해 주요 추천과 구분했어요. 선택한 필수조건을 충족한다고 볼 수
             없습니다.
           </p>
-          <div className="results-grid">
+          <div className="results-grid editorial-results-grid verification-results-grid">
             {query.data.needsVerification.map((item, index) => (
-              <ExhibitionCard key={item.id} item={item} index={index} demo={demo} />
+              <ExhibitionCard
+                key={item.id}
+                item={item}
+                index={index}
+                demo={demo}
+                variant="editorial"
+              />
             ))}
           </div>
         </section>

@@ -176,10 +176,16 @@ export function SearchPanel() {
           />
         )}
         {query.data && !items.length && <EmptyState />}
-        <div className="results-grid">
+        <div className="results-grid catalog-results-grid">
           {items.map((item, index) =>
             item.kind === 'exhibition' ? (
-              <ExhibitionCard key={`e-${item.id}`} item={item} index={index} demo={demo} />
+              <ExhibitionCard
+                key={`e-${item.id}`}
+                item={item}
+                index={index}
+                demo={demo}
+                variant="catalog"
+              />
             ) : (
               <InstitutionCard key={`i-${item.id}`} item={item} />
             ),

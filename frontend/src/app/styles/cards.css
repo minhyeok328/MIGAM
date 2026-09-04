@@ -1,0 +1,238 @@
+@layer components {
+  .catalog-results-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2rem 2.5rem;
+  }
+
+  .editorial-results-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .editorial-results-grid > .exhibition-card {
+    grid-column: span 4;
+  }
+
+  .editorial-results-grid > .exhibition-card:nth-child(6n + 1) {
+    grid-column: span 7;
+  }
+
+  .editorial-results-grid > .exhibition-card:nth-child(6n + 2) {
+    grid-column: span 5;
+  }
+
+  .editorial-results-grid > .exhibition-card:nth-child(6n + 6) {
+    grid-column: 3 / span 8;
+  }
+
+  .exhibition-card {
+    @apply min-w-0;
+  }
+
+  .exhibition-card--catalog {
+    @apply grid border-t border-line pt-5;
+    grid-template-columns: minmax(9rem, 0.8fr) minmax(0, 1.2fr);
+    gap: 1.25rem;
+  }
+
+  .card-cover {
+    @apply relative flex aspect-[1.25] flex-col overflow-hidden border border-line bg-surface p-5;
+    border-radius: 14px;
+  }
+
+  .exhibition-card--catalog .card-cover {
+    aspect-ratio: 4 / 3;
+    align-self: start;
+  }
+
+  .exhibition-card--editorial .card-cover {
+    aspect-ratio: 4 / 5;
+  }
+
+  .editorial-results-grid > .exhibition-card:nth-child(6n + 1) .card-cover,
+  .editorial-results-grid > .exhibition-card:nth-child(6n + 6) .card-cover {
+    aspect-ratio: 3 / 2;
+  }
+
+  .cover-top {
+    @apply relative z-10 flex items-start justify-between gap-3;
+  }
+
+  .status-tag {
+    @apply border border-line bg-surface px-2 py-1 text-xs;
+  }
+
+  .status-ended,
+  .status-canceled {
+    @apply bg-paper text-muted;
+  }
+
+  .cover-title {
+    @apply relative z-10 my-auto pt-6;
+  }
+
+  .cover-rule {
+    @apply mb-4 block w-8 border-t border-accent;
+  }
+
+  .cover-title p {
+    @apply mb-2 text-sm text-muted;
+  }
+
+  .cover-title h3 {
+    @apply break-keep font-serif text-[clamp(1.7rem,2.4vw,2.4rem)] leading-[1.35] tracking-[-0.05em];
+    overflow-wrap: anywhere;
+  }
+
+  .exhibition-card--catalog .cover-title h3 {
+    font-size: clamp(1.35rem, 1.8vw, 1.85rem);
+  }
+
+  .cover-folio {
+    @apply absolute -bottom-5 right-2 font-serif text-[4.75rem] tracking-[-0.1em] text-line opacity-35;
+    white-space: nowrap;
+  }
+
+  .card-cover.has-image {
+    @apply p-4;
+  }
+
+  .card-cover img {
+    @apply absolute inset-0 h-full w-full object-cover;
+  }
+
+  .has-image .editorial-label {
+    @apply bg-surface px-2 py-1;
+  }
+
+  .card-body {
+    @apply pt-5;
+  }
+
+  .exhibition-card--catalog .card-body {
+    padding-top: 0;
+  }
+
+  .image-card-title {
+    @apply mb-4 font-serif text-2xl tracking-[-0.04em];
+  }
+
+  .match-label {
+    @apply mb-2 text-sm font-medium text-accent;
+  }
+
+  .reason {
+    @apply mb-4 text-sm leading-6;
+  }
+
+  .card-meta {
+    @apply mb-2 flex items-start gap-2 text-sm leading-6 text-muted;
+  }
+
+  .card-meta svg {
+    @apply mt-1 shrink-0;
+  }
+
+  .freshness-warning {
+    @apply mt-3 border-l-2 border-accent pl-3 text-sm text-accent;
+  }
+
+  .source-details {
+    @apply mt-4 text-xs text-muted;
+  }
+
+  .source-details summary {
+    @apply flex min-h-11 items-center text-sm underline decoration-line underline-offset-4;
+  }
+
+  .source-details p {
+    @apply py-2 leading-6;
+  }
+
+  .source-details a {
+    @apply inline-block min-h-11 py-2 underline;
+  }
+
+  .card-footer {
+    @apply mt-2 flex min-h-12 items-center border-t border-line;
+  }
+
+  .card-footer a {
+    @apply flex min-h-11 w-full items-center justify-between gap-2 text-sm;
+  }
+
+  .demo-card-note,
+  .credit {
+    @apply text-xs text-muted;
+  }
+
+  .verification-labels {
+    @apply mb-4 grid gap-1 text-sm text-accent;
+  }
+
+  .verification-labels li {
+    @apply flex items-center gap-2;
+  }
+
+  .institution-card {
+    @apply border border-line bg-surface p-7;
+  }
+
+  .institution-card h3 {
+    @apply mt-12 mb-4 font-serif text-3xl;
+  }
+
+  .institution-card > p {
+    @apply text-sm text-muted;
+  }
+
+  .institution-count {
+    @apply mt-8 flex justify-between border-t border-line pt-5;
+  }
+}
+
+@media (max-width: 1100px) {
+  .catalog-results-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .editorial-results-grid > .exhibition-card,
+  .editorial-results-grid > .exhibition-card:nth-child(n) {
+    grid-column: span 6;
+  }
+}
+
+@media (max-width: 700px) {
+  .catalog-results-grid,
+  .editorial-results-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2.75rem;
+  }
+
+  .editorial-results-grid > .exhibition-card,
+  .editorial-results-grid > .exhibition-card:nth-child(n) {
+    grid-column: 1;
+  }
+
+  .exhibition-card--catalog {
+    display: block;
+    padding-top: 1rem;
+  }
+
+  .exhibition-card--catalog .card-cover {
+    aspect-ratio: 1.25;
+  }
+
+  .exhibition-card--catalog .card-body {
+    padding-top: 1.25rem;
+  }
+
+  .exhibition-card--editorial .card-cover,
+  .editorial-results-grid > .exhibition-card:nth-child(n) .card-cover {
+    aspect-ratio: 1.05;
+  }
+
+  .cover-title h3 {
+    font-size: 2.05rem;
+  }
+}

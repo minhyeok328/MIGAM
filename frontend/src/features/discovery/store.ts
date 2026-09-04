@@ -9,24 +9,26 @@ import {
   type SearchDraft,
 } from './forms';
 
+export type DiscoveryTab = 'search' | 'recommend';
+
 type DiscoveryState = {
-  tab: 'search' | 'recommend';
+  tab: DiscoveryTab;
   searchDraft: SearchDraft;
   recommendationDraft: RecommendationDraft;
   searchRequest: SearchRequest;
   recommendationRequest: RecommendationRequest;
   searchRevision: number;
   recommendationRevision: number;
-  setTab: (tab: 'search' | 'recommend') => void;
+  setTab: (tab: DiscoveryTab) => void;
   setSearch: (patch: Partial<SearchDraft>) => void;
   setRecommendation: (patch: Partial<RecommendationDraft>) => void;
   applySearch: () => void;
   applyRecommendation: () => void;
 };
 
-export function createDiscoveryStore() {
+export function createDiscoveryStore(initialTab: DiscoveryTab = 'search') {
   return createStore<DiscoveryState>()((set, get) => ({
-    tab: 'search',
+    tab: initialTab,
     searchDraft: { ...emptySearchDraft },
     recommendationDraft: { ...emptyRecommendationDraft },
     searchRequest: buildSearchRequest(emptySearchDraft),
