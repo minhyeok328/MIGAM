@@ -1,0 +1,11 @@
+[0:v]zoompan=z='min(1+on*0.00045\,1.027)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=30,trim=duration=2,setpts=PTS-STARTPTS,fps=30,settb=AVTB[v0];
+[1:v]zoompan=z=1.027:x='(iw-iw/zoom)*on/59':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=30,trim=duration=2,setpts=PTS-STARTPTS,fps=30,settb=AVTB[v1];
+[2:v]zoompan=z='max(1.027-on*0.00045\,1)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=30,trim=duration=2,setpts=PTS-STARTPTS,fps=30,settb=AVTB[v2];
+[3:v]zoompan=z=1.027:x='(iw-iw/zoom)*(1-on/59)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=30,trim=duration=2,setpts=PTS-STARTPTS,fps=30,settb=AVTB[v3];
+[4:v]zoompan=z='min(1+on*0.00045\,1.027)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=30,trim=duration=2,setpts=PTS-STARTPTS,fps=30,settb=AVTB[v4];
+[5:v]zoompan=z='max(1.027-on*0.00045\,1)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=1:s=1920x1080:fps=30,trim=duration=2,setpts=PTS-STARTPTS,fps=30,settb=AVTB[v5];
+[v0][v1]xfade=transition=fade:duration=0.25:offset=1.75[x1];
+[x1][v2]xfade=transition=fade:duration=0.25:offset=3.5[x2];
+[x2][v3]xfade=transition=fade:duration=0.25:offset=5.25[x3];
+[x3][v4]xfade=transition=fade:duration=0.25:offset=7[x4];
+[x4][v5]xfade=transition=fade:duration=0.25:offset=8.75,format=yuv420p[vout]
