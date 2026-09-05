@@ -58,7 +58,9 @@ describe('discovery user flows', () => {
     expect(screen.getByRole('heading', { level: 1 })).toHaveAccessibleName(
       '당신의 감각으로, 전시를 발견하다.',
     );
-    expect(screen.getByRole('navigation', { name: '주요 탐색' })).toBeInTheDocument();
+    const homeLink = screen.getByRole('link', { name: '미감 홈' });
+    expect(within(homeLink.closest('header')!).getAllByRole('link')).toHaveLength(1);
+    expect(homeLink).toHaveAttribute('href', '/');
     expect(screen.getByRole('link', { name: '본문으로 바로가기' })).toHaveAttribute(
       'href',
       '#main-content',
@@ -80,6 +82,18 @@ describe('discovery user flows', () => {
     expect(requests).toHaveLength(0);
   });
 
+  it('uses the warm limestone theme for the home chrome and editorial sections', () => {
+    renderAppAt('/');
+
+    expect(screen.getByRole('link', { name: '미감 홈' }).closest('header')).toHaveClass(
+      'site-header-limestone',
+    );
+    expect(
+      screen.getByRole('heading', { name: '어떤 전시가 끌리나요?' }).closest('section'),
+    ).toHaveClass('theme-limestone');
+    expect(screen.getByRole('contentinfo').parentElement).toHaveClass('theme-limestone');
+  });
+
   it('renders discovery as a separate document without the home hero', () => {
     renderAppAt('/discover', { api: apiWith(() => response()) });
 
@@ -92,6 +106,9 @@ describe('discovery user flows', () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getByRole('tablist', { name: '전시 발견 방법' })).toBeInTheDocument();
+    expect(
+      within(screen.getByRole('link', { name: '미감 홈' }).closest('header')!).getAllByRole('link'),
+    ).toHaveLength(1);
     expect(screen.getByRole('searchbox')).toBeInTheDocument();
     expect(
       screen.queryByRole('heading', {
@@ -120,7 +137,7 @@ describe('discovery user flows', () => {
     expect(sessionStorage.length).toBe(0);
   });
 
-  it('reselects recommendations from the header when the fixed fragment is already present', async () => {
+  it('reselects recommendations from the tabs when the fixed fragment is already present', async () => {
     const user = userEvent.setup();
     renderAppAt('/discover#recommend', { api: apiWith(() => response()) });
 
@@ -130,24 +147,20 @@ describe('discovery user flows', () => {
       'active',
     );
 
-    await user.click(screen.getByRole('link', { name: '조건으로 추천받기' }));
+    await user.click(screen.getByRole('tab', { name: '조건으로 추천받기' }));
     expect(screen.getByRole('tab', { name: '조건으로 추천받기' })).toHaveAttribute(
       'data-state',
       'active',
     );
   });
 
-  it('offers both valid destinations from an unknown route', () => {
+  it('offers a return to the home from an unknown route', () => {
     renderAppAt('/missing', { api: apiWith(() => response()) });
 
     expect(
       screen.getByRole('heading', { level: 1, name: '페이지를 찾을 수 없어요.' }),
     ).toBeInTheDocument();
     expect(screen.getByRole('link', { name: '홈으로 돌아가기' })).toHaveAttribute('href', '/');
-    expect(screen.getByRole('link', { name: '전시 둘러보기' })).toHaveAttribute(
-      'href',
-      '/discover',
-    );
   });
 
   it('provides a silent decorative film above a persistent poster', () => {
