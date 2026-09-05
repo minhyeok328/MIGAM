@@ -229,7 +229,7 @@
     justify-content: space-between;
     gap: 1rem;
     border-bottom: 1px solid rgb(37 41 35 / 24%);
-    font-family: var(--font-serif);
+    font-family: var(--font-sans);
     font-size: clamp(1.35rem, 2.2vw, 2.25rem);
     letter-spacing: -0.04em;
   }

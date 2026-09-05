@@ -8,8 +8,8 @@
   --color-accent: #66777a;
   --color-limestone: #d9d4c9;
   --color-earth: #9b8874;
-  --font-sans: 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif;
-  --font-serif: 'Batang', 'AppleMyungjo', 'Noto Serif CJK KR', Georgia, serif;
+  --font-sans: 'SUIT', 'Malgun Gothic', 'Apple SD Gothic Neo', system-ui, sans-serif;
+  --font-serif: 'Maru Buri', 'Batang', 'AppleMyungjo', 'Noto Serif CJK KR', Georgia, serif;
 }
 
 @layer base {
