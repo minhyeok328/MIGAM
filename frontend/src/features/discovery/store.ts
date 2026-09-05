@@ -14,6 +14,7 @@ export type DiscoveryTab = 'search' | 'recommend';
 type DiscoveryState = {
   tab: DiscoveryTab;
   searchDraft: SearchDraft;
+  appliedSearchDraft: SearchDraft;
   recommendationDraft: RecommendationDraft;
   searchRequest: SearchRequest;
   recommendationRequest: RecommendationRequest;
@@ -23,6 +24,7 @@ type DiscoveryState = {
   setSearch: (patch: Partial<SearchDraft>) => void;
   setRecommendation: (patch: Partial<RecommendationDraft>) => void;
   applySearch: () => void;
+  refineSearch: (patch: Partial<SearchDraft>) => void;
   applyRecommendation: () => void;
 };
 
@@ -30,6 +32,7 @@ export function createDiscoveryStore(initialTab: DiscoveryTab = 'search') {
   return createStore<DiscoveryState>()((set, get) => ({
     tab: initialTab,
     searchDraft: { ...emptySearchDraft },
+    appliedSearchDraft: { ...emptySearchDraft },
     recommendationDraft: { ...emptyRecommendationDraft },
     searchRequest: buildSearchRequest(emptySearchDraft),
     recommendationRequest: { limit: 6 },
@@ -42,8 +45,19 @@ export function createDiscoveryStore(initialTab: DiscoveryTab = 'search') {
     applySearch: () =>
       set((state) => ({
         searchRequest: buildSearchRequest(get().searchDraft),
+        appliedSearchDraft: { ...get().searchDraft },
         searchRevision: state.searchRevision + 1,
       })),
+    refineSearch: (patch) =>
+      set((state) => {
+        const appliedSearchDraft = { ...state.appliedSearchDraft, ...patch };
+        return {
+          searchRequest: buildSearchRequest(appliedSearchDraft),
+          appliedSearchDraft,
+          searchDraft: { ...state.searchDraft, ...patch },
+          searchRevision: state.searchRevision + 1,
+        };
+      }),
     applyRecommendation: () =>
       set((state) => ({
         recommendationRequest: buildRecommendationRequest(get().recommendationDraft),

@@ -102,7 +102,7 @@ describe('discovery user flows', () => {
     expect(
       screen.getByRole('heading', {
         level: 1,
-        name: '오늘의 전시를 찾는 두 가지 방법',
+        name: '전시 찾기',
       }),
     ).toBeInTheDocument();
     expect(screen.getByRole('tablist', { name: '전시 발견 방법' })).toBeInTheDocument();
@@ -271,12 +271,10 @@ describe('discovery user flows', () => {
     await user.click(screen.getByRole('button', { name: '전시 더 보기' }));
     expect(await screen.findByRole('heading', { name: '두 번째 전시' })).toBeInTheDocument();
     await user.type(screen.getByRole('searchbox'), '다른 전시');
-    await user.selectOptions(screen.getByLabelText('전시 상태'), 'ENDED');
-    expect(screen.getByLabelText('적용한 검색 조건')).not.toHaveTextContent('종료 전시');
     expect(screen.getByRole('heading', { name: '두 번째 전시' })).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '검색하기' }));
     expect(await screen.findByRole('heading', { name: '새로운 결과' })).toBeInTheDocument();
-    expect(screen.getByLabelText('적용한 검색 조건')).toHaveTextContent('종료 전시');
+    expect(screen.getByLabelText('적용한 검색 조건')).toHaveTextContent('다른 전시');
     expect(screen.queryByRole('heading', { name: '두 번째 전시' })).not.toBeInTheDocument();
   });
 
