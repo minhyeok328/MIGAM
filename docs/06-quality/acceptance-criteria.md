@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 합격 기준"
 status: DRAFT
-version: "0.3.5"
-last_updated: "2026-09-04"
+version: "0.3.6"
+last_updated: "2026-09-05"
 authoritative_for:
   - "P0 기능·데이터·추천·접근성의 합격 판정"
   - "요구사항별 검증 가능한 완료 조건"
@@ -415,4 +415,4 @@ TP-006에서는 검색어·필터·추천 payload를 URL query, history state, l
 ## 14. 열린 결정이 합격 판정에 미치는 영향
 
 - `OD-003`: `RESOLVED`. 실제 수도권 기관·출처 목록과 출처별 허용 필드·호출 제약은 [`sources.yaml`](../../sources.yaml), `4/5 CORE_PASS`를 포함한 판정 근거는 [`source-qualification.json`](../../fixtures/source-qualification.json)을 적용한다.
-- `OD-004`: 정보 위계·키보드·대비·확대 합격 기준은 현재 적용한다. 최종 워드마크와 폰트 렌더링에 대한 시각 회귀 승인은 이 결정이 해소된 뒤 수행한다.
+- `OD-004`: 정보 위계·키보드·대비·확대 합격 기준과 DEC-101로 확정한 마루 부리·SUIT의 라이선스·로딩·렌더링 검증은 현재 적용한다. 최종 워드마크·로고 형식과 해당 자산의 시각 승인은 남아 있다.

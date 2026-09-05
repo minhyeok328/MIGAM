@@ -1,8 +1,8 @@
 ---
 title: "미감 결정 등록부"
 status: DRAFT
-version: "0.4.1"
-last_updated: "2026-09-03"
+version: "0.5.0"
+last_updated: "2026-09-05"
 authoritative_for:
   - "제품 기획의 확정·폐기·미확정 결정 추적"
   - "후반 결정이 대체한 초기안 기록"
@@ -120,7 +120,7 @@ related_documents:
 | ID | 결정 | 소유 문서 |
 | --- | --- | --- |
 | DEC-100 | 반응형 한국어 웹이며 제한된 공식 영문 제목만 보조 표시한다. 다국어 UI는 P0에서 제외한다. | UI Guidelines |
-| DEC-101 | 디자인은 따뜻한 중성색, Serif 제목과 Sans UI, 얇은 선, 넓은 여백, 절제된 모션을 사용한다. | UI Guidelines |
+| DEC-101 | 디자인은 따뜻한 중성색, Serif 제목과 Sans UI, 얇은 선, 넓은 여백, 절제된 모션을 사용한다. 2026-09-05 사용자 승인으로 제목·전시명은 마루 부리(Maru Buri), 본문·입력·필터·버튼·내비게이션은 SUIT로 확정했다. 필요한 굵기의 WOFF2를 직접 호스팅하고 `font-display: swap`과 시스템 fallback을 사용한다. | UI Guidelines, TP-006 |
 | DEC-102 | 이미지가 없는 카드도 정보 위계가 떨어지지 않는 편집형 텍스트 카드로 제공한다. | UI Guidelines, Screen Spec |
 | DEC-103 | 웹 접근성은 키보드·포커스·대체텍스트·텍스트 상태·대비·모션 감소·확대·터치 사용을 포함한다. | UI Guidelines, Acceptance Criteria |
 | DEC-104 | P0 기술은 React·TypeScript·Vite, Django·DRF, Python 파이프라인, SQLite, Kakao 지도 조합이다. | System Architecture |
@@ -162,7 +162,7 @@ related_documents:
 | OD-001 | `OPEN` | P0를 개인 로컬 포트폴리오로만 사용할지, 비영리 공개 또는 향후 상업 공개까지 고려할지 | Data Source Policy, Security & Privacy |
 | OD-002 | `OPEN` | Git 저장소 공개 여부와 MIT 코드 라이선스 외에 문서·데모 데이터 재배포 조건을 어떻게 둘지 | README, Data Source Policy |
 | OD-003 | `RESOLVED` | 세종문화회관 본관 전시공간·서울시립 서서울미술관·서울시립 사진미술관·수원시립미술관 행궁 본관·국립민속박물관 서울 본관과 공식 Source 3개를 P0 allowlist로 확정 | P0 PRD, Roadmap, Data Source Policy, Data Model, Data Pipeline, System Architecture, Acceptance Criteria, Test Plan, Traceability Matrix, Implementation Readiness |
-| OD-004 | `OPEN` | 타이포그래피형 워드마크와 별도 로고 중 무엇을 채택하고 Serif·Sans 최종 폰트를 무엇으로 할지 | UI Guidelines |
+| OD-004 | `OPEN` | 타이포그래피형 워드마크와 별도 로고 중 무엇을 채택할지. 폰트 패밀리는 2026-09-05 마루 부리·SUIT로 확정했으며(`DEC-101`), 로고 형식은 계속 미결이다. | UI Guidelines |
 | OD-005 | `OPEN` | P0 API를 내부 소비 전용으로 유지할지 제3자 공개 API까지 제공할지 | API Guidelines, Security & Privacy |
 | OD-006 | `OPEN` | P1 호스팅 대상, 월 비용 한도, 도메인, 오류 모니터링과 최소 분석 허용 범위 | Roadmap, System Architecture |
 | OD-007 | `OPEN` | 구현 마감일, 병렬 작업 규모, 브랜치·리뷰·병합 방식 | Implementation Readiness |

@@ -1,8 +1,8 @@
 ---
 title: "미감 문서 관리 정책"
 status: DRAFT
-version: "0.2.1"
-last_updated: "2026-09-03"
+version: "0.2.2"
+last_updated: "2026-09-05"
 authoritative_for:
   - "문서 상태와 버전 규칙"
   - "문서 간 권한과 충돌 해결 순서"
@@ -134,4 +134,4 @@ related_documents:
 
 ## 9. 현재 적용 범위
 
-현재 문서 세트는 문서별 상태가 다르다. Project Brief와 Domain Rules는 `APPROVED`지만, P0 PRD와 데이터·추천·UX·기술·품질·실행 문서 및 작업 패킷은 아직 `DRAFT`다. 따라서 승인된 제품 방향과 도메인 규칙은 하위 검토 기준으로 사용할 수 있으나 코드 구현과 외부 배포는 아직 승인하지 않는다. 최신 상태는 `docs/00-index.md`를 기준으로 확인한다.
+Project Brief, Domain Rules, Source Qualification, Source Registry, 홈·탐색 분리 설계와 `TP-001`~`TP-006`은 각자의 범위에서 승인되어 있다. P0 PRD를 포함한 포괄 문서는 계속 `DRAFT`이며, 승인된 작업 패킷과 최신 사용자 결정의 범위 안에서 구현한다. 문서 정리나 일부 기능 구현을 전체 P0·공개 배포 승인으로 확대하지 않는다. 문서별 최신 상태는 [문서 인덱스](../00-index.md)를 따른다.

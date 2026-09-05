@@ -1,8 +1,8 @@
 ---
 title: "TP-002 기관 ACTIVE 승격 증거와 자동 전이"
 status: APPROVED
-version: "1.0.2"
-last_updated: "2026-09-03"
+version: "1.0.3"
+last_updated: "2026-09-05"
 authoritative_for:
   - "PROVISIONAL 기관의 승격 검증 실행과 QualificationRun 기록"
   - "Canonical ChangeHistory와 P0 의미 변경 증거"
@@ -49,7 +49,7 @@ related_documents:
 - CandidateAssessment·4/5 후보 심사 자동화.
 - 수집기 요청의 기관별 retry telemetry. 측정할 수 없는 값은 `null`로 유지한다.
 - 핵심 대상 페이지별 상세 실행 로그. 이번 패킷은 승인 표본 수와 기관별 최종 처리량으로 완전성을 판정한다.
-- 현재 Canonical 모델에 없는 요금·예약·공식 설명 필드의 ChangeHistory와 의미 변경 판정.
+- 요금·예약·공식 설명의 ChangeHistory와 승격 의미 변경 판정. 요금·예약 저장 모델은 이후 TP-003에서 도입했지만 이 패킷의 승격 판정 범위에는 포함하지 않는다.
 - 전체 lifecycle·health ChangeHistory, Django Admin과 `/admin/data-status/` 화면.
 - 배포 스케줄러, SearchService, OpenAPI, 추천, 프론트엔드.
 

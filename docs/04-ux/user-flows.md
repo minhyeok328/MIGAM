@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 사용자 흐름"
 status: DRAFT
-version: "0.2.0"
-last_updated: "2026-08-30"
+version: "0.2.1"
+last_updated: "2026-09-05"
 authoritative_for:
   - "P0 핵심 사용자 여정과 화면 간 전이"
   - "탐색·검색·상세·관심·비교·지도·로컬 초기화 흐름"
@@ -12,6 +12,8 @@ related_documents:
   - "../01-product/project-brief.md"
   - "../01-product/prd-p0.md"
   - "./screen-spec.md"
+  - "./home-design.md"
+  - "../07-execution/task-packets/TP-006-frontend-discovery.md"
   - "../06-quality/acceptance-criteria.md"
 ---
 
@@ -21,7 +23,14 @@ related_documents:
 
 이 문서는 사용자가 미감에서 `발견 → 이해 → 판단`을 완수하는 순서와 화면 간 전이를 정한다. 화면별 정보 배치와 컴포넌트 상태는 `screen-spec.md`, 시각·접근성 표현은 `ui-guidelines.md`, 합격 조건은 `acceptance-criteria.md`가 맡는다.
 
-P0 흐름은 회원가입과 로그인 없이 완결된다. 취향·관심·최근 본 전시는 현재 브라우저에만 저장하며, 서버 개인 프로필이나 기기 간 동기화를 전제로 하지 않는다.
+아래 UX-001~UX-013은 전체 P0 목표이며 모두 구현된 흐름이 아니다. 현재 [TP-006](../07-execution/task-packets/TP-006-frontend-discovery.md)은 다음 흐름에 한정한다.
+
+- `/`의 API 없는 브랜드 홈 → `전시 둘러보기` → `/discover`의 기본 전시 목록.
+- 검색창 제출 → 결과, 또는 필터 열기 → 대상·지역·상태 선택 → 적용 → 조건 칩과 결과. 적용 없이 닫으면 필터 수정은 버린다. 정렬·칩 해제는 미제출 검색어를 전송하지 않는다.
+- 홈의 `조건으로 추천받기` → `/discover#recommend` → 조건 입력·추천 → 주요 결과와 확인 필요 후보.
+- 검색·추천 입력과 적용 조건은 현재 페이지 메모리에만 두며, 고정 추천 탭 fragment 외에는 URL·브라우저 저장소에 기록하지 않는다. 아래 URL 복원 목표는 현재 구현에 적용하지 않는다.
+
+전체 P0 흐름은 회원가입과 로그인 없이 완결된다. 후속 취향·관심·최근 본 전시 저장은 현재 브라우저에만 한정하며, 서버 개인 프로필이나 기기 간 동기화를 전제로 하지 않는다. 상세·비교·관심·지도·실제 취향 테스트는 별도 승인 후 구현한다.
 
 ## 2. 화면 식별자
 

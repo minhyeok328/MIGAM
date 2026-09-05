@@ -1,8 +1,8 @@
 ---
 title: "미감(美感) Normalization Rules"
 status: DRAFT
-version: "0.3.2"
-last_updated: "2026-09-01"
+version: "0.3.3"
+last_updated: "2026-09-05"
 authoritative_for:
   - "출처 원본값을 정본 도메인 값으로 변환하는 규칙"
   - "이름·지역·날짜·가격·예약·분류·접근성의 미확인 처리"
@@ -64,7 +64,7 @@ SourceRecord 변경 또는 신규 생성
 
 P0 의미 변경 allowlist는 신규 전시, 종료일 변경·연장, 요금 변경, 장소 변경, 예약 방식 변경, 전시 취소, 공식 설명에서 P0 승인·버전 고정 정규화 규칙이 실제 Canonical 필드 변경을 만든 경우로 닫는다. 전시명·시작일·지역·일반 상태 전이를 포함한 목록 밖 값은 그 자체로 승격 증거가 아니며, 범위를 늘리려면 결정 등록부와 이 문서의 규칙 버전을 먼저 함께 갱신한다. 취소만 상태 변경 유형의 명시적 예외다.
 
-현재 구현된 Canonical Exhibition 필드에서는 신규 전시, `end_date`, `venue`, `lifecycle → CANCELED`만 위 allowlist에 직접 대응한다. 요금·예약·공식 설명은 정본 필드가 도입되는 후속 패킷 전까지 ChangeHistory 승격 유형으로 만들지 않는다. `title`, `start_date`, 지역, 일반 lifecycle, `official_url`의 실제 Canonical 변경은 감사 이력에는 남기되 `meaningful_for_promotion = false`다.
+현재 구현된 Canonical Exhibition 필드에서는 신규 전시, `end_date`, `venue`, `lifecycle → CANCELED`만 위 allowlist에 직접 대응한다. TP-003에서 요금·예약의 선택 정보 모델을 도입했지만, 이 모델의 변경과 공식 설명 변경을 ChangeHistory 승격 유형으로 연결하는 작업은 후속 범위다. `title`, `start_date`, 지역, 일반 lifecycle, `official_url`의 실제 Canonical 변경은 감사 이력에는 남기되 `meaningful_for_promotion = false`다.
 
 페이지 footer·배너, tracking parameter, HTML whitespace·속성 또는 필드 순서, 수집 시각, 재시도 횟수, 정규화 결과가 같은 원본 hash 변화는 의미 있는 변경이 아니다. 이 변화는 SourceRecord와 실행 감사 이력에는 남길 수 있지만 Canonical 필드가 달라지지 않았으면 ChangeHistory의 의미 변경 건수와 승격 증거에 포함하지 않는다.
 

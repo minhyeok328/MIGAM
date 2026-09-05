@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 테스트 계획"
 status: DRAFT
-version: "0.3.4"
-last_updated: "2026-09-03"
+version: "0.3.5"
+last_updated: "2026-09-05"
 authoritative_for:
   - "P0 계층별 테스트 전략과 검증 범위"
   - "데이터·추천·백엔드·프론트·E2E·브라우저·접근성 테스트 시나리오"
@@ -23,7 +23,7 @@ related_documents:
 
 ## 1. 목적과 현재 상태
 
-이 문서는 P0를 데이터 입력부터 사용자 판단까지 반복 검증하는 방법을 정의한다. 현재 구현된 Django 데이터 범위는 `uv run --project backend python backend/manage.py test tests --verbosity 1`로 실행하며 2026-09-01 기준 126개 테스트를 발견한다. API·프론트·E2E 러너는 해당 구현 패킷에서 추가한다.
+이 문서는 P0를 데이터 입력부터 사용자 판단까지 반복 검증하는 방법을 정의한다. 현재 Django 데이터·서비스·API 테스트는 `backend/`에서 `uv run python manage.py test ../tests --verbosity 1`, 프론트 단위·컴포넌트 테스트는 `frontend/`에서 `npm test`로 실행한다. OpenAPI 생성 타입·Zod 경계와 격리 데모 API 테스트도 존재한다. 테스트 수와 통과 결과는 실행 날짜별 작업 패킷에 기록하며 고정된 현재 수치로 복제하지 않는다. 자동 브라우저 E2E 러너는 후속 범위다.
 
 검증 기술의 방향은 다음과 같이 확정되어 있다.
 
@@ -168,15 +168,15 @@ P0 대표 데모 데이터는 전시 300~500, 작품 500~1,000, 기관 약 100�
 | `TEST-042` | 기관 lifecycle·서비스 적격성·`ACTIVE` 승격 | `CANDIDATE → PROVISIONAL → ACTIVE → SUSPENDED → PROVISIONAL`의 온보딩·복구 흐름과 `PROVISIONAL`·`ACTIVE` CORE_PASS의 동일 서비스 경로를 확인한다. `promotion_validation_started_at + 14일`과 `finished_at`의 `Asia/Seoul` 달력일로 서로 다른 날짜 3회 연속 최종 `SUCCESS`·중간 `FAILED` 0을 검증하며 UTC·서울 날짜 경계도 포함한다. retry 후 모든 핵심 대상을 처리한 성공은 허용하되 `PROVISIONAL`의 핵심 대상 최종 미수집·기관별 최종 `FAILED`·핵심 미완성값 Canonical commit·실행 중 Critical은 InstitutionRunResult·InstitutionQualificationRun의 최종 `FAILED`와 streak 초기화로 판정한다. 공유 IngestionRun이 다른 기관 때문에 실패해도 해당 기관 결과가 성공이면 QualificationRun을 실패로 바꾸지 않는다. 선택 대상 실패와 단건 격리는 승격 실패로 오인하지 않는다. 사용자 승인 의미 변경 allowlist·denylist, SourceRecord→승인 정규화 규칙과 버전→Canonical→ChangeHistory chain, 마지막 성공·Source 정상·구조적 누락·정책/접근 문제·미해결 구조 충돌 0, `SUSPENDED → PROVISIONAL` 재검증 초기화를 확인한다. | `AC-021`, `AC-023`, `AC-026`, `AC-027` |
 | `TEST-043` | 기관 health·실패 사다리·Critical·격리 | 같은 실행의 503·여러 retry 후 핵심 대상 성공은 `SUCCESS`이고 실패 수가 증가하지 않는다. 첫 최종 `FAILED`는 `ACTIVE + DEGRADED + count 1 + 우선 재검증`, 다음 성공은 count 0과 원인별 health 복구, 중간 성공 없는 서로 다른 IngestionRun의 두 번째 최종 `FAILED`는 날짜와 무관하게 `SUSPENDED`인지 확인한다. `POLICY_BLOCK`·`ACCESS_BLOCK`·`STRUCTURAL_CRITICAL` 각각은 1회 확인으로 즉시 중단되고 추가 요청·우회·핵심 반영이 0건이어야 한다. 실행 중 Critical은 영향 InstitutionRunResult와 전체 IngestionRun을 `FAILED`로 만들고 `ACTIVE` counter를 0→1 또는 1→2로 올리되 즉시 중단하며, 실행 밖 Critical은 가상 실행·실패 수를 만들지 않아야 한다. `STRUCTURAL_OPTIONAL`은 실행 `SUCCESS`, `UNKNOWN`·이미지 대체, lifecycle 유지 + `DEGRADED`, `ACTIVE` count 불변이며, `RECORD_EXCEPTION`은 해당 레코드만 정본·파생·승격 증거에서 격리하고 기관 상태를 유지한다. 반복 단건 패턴의 Critical 재분류, `ENTRY` 기본 scope와 Source 전체 근거가 있을 때만 `SOURCE`로 확대되는지 검증한다. `PROVISIONAL`의 일반 실패·실행 중 Critical은 health `DEGRADED`, count 0, QualificationRun `FAILED`, streak 초기화이고 미해결 Critical은 모든 변경 명령을 네트워크 전에 차단해야 한다. `PROVISIONAL` 선택 구조는 `SUCCESS + DEGRADED`, 단건 예외는 health 불변이다. `ACTIVE` 런타임 결과가 InstitutionQualificationRun·과거 PromotionEvidence를 생성·변경하지 않고, `SUSPENDED`만으로 마지막 정상 정본이 일괄 `EXCLUDED`되지 않는지도 확인한다. | `AC-021`, `AC-023`, `AC-024`, `AC-027` |
 
-`TP-001`은 `TEST-039` 중 registry 부트스트랩, `PROVISIONAL`·`ACTIVE`·`DEGRADED` 허용, `CANDIDATE`·`SUSPENDED`·비정상 Source·ENTRY/SOURCE Critical 수집 전 차단과 성공 확정 전 재검사, 세 변경 명령의 기관별 결과와 성공 확정 원자성을 구현했다. `TEST-043` 중 같은 실행 중복 결과 방지, `ACTIVE` 첫·두 번째 실패와 성공 복구, 열린 Critical을 반영한 즉시 중단·전이 근거, `PROVISIONAL` counter 0, 선택 구조 issue가 열린 동안 `DEGRADED` 유지도 구현했다. `TP-002`는 `TEST-042` 중 명시적 자격 실행, 승인 표본 처리 완료와 정상 단건 격리, Canonical ChangeHistory allowlist, 14일 미만·정확한 경계·서울 자정·같은 날짜 중복, 마지막 실패 이후 연속 성공, 의미 변경·Source·Critical·충돌 veto와 PromotionEvidence 승격을 구현했다. `TP-003`은 `TEST-005`의 권리 상태·처리 허용·현재 이력과 안전한 인라인 판정, `TEST-040`의 선택 정보 `UNKNOWN`·확인된 부정 분리·핵심 적격성 독립을 저장 계층에서 구현했다. `TP-004`는 `TEST-010`·`TEST-011` 중 전시·기관 FTS5 검색과 내부 GET 계약을 구현했다. `TP-005`는 `TEST-006`~`TEST-009`, `TEST-012` 중 현재·예정 추천 후보 게이트, 필수조건·`UNKNOWN`, 명시 신호, 결정적 점수·다양성·연결 탐색·실제 이유와 내부 POST 계약을 구현했다. 배포 스케줄러·복구 승인·실행 중 Critical 자동 분류·기관별 재시도 telemetry·선택 필드와 추천 특성의 실제 수집기 변환·OperatingSchedule·Admin·상세/비교 API·프론트 표시는 아직 부분 미구현이다.
+`TP-001`은 `TEST-039` 중 registry 부트스트랩, `PROVISIONAL`·`ACTIVE`·`DEGRADED` 허용, `CANDIDATE`·`SUSPENDED`·비정상 Source·ENTRY/SOURCE Critical 수집 전 차단과 성공 확정 전 재검사, 세 변경 명령의 기관별 결과와 성공 확정 원자성을 구현했다. `TEST-043` 중 같은 실행 중복 결과 방지, `ACTIVE` 첫·두 번째 실패와 성공 복구, 열린 Critical을 반영한 즉시 중단·전이 근거, `PROVISIONAL` counter 0, 선택 구조 issue가 열린 동안 `DEGRADED` 유지도 구현했다. `TP-002`는 `TEST-042` 중 명시적 자격 실행, 승인 표본 처리 완료와 정상 단건 격리, Canonical ChangeHistory allowlist, 14일 미만·정확한 경계·서울 자정·같은 날짜 중복, 마지막 실패 이후 연속 성공, 의미 변경·Source·Critical·충돌 veto와 PromotionEvidence 승격을 구현했다. `TP-003`은 `TEST-005`의 권리 상태·처리 허용·현재 이력과 안전한 인라인 판정, `TEST-040`의 선택 정보 `UNKNOWN`·확인된 부정 분리·핵심 적격성 독립을 저장 계층에서 구현했다. `TP-004`는 `TEST-010`·`TEST-011` 중 전시·기관 FTS5 검색과 내부 GET 계약을 구현했다. `TP-005`는 `TEST-006`~`TEST-009`, `TEST-012` 중 현재·예정 추천 후보 게이트, 필수조건·`UNKNOWN`, 명시 신호, 결정적 점수·다양성·연결 탐색·실제 이유와 내부 POST 계약을 구현했다. 배포 스케줄러·복구 승인·실행 중 Critical 자동 분류·기관별 재시도 telemetry·선택 필드와 추천 특성의 실제 수집기 변환·OperatingSchedule·Admin·상세/비교 API와 해당 화면은 후속 범위다. 현재 홈·검색·추천 프론트 구현과 검증은 아래 TP-006 항목을 따른다.
 
 ## 5. 실행 환경
 
 ### TP-006 구현 범위
 
-`frontend/src/shared/api/client.test.ts`는 출처·날짜·URL·권리·계약 오류, `forms.test.ts`는 예산 0·방문 조건·최대 3개 분위기·draft/적용 분리, `frontend/src/app/App.test.tsx`는 검색·더 보기·늦은 응답·오류/0건·별도 확인 후보·적용 조건 표시·Radix ESC 포커스·이미지 대체를 검증한다. `frontend/src/test/dev-log.test.ts`는 Vite 프록시 query 제거, `contract.typecheck.ts`는 OpenAPI 관람시간 입력의 생성 타입을 검증한다. `tests/discovery/test_demo_api.py`는 가상 seed 보호와 실제 검색·추천 서비스의 필수/UNKNOWN/0건 결과를 검증한다.
+`frontend/src/shared/api/client.test.ts`는 출처·날짜·URL·권리·계약 오류, `forms.test.ts`는 예산 0·방문 조건·최대 3개 분위기·draft/적용 분리, `frontend/src/app/App.test.tsx`는 경로 분리·홈 API 0회·film 대체·검색/추천·더 보기·늦은 응답·오류/0건·이미지 대체를 검증한다. `frontend/src/features/discovery/SearchPanel.test.tsx`는 기본 목록·접힌 필터·적용/취소·지역 종속값 초기화·미제출 검색어 보존을 확인한다. `frontend/src/app/SiteShell.test.tsx`는 홈 헤더 축소와 탐색·모바일의 고정 높이 조건, `frontend/src/features/home/useHomeReveal.test.tsx`는 모션 감소·관찰 API 대체·정리를 검증한다. `frontend/src/test/dev-log.test.ts`는 Vite 프록시 query 제거, `contract.typecheck.ts`는 OpenAPI 관람시간 입력의 생성 타입을 검증한다. `tests/discovery/test_demo_api.py`는 가상 seed 보호와 실제 검색·추천 서비스의 필수/UNKNOWN/0건 결과를 검증한다.
 
-TP-006은 `TEST-017`·`TEST-018`·`TEST-027`의 일부를 컴포넌트 수준에서 검증한 것이며 브라우저 E2E 통과가 아니다. 아래 전체 P0의 Chromium·Firefox·WebKit·실제 모바일·확대·스크린리더 검증은 아직 실행하지 않았다. 키 없는 로컬 실행은 [Frontend README](../../frontend/README.md), 실행 시점·수치·제외 사항은 [TP-006](../07-execution/task-packets/TP-006-frontend-discovery.md)에 기록한다.
+TP-006은 `TEST-017`·`TEST-018`·`TEST-027`의 일부를 컴포넌트 수준에서 검증한 것이며 자동 브라우저 E2E 통과가 아니다. Chrome의 1440px·390px에서 홈·탐색·필터와 키보드·모션 감소를 한정적으로 확인했다. 전체 P0 E2E, Firefox·WebKit·실제 모바일·200% 확대·스크린리더 검수는 남아 있다. 키 없는 로컬 실행은 [Frontend README](../../frontend/README.md), 실행 시점·수치·제외 사항은 [TP-006](../07-execution/task-packets/TP-006-frontend-discovery.md)에 기록한다.
 
 ### 5.1 기본 모드
 
@@ -273,4 +273,4 @@ Firefox와 WebKit에서는 다음을 최소 수행한다.
 ## 11. 열린 결정
 
 - `OD-003`: `RESOLVED`. 출처 계약 픽스처는 [`source-qualification.json`](../../fixtures/source-qualification.json)이며 3개 Source·5개 기관·24개 `PASS`·1개 격리를 검증한다. 실제 허용 필드와 호출 제약은 [`sources.yaml`](../../sources.yaml)을 따른다.
-- `OD-004`: 최종 워드마크·폰트가 확정되면 해당 자산의 라이선스, 로딩 실패, 한국어 렌더링과 시각 회귀 검증을 `TEST-030`·`TEST-034`에 포함한다.
+- `OD-004`: DEC-101로 확정한 마루 부리·SUIT는 라이선스·로딩 실패·한국어 렌더링 검증을 현재 적용하고 `TEST-030`·`TEST-034`에 연결한다. 최종 워드마크·로고 형식과 해당 자산의 시각 승인은 남아 있다.

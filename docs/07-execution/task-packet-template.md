@@ -1,8 +1,8 @@
 ---
 title: "미감 작업 패킷 템플릿"
 status: DRAFT
-version: "0.2.0"
-last_updated: "2026-08-30"
+version: "0.2.1"
+last_updated: "2026-09-05"
 authoritative_for:
   - "P0 구현 작업의 최소 명세 형식"
   - "작업별 범위·검증·의존성 기록 기준"
@@ -17,7 +17,7 @@ related_documents:
 
 # 미감 작업 패킷 템플릿
 
-이 템플릿은 승인된 P0 작업을 구현 가능한 작은 단위로 기록하기 위한 형식이다. 작업 순서·일정·브랜치 전략은 이 문서에서 정하지 않으며 OD-007을 따른다.
+이 템플릿은 승인된 P0 작업의 범위와 검증을 기록한다. 현재 브랜치·위임·변경 보존 규칙은 [AGENTS.md](../../AGENTS.md)를 우선하며, 별도 합의가 필요한 일정·리뷰 범위는 OD-007에 연결한다. 적용하지 않는 항목은 생략하거나 `해당 없음`으로 표시한다.
 
 ```markdown
 ## 작업명
@@ -58,23 +58,8 @@ related_documents:
 ### 외부 의존성과 안전한 저하
 
 - MapProvider / SearchService / 출처 / 기타:
-- 신규 출처 후보라면 최근 공식 전시 5건 사전 검토 근거:
-- 표본별 `CORE_PASS`, 4/5 판정과 `PASS`·`HOLD` 심사 결과:
-- 같은 필수 필드의 반복적·구조적 누락 검토:
-- 정책·라이선스·robots·인증·CAPTCHA·호출 제한 검토:
-- 현재·목표 lifecycle과 허용 전이: `CANDIDATE` / `PROVISIONAL` / `ACTIVE` / `SUSPENDED`
-- 현재·목표 health, `ACTIVE` 연속 최종 실패 수와 우선 재검증: `HEALTHY` / `DEGRADED`
-- `PROVISIONAL`·`ACTIVE`의 동일한 레코드 품질·권리·최신성·충돌 게이트와 정상 서비스 경로:
-- `promotion_validation_started_at + 14일` 경과와 `InstitutionQualificationRun.finished_at`의 `Asia/Seoul` 기준 서로 다른 날짜 3회 연속 최종 `SUCCESS`·중간 `FAILED`:
-- 요청 재시도와 최종 성공, 핵심 대상 페이지 최종 미수집·핵심 미완성 commit 실패, 선택 대상 저하·단건 격리 판정:
-- 의미 있는 신규·변경 allowlist와 raw hash·페이지 외피 denylist:
-- `SourceRecord → P0 승인 정규화 규칙과 버전 → Canonical Exhibition → ChangeHistory` 승격 근거:
-- 마지막 실행 성공·Source 정상·구조적 누락·정책/접근 문제·미해결 구조 충돌 0건:
-- `ACTIVE` 첫 최종 `FAILED`·중간 `SUCCESS`·서로 다른 실행 2회 연속 최종 `FAILED` 판정과 counter 변경:
-- `POLICY_BLOCK` / `ACCESS_BLOCK` / `STRUCTURAL_CRITICAL` 즉시 중단 근거, 실행 중·실행 밖 결과 차이, `ENTRY` / `SOURCE` scope와 범위 확대 증거:
-- `PROVISIONAL` 일반 실패의 health·QualificationRun·counter 0, 미해결 Critical 수집 전 차단과 승격 증거 초기화:
-- `STRUCTURAL_OPTIONAL`의 `UNKNOWN + DEGRADED`, `RECORD_EXCEPTION` 단건 격리와 반복 패턴 재분류:
-- `ACTIVE → SUSPENDED → PROVISIONAL` 사유·수정·재승인, 연속 실패 수 0, 새 검증 시작 시각과 검증 증거 초기화(필수):
+- 외부 정책·권리·호출 제한과 검토 근거:
+- 해당 영역의 추가 확인 사항과 소유 문서 링크:
 - 키 없는 데모·테스트 대체 경로:
 - 외부 실패·데이터 누락 시 사용자 표시:
 
@@ -99,6 +84,16 @@ related_documents:
 ```
 
 ## 작성 규칙
+
+추가 확인 사항은 해당 작업에서만 아래 소유 문서의 조건과 증거를 기록한다. 공통 템플릿에 전체 도메인 규칙을 복제하지 않는다.
+
+| 변경 영역 | 추가로 기록할 내용 | 기준 문서 |
+| --- | --- | --- |
+| 출처 온보딩 | 5건 표본·4/5 CORE_PASS·구조/정책 HOLD·허용 필드와 권리 | [출처 자격 심사](../02-data/source-qualification.md), [출처 정책](../02-data/data-source-policy.md) |
+| 기관 운영·승격 | lifecycle·health·Critical scope·실패/복구·14일/3일자 성공·의미 변경 chain과 veto | [구현 준비도](implementation-readiness.md), [도메인 규칙](../01-product/domain-rules.md) |
+| 수집·정규화 | 최소 품질·격리·UNKNOWN·정본 반영과 변경 이력 | [데이터 파이프라인](../02-data/data-pipeline.md), [정규화 규칙](../02-data/normalization-rules.md) |
+| 검색·추천 API | 필수/선호·UNKNOWN·조건 보존·OpenAPI와 Zod 영향 | [추천 명세](../03-recommendation/recommendation-spec.md), [API 지침](../05-engineering/api-guidelines.md) |
+| UI·운영 화면 | primitive·포커스·반응형·권리 대체·staff 접근 경계 | [UI 지침](../04-ux/ui-guidelines.md), [보안·개인정보](../05-engineering/security-privacy.md) |
 
 - 각 패킷은 하나의 검증 가능한 결과를 목표로 하며, 구현 계획 전체를 복제하지 않는다.
 - 확정되지 않은 결정은 일반적인 미결정 표기로 남기지 말고 OD-001~OD-007 중 해당 항목을 적는다.
