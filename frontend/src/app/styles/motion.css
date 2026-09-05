@@ -2,67 +2,77 @@
   .primary-button,
   .secondary-button,
   .inverse-button,
-  .header-nav a,
-  .header-nav a::after,
   .card-footer a,
   .card-cover,
   .home-entry-link,
-  .home-entry-link svg {
+  .home-entry-link svg,
+  .hero-actions a svg,
+  .card-footer a svg,
+  .discovery-tabs button,
+  .discovery-tabs button::after {
     transition-duration: 220ms;
     transition-property: color, background-color, border-color, transform;
     transition-timing-function: ease-out;
   }
 
-  .primary-button:hover {
+  .primary-button:is(:hover, :focus-visible) {
     border-color: var(--color-ink);
     background: var(--color-ink);
   }
 
-  .secondary-button:hover {
+  .secondary-button:is(:hover, :focus-visible) {
     border-color: var(--color-accent);
     background: var(--color-surface);
   }
 
-  .home-film .primary-button:hover {
+  .home-film .primary-button:is(:hover, :focus-visible) {
     border-color: #d5d7d0;
     background: #d5d7d0;
   }
 
-  .home-film .secondary-button:hover {
+  .home-film .secondary-button:is(:hover, :focus-visible) {
     border-color: var(--color-paper);
     background: rgb(242 240 233 / 12%);
   }
 
-  .inverse-button:hover {
+  .inverse-button:is(:hover, :focus-visible) {
     background: var(--color-paper);
     color: var(--color-ink);
   }
 
-  .header-nav a:hover,
-  .header-nav a:focus-visible,
-  .card-footer a:hover {
+  .card-footer a:is(:hover, :focus-visible) {
     color: var(--color-accent);
-  }
-
-  .site-header-ink .header-nav a:hover,
-  .site-header-ink .header-nav a:focus-visible {
-    color: var(--color-paper);
-  }
-
-  .header-nav a:hover::after,
-  .header-nav a:focus-visible::after {
-    transform: scaleX(1);
-    transform-origin: left;
   }
 
   .home-entry-link:hover,
   .home-entry-link:focus-visible {
-    color: #d2d9d7;
+    color: var(--color-accent);
   }
 
   .home-entry-link:hover svg,
-  .home-entry-link:focus-visible svg {
-    transform: translateX(0.4rem);
+  .home-entry-link:focus-visible svg,
+  .hero-actions a:is(:hover, :focus-visible) svg,
+  .card-footer a:is(:hover, :focus-visible) svg {
+    transform: translateX(5px);
+  }
+
+  [data-reveal-state] {
+    transition:
+      opacity 320ms ease-out,
+      transform 320ms ease-out;
+  }
+
+  [data-reveal-state='pending'] {
+    opacity: 0;
+  }
+
+  [data-reveal='up'][data-reveal-state='pending'] {
+    transform: translateY(8px);
+  }
+
+  [data-reveal-state='visible'] {
+    opacity: 1;
+    transform: none;
   }
 
   .home-film-video {
@@ -81,6 +91,11 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none !important;
+  }
+
   html {
     scroll-behavior: auto;
   }

@@ -1,18 +1,40 @@
-import type { ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 
 export function SiteShell({
   children,
   currentPage,
   tone,
   demo = false,
-  onRecommendClick,
 }: {
   children: ReactNode;
   currentPage: 'home' | 'discover';
-  tone: 'ink' | 'paper';
+  tone: 'ink' | 'limestone' | 'paper';
   demo?: boolean;
-  onRecommendClick?: () => void;
 }) {
+  const [compact, setCompact] = useState(false);
+
+  useEffect(() => {
+    if (currentPage !== 'home') {
+      setCompact(false);
+      return;
+    }
+
+    const updateHeader = () => {
+      setCompact((wasCompact) => {
+        if (window.innerWidth <= 700) return false;
+        return window.scrollY > (wasCompact ? 40 : 120);
+      });
+    };
+
+    updateHeader();
+    window.addEventListener('scroll', updateHeader, { passive: true });
+    window.addEventListener('resize', updateHeader);
+    return () => {
+      window.removeEventListener('scroll', updateHeader);
+      window.removeEventListener('resize', updateHeader);
+    };
+  }, [currentPage]);
+
   return (
     <div className={`site-page site-page-${tone}`}>
       <a className="skip-link" href="#main-content">
@@ -23,31 +45,27 @@ export function SiteShell({
           로컬 데모 · 아래 전시와 기관은 가상 데이터이며 실제 전시가 아닙니다.
         </div>
       )}
-      <header className={`site-header site-header-${tone}`}>
-        <div className="page-width header-inner">
-          <a className="wordmark" href="/" aria-label="미감 홈">
-            <span className="wordmark-hanja" aria-hidden="true">
-              美感
-            </span>
-            <span>
-              미감 <small>MIGAM</small>
-            </span>
-          </a>
-          <nav className="header-nav" aria-label="주요 탐색">
-            <a href="/discover" aria-current={currentPage === 'discover' ? 'page' : undefined}>
-              전시 둘러보기
+      <div className={`site-header-frame site-header-frame-${currentPage}`}>
+        <header
+          className={`site-header site-header-${tone}${currentPage === 'home' && compact ? ' site-header-compact' : ''}`}
+        >
+          <div className="page-width header-inner">
+            <a className="wordmark" href="/" aria-label="미감 홈">
+              <span className="wordmark-hanja" aria-hidden="true">
+                美感
+              </span>
+              <span>
+                미감 <small>MIGAM</small>
+              </span>
             </a>
-            <a href="/discover#recommend" onClick={onRecommendClick}>
-              조건으로 추천받기
-            </a>
-          </nav>
-          <span className="edition-label">
-            {currentPage === 'home' ? 'ART, AT YOUR PACE' : 'EXHIBITION DISCOVERY'}
-          </span>
-        </div>
-      </header>
+            <span className="edition-label">
+              {currentPage === 'home' ? 'ART, AT YOUR PACE' : 'EXHIBITION DISCOVERY'}
+            </span>
+          </div>
+        </header>
+      </div>
       {children}
-      <div className="site-footer-shell theme-ink">
+      <div className="site-footer-shell theme-limestone">
         <footer className="page-width site-footer">
           <div>
             <span className="footer-mark">美感</span>

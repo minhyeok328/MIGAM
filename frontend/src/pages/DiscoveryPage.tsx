@@ -9,12 +9,7 @@ export function DiscoveryPage() {
   const { state, demo } = useDiscovery();
 
   return (
-    <SiteShell
-      currentPage="discover"
-      tone="paper"
-      demo={demo}
-      onRecommendClick={() => state.setTab('recommend')}
-    >
+    <SiteShell currentPage="discover" tone="paper" demo={demo}>
       <main id="main-content" className="discovery-page" tabIndex={-1}>
         <section
           id="discovery-tools"

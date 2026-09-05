@@ -5,14 +5,14 @@
   }
 
   .discovery-workspace {
-    padding-block: clamp(4.5rem, 7vw, 7rem) clamp(6rem, 10vw, 10rem);
+    padding-block: clamp(2.5rem, 4vw, 4rem) clamp(5rem, 8vw, 8rem);
     scroll-margin-top: 7rem;
   }
 
   .discovery-intro {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
-    gap: 2rem;
+    gap: 1.25rem 2rem;
     align-items: end;
     border-top: 1px solid var(--color-ink);
     padding-top: 1.25rem;
@@ -24,17 +24,17 @@
 
   .discovery-intro h1 {
     grid-column: 1 / span 8;
-    margin-top: clamp(2.5rem, 5vw, 5rem);
+    margin-top: clamp(0.5rem, 1.25vw, 1.25rem);
     font-family: var(--font-serif);
-    font-size: clamp(3rem, 5.5vw, 6rem);
+    font-size: clamp(2.5rem, 4vw, 4.25rem);
     font-weight: 400;
-    letter-spacing: -0.065em;
-    line-height: 1.08;
+    letter-spacing: -0.045em;
+    line-height: 1.25;
     text-wrap: balance;
   }
 
   .discovery-intro > p {
-    grid-column: 10 / -1;
+    grid-column: 9 / -1;
     padding-bottom: 0.5rem;
     color: var(--color-muted);
     font-size: 0.875rem;
@@ -43,15 +43,32 @@
 
   .discovery-tabs {
     @apply flex gap-8 border-b border-ink;
-    margin-top: clamp(4rem, 8vw, 8rem);
+    margin-top: clamp(2rem, 3vw, 3rem);
   }
 
   .discovery-tabs button {
     @apply flex min-h-16 items-center gap-2 border-b-2 border-transparent px-1 text-base text-muted;
+    position: relative;
+  }
+
+  .discovery-tabs button::after {
+    position: absolute;
+    right: 0;
+    bottom: -2px;
+    left: 0;
+    height: 2px;
+    background: var(--color-ink);
+    content: '';
+    transform: scaleX(0);
+    transform-origin: left;
   }
 
   .discovery-tabs button[data-state='active'] {
-    @apply border-ink font-semibold text-ink;
+    @apply font-semibold text-ink;
+  }
+
+  .discovery-tabs button[data-state='active']::after {
+    transform: scaleX(1);
   }
 
   .search-form,
@@ -324,12 +341,12 @@
 
 @media (max-width: 700px) {
   .discovery-workspace {
-    padding-block: 3.5rem 6rem;
+    padding-block: 2rem 4.5rem;
   }
 
   .discovery-intro {
     grid-template-columns: minmax(0, 1fr);
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   .discovery-intro .editorial-label,
@@ -339,8 +356,8 @@
   }
 
   .discovery-intro h1 {
-    margin-top: 2rem;
-    font-size: clamp(2.75rem, 12vw, 4rem);
+    margin-top: 0.75rem;
+    font-size: clamp(2rem, 8.75vw, 3rem);
   }
 
   .discovery-intro > p {
@@ -348,7 +365,7 @@
   }
 
   .discovery-tabs {
-    margin-top: 4rem;
+    margin-top: 2rem;
   }
 
   .results-grid {

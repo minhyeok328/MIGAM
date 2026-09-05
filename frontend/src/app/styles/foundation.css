@@ -94,6 +94,8 @@
   h3,
   p {
     margin: 0;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
   }
 
   img {
@@ -114,6 +116,19 @@
 
   .theme-ink .editorial-label {
     color: #bfc3bb;
+  }
+
+  .theme-limestone {
+    background: var(--color-limestone);
+    color: var(--color-ink);
+  }
+
+  .theme-limestone .editorial-label {
+    color: var(--color-ink-soft);
+  }
+
+  .theme-limestone :focus-visible {
+    outline-color: var(--color-ink);
   }
 
   .theme-ink :focus-visible,

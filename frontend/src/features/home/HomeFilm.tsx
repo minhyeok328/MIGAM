@@ -60,16 +60,11 @@ export function HomeFilm() {
       )}
       <div className="home-film-wash" aria-hidden="true" />
       <div className="page-width home-film-copy">
-        <p className="editorial-label">EXHIBITIONS, FOR YOUR SENSES</p>
         <h1>
           당신의 감각으로, <br />
           전시를 발견하다.
         </h1>
-        <p className="home-film-lede">
-          아는 만큼 보는 대신,
-          <br />
-          오늘 마음이 향하는 것부터 시작해보세요.
-        </p>
+        <p className="home-film-lede">지금의 취향과 일정에 맞는 전시를 만나보세요.</p>
         <div className="hero-actions">
           <a className="primary-button" href="/discover">
             전시 둘러보기
@@ -81,9 +76,6 @@ export function HomeFilm() {
           </a>
         </div>
       </div>
-      <span className="home-film-folio" aria-hidden="true">
-        美感 / 01—06
-      </span>
     </section>
   );
 }
