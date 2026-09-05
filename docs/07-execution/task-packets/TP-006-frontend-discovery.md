@@ -1,8 +1,8 @@
 ---
 title: "TP-006 프론트엔드 홈과 검색·추천 분리"
 status: APPROVED
-version: "2.0.0"
-last_updated: "2026-09-04"
+version: "2.0.1"
+last_updated: "2026-09-05"
 authoritative_for:
   - "첫 React 프론트엔드의 브랜드 홈과 검색·추천 경로 범위와 검증"
   - "OpenAPI 생성 TypeScript·Zod 경계와 로컬 실행 계약"
@@ -27,9 +27,9 @@ related_documents:
 
 - `frontend/`: npm·lockfile, React·TypeScript·Vite, Tailwind CSS, Lucide React, TanStack Query, Zustand.
 - 복합 primitive는 **Radix 직접 사용**으로 통일한다. 탭은 Radix Tabs, 상세 조건은 Radix Dialog의 데스크톱 우측 패널/모바일 바텀시트로 구현한다. 일반 입력·선택·체크는 native form control을 사용한다.
-- `/`는 discovery provider와 API를 마운트하지 않는 브랜드 홈이다. `美感` 워드마크, 하나의 페이지 `h1`, 풀스크린 홈 필름, 미감의 관점, `공간의 온도`·`머무는 시선`·`재료의 감각` 시각 챕터, `/discover`와 `/discover#recommend`로 이동하는 두 CTA만 제공한다.
+- `/`는 discovery provider와 API를 마운트하지 않는 브랜드 홈이다. `美感` 워드마크, 하나의 페이지 `h1`, 풀스크린 홈 필름, `01 공간의 온도`·`02 머무는 시선`·`03 재료의 감각`의 독립 이미지 섹션, `/discover`와 `/discover#recommend`로 이동하는 두 CTA를 제공한다. 2026-09-05 최신 사용자 피드백에 따라 처음의 번호·제목·큰 사진으로 구분한 섹션 구성을 복원하고 설명은 짧게 유지한다. 긴 관점 선언문·장식용 영문 라벨·갤러리 공통 도입 문구는 제외한다. 공식 슬로건과 두 출발점은 유지하고 첫 화면·마지막 CTA에 짧은 이용 안내를 둔다.
 - `/discover`는 기존 `전시 둘러보기`·`조건으로 추천받기` 탭, 검색·추천 입력과 API 결과만 소유한다. 홈 히어로·브랜드 선언문·장식 챕터를 반복하지 않으며 미구현 메뉴·상세·관심 버튼은 노출하지 않는다.
-- 두 경로는 실제 `<a href>` 문서 이동을 사용한다. `/discover#recommend`의 고정 fragment만 비민감한 초기 탭 선택자로 허용하고, 두 고정 경로를 위해 라우터 의존성이나 자체 history 라우터를 추가하지 않는다. 나머지 경로는 접근 가능한 404 안내와 두 유효 경로 링크를 제공한다.
+- 두 경로는 실제 `<a href>` 문서 이동을 사용한다. `/discover#recommend`의 고정 fragment만 비민감한 초기 탭 선택자로 허용하고, 두 고정 경로를 위해 라우터 의존성이나 자체 history 라우터를 추가하지 않는다. 사용자 요청으로 공통 헤더의 검색·추천 링크를 제거하며, 나머지 경로는 접근 가능한 404 안내와 본문의 홈 복귀 링크를 제공한다.
 - 홈에는 하나의 가상 미술관처럼 통일한 자체 생성 16:9 장면 6개를 사용한다. 자연광, 작은 가상 관람객의 뒷모습, 한지·도자·무광 금속, 유리와 그림자를 웜 아이보리·먹색·석회색·흐린 청회색·옅은 흙색으로 표현한다. 실존 인물·작품·기관·브랜드·읽을 수 있는 문구·로고·워터마크는 넣지 않는다.
 - 여섯 장면은 약 10~12초 무음 MP4·WebM 루프와 WebP poster로 제공한다. 영상은 장식이며 `muted`, `autoPlay`, `loop`, `playsInline`, `preload="metadata"`를 사용한다. `prefers-reduced-motion: reduce`, 모바일 우선 표시, 로딩·재생 실패에서는 poster만으로 같은 메시지와 CTA가 성립해야 한다.
 - 홈 생성 자산은 실제 전시·작품·기관을 나타내지 않으며 빈 대체 텍스트 또는 접근성 트리 제외를 사용하고 전시 데이터·추천 근거·`MediaAsset`에 연결하지 않는다. 기존 갈색 v1 추상 이미지는 기록용으로 보존하되 런타임에서 참조하지 않는다.

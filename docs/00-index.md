@@ -51,7 +51,7 @@ related_documents:
 | 실행 | [TP-003 선택 관람 정보와 미디어 권리 모델](07-execution/task-packets/TP-003-visit-information-and-media-rights.md) | 선택 정보 UNKNOWN 정본, MediaAsset·MediaRights 이력과 안전한 노출 판정 | `APPROVED 1.0.1` |
 | 실행 | [TP-004 내부 OpenAPI와 FTS5 검색](07-execution/task-packets/TP-004-internal-search-openapi.md) | 전시·기관 내부 검색 API, SearchDocument·SearchService·SQLite FTS5 | `APPROVED 1.0.1` |
 | 실행 | [TP-005 조건 보존 설명형 추천](07-execution/task-packets/TP-005-explainable-recommendation.md) | ContentFeatureSnapshot, 하드 조건·UNKNOWN·점수·다양성·이유와 내부 추천 API | `APPROVED 1.0.1` |
-| 실행 | [TP-006 프론트엔드 홈과 검색·추천 분리](07-execution/task-packets/TP-006-frontend-discovery.md) | API 없는 몰입형 홈 `/`, 검색·추천 `/discover`, 생성 타입·Zod, 조건 보존·권리 경계와 격리 데모 | `APPROVED 2.0.0` |
+| 실행 | [TP-006 프론트엔드 홈과 검색·추천 분리](07-execution/task-packets/TP-006-frontend-discovery.md) | API 없는 몰입형 홈 `/`, 검색·추천 `/discover`, 생성 타입·Zod, 조건 보존·권리 경계와 격리 데모 | `APPROVED 2.0.1` |
 | 저장소 | [AGENTS.md](../AGENTS.md) | 저장소 작업·검증 규칙 | `APPROVED 1.1.0` |
 | 저장소 | [README.md](../README.md) | 프로젝트 소개와 임시 UI/UX 안내 | 현재 상태 안내 |
 | 저장소 | [Frontend README](../frontend/README.md) | 키 없는 데모·로컬 실행과 프론트 검증 명령 | 현재 실행 안내 |
