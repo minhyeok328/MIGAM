@@ -1,3 +1,4 @@
+from datetime import date, time
 from decimal import Decimal
 
 from django.core.exceptions import ValidationError
@@ -237,7 +238,97 @@ class TargetedSourceEvidence(models.Model):
         super().save(*args, **kwargs)
 
 
+class OperatingSchedule(TargetedSourceEvidence):
+    class Status(models.TextChoices):
+        CONFIRMED = "CONFIRMED", "Confirmed"
+        UNKNOWN = "UNKNOWN", "Unknown"
+
+    class Kind(models.TextChoices):
+        REGULAR = "REGULAR", "Regular weekday rule"
+        OVERRIDE = "OVERRIDE", "Temporary date override"
+
+    status = models.CharField(max_length=16, choices=Status.choices)
+    kind = models.CharField(max_length=16, choices=Kind.choices)
+    effective_from = models.DateField()
+    effective_to = models.DateField()
+    weekdays = models.JSONField(default=list, blank=True)
+    is_open = models.BooleanField(null=True, blank=True)
+    opens_at = models.TimeField(null=True, blank=True)
+    closes_at = models.TimeField(null=True, blank=True)
+    details = models.TextField(blank=True)
+    rule_version = models.CharField(max_length=64)
+
+    class Meta:
+        ordering = ("exhibition_id", "institution_id", "effective_from", "kind", "id")
+        constraints = [
+            models.CheckConstraint(
+                condition=(
+                    models.Q(exhibition__isnull=False, institution__isnull=True)
+                    | models.Q(exhibition__isnull=True, institution__isnull=False)
+                ),
+                name="catalog_schedule_target_xor",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(effective_to__gte=models.F("effective_from")),
+                name="catalog_schedule_date_range",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(status="UNKNOWN", is_open__isnull=True, weekdays=[],
+                             opens_at__isnull=True, closes_at__isnull=True)
+                    | models.Q(status="CONFIRMED", is_open=False, is_open__isnull=False,
+                               opens_at__isnull=True, closes_at__isnull=True)
+                    | models.Q(status="CONFIRMED", is_open=True, is_open__isnull=False, opens_at__isnull=False,
+                               closes_at__isnull=False, closes_at__gt=models.F("opens_at"))
+                ),
+                name="catalog_schedule_valid_state",
+            ),
+            models.CheckConstraint(
+                condition=(models.Q(kind="REGULAR") | models.Q(kind="OVERRIDE", weekdays=[])),
+                name="catalog_schedule_valid_kind",
+            ),
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        errors: dict[str, str] = {}
+        if (
+            isinstance(self.effective_from, date)
+            and isinstance(self.effective_to, date)
+            and self.effective_from > self.effective_to
+        ):
+            errors["effective_to"] = "Schedule end must not precede its start."
+        if not isinstance(self.weekdays, list) or any(
+            isinstance(day, bool) or not isinstance(day, int) or not 0 <= day <= 6
+            for day in self.weekdays
+        ):
+            errors["weekdays"] = "Weekdays must be a list of integers from 0 to 6."
+        elif len(self.weekdays) != len(set(self.weekdays)):
+            errors["weekdays"] = "Weekdays must not contain duplicates."
+        if self.kind == self.Kind.OVERRIDE and self.weekdays:
+            errors["weekdays"] = "Date overrides apply to every date in their period."
+        if self.status == self.Status.UNKNOWN:
+            if self.is_open is not None or self.opens_at is not None or self.closes_at is not None or self.weekdays:
+                errors["status"] = "UNKNOWN schedule must not carry inferred opening facts."
+        elif self.status == self.Status.CONFIRMED:
+            if self.kind == self.Kind.REGULAR and not self.weekdays:
+                errors["weekdays"] = "Confirmed regular rules require explicit weekdays."
+            if self.is_open is None:
+                errors["is_open"] = "Confirmed schedule requires an explicit opening state."
+            elif self.is_open:
+                if not isinstance(self.opens_at, time) or not isinstance(self.closes_at, time):
+                    errors["opens_at"] = "Open days require both opening and closing times."
+                elif self.opens_at >= self.closes_at:
+                    errors["closes_at"] = "Closing time must be after opening time."
+            elif self.opens_at is not None or self.closes_at is not None:
+                errors["is_open"] = "Closed days must not carry opening hours."
+        if errors:
+            raise ValidationError(errors)
+
+
 class PriceOption(TargetedSourceEvidence):
+    rule_version = models.CharField(max_length=64, blank=True)
+
     class Status(models.TextChoices):
         CONFIRMED = "CONFIRMED", "Confirmed"
         UNKNOWN = "UNKNOWN", "Unknown"
@@ -939,3 +1030,132 @@ class DuplicateCandidate(models.Model):
                 name="catalog_unique_duplicate_pair",
             )
         ]
+
+
+ARTWORK_MEDIA_GROUPS = (
+    "PAINTING", "SCULPTURE", "CRAFT", "PHOTOGRAPHY", "VIDEO", "SOUND",
+    "INSTALLATION", "PERFORMANCE", "INTERACTIVE", "MEDIA_ART", "DESIGN", "ARCHITECTURE",
+)
+ARTWORK_MOODS = ("CALM", "REFLECTIVE", "LIVELY", "IMMERSIVE", "PARTICIPATORY", "EXPERIMENTAL")
+
+
+class Artwork(models.Model):
+    """Metadata only; real artwork publication awaits an approved source pipeline."""
+
+    class Eligibility(models.TextChoices):
+        UNVERIFIED = "UNVERIFIED", "Unverified"
+        VERIFIED = "VERIFIED", "Verified"
+        EXCLUDED = "EXCLUDED", "Excluded"
+        DEMO = "DEMO", "Fictional demo only"
+
+    class CreatorState(models.TextChoices):
+        KNOWN = "KNOWN", "Known"
+        UNKNOWN = "UNKNOWN", "Officially unknown"
+
+    class CultureState(models.TextChoices):
+        CONFIRMED = "CONFIRMED", "Confirmed"
+        UNKNOWN = "UNKNOWN", "Unknown"
+
+    source_id = models.CharField(max_length=128)
+    source_artwork_id = models.CharField(max_length=255)
+    source_record = models.ForeignKey(SourceRecord, on_delete=models.PROTECT, related_name="artworks")
+    title = models.CharField(max_length=500)
+    creator_name = models.CharField(max_length=255)
+    creator_official_id = models.CharField(max_length=255, blank=True)
+    creator_state = models.CharField(max_length=16, choices=CreatorState.choices)
+    production_year = models.CharField(max_length=100)
+    medium = models.CharField(max_length=500)
+    collection_institution = models.ForeignKey(Institution, on_delete=models.PROTECT, related_name="artworks")
+    culture_state = models.CharField(max_length=16, choices=CultureState.choices, default=CultureState.UNKNOWN)
+    cultural_context = models.CharField(max_length=255, blank=True)
+    is_korean = models.BooleanField(null=True, blank=True)
+    official_url = models.URLField(max_length=2048, validators=(HTTPS_URL_VALIDATOR,))
+    last_verified_at = models.DateTimeField(null=True, blank=True)
+    eligibility = models.CharField(max_length=16, choices=Eligibility.choices, default=Eligibility.UNVERIFIED)
+    is_demo = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("id",)
+        constraints = [
+            models.UniqueConstraint(fields=("source_id", "source_artwork_id"), name="catalog_unique_artwork_identity"),
+            models.CheckConstraint(
+                condition=~models.Q(creator_state="UNKNOWN") | models.Q(creator_official_id=""),
+                name="catalog_artwork_unknown_creator",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(culture_state="UNKNOWN") | models.Q(cultural_context="", is_korean__isnull=True),
+                name="catalog_artwork_unknown_culture",
+            ),
+            models.CheckConstraint(
+                condition=~models.Q(eligibility="DEMO") | models.Q(is_demo=True),
+                name="catalog_artwork_demo_flag",
+            ),
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        errors = {}
+        for field in ("title", "creator_name", "production_year", "medium", "source_id", "source_artwork_id"):
+            if not getattr(self, field).strip():
+                errors[field] = "Explicit official metadata is required."
+        if self.creator_state == self.CreatorState.UNKNOWN and self.creator_official_id:
+            errors["creator_official_id"] = "An unknown creator must not have an inferred identity."
+        if self.culture_state == self.CultureState.UNKNOWN and (self.cultural_context or self.is_korean is not None):
+            errors["culture_state"] = "Unknown culture must not carry inferred nationality or culture."
+        if self.culture_state == self.CultureState.CONFIRMED and not self.cultural_context.strip():
+            errors["cultural_context"] = "Confirmed culture requires an explicit source value."
+        if self.eligibility in (self.Eligibility.VERIFIED, self.Eligibility.DEMO) and not self.last_verified_at:
+            errors["last_verified_at"] = "Displayable records require a verification timestamp."
+        if self.eligibility == self.Eligibility.DEMO and not self.is_demo:
+            errors["is_demo"] = "Demo eligibility requires an explicit fictional marker."
+        if self.source_record_id and self.collection_institution_id:
+            source = self.source_record
+            if (source.source_id != self.source_id or source.source_record_id != self.source_artwork_id
+                    or source.institution_id != self.collection_institution.registry_id):
+                errors["source_record"] = "Source identity and collection institution must match."
+            if not source.source_owner.strip():
+                errors["source_record"] = "Source owner is required."
+            if self.is_demo and (source.source_id != "fictional-demo-only"
+                                 or not isinstance(source.payload, dict) or source.payload.get("fictional") is not True
+                                 or "가상" not in self.title):
+                errors["is_demo"] = "Fictional records require an explicit demo source and title."
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args: object, **kwargs: object) -> None:
+        self.full_clean()
+        super().save(*args, **kwargs)
+
+
+class ArtworkFeatureAssertion(models.Model):
+    """Direct, current artwork evidence; no title-derived or client-inferred facts."""
+
+    artwork = models.ForeignKey(Artwork, on_delete=models.PROTECT, related_name="feature_assertions")
+    source_record = models.ForeignKey(SourceRecord, on_delete=models.PROTECT, related_name="artwork_feature_assertions")
+    axis = models.CharField(max_length=16, choices=(("MEDIA_GROUP", "Media group"), ("MOOD", "Mood")))
+    value = models.CharField(max_length=64)
+    evidence_kind = models.CharField(max_length=16, choices=(("DIRECT", "Direct"),), default="DIRECT")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ("artwork_id", "axis", "value", "id")
+        constraints = [
+            models.UniqueConstraint(fields=("artwork", "axis", "value"), name="catalog_unique_artwork_feature"),
+        ]
+
+    def clean(self) -> None:
+        super().clean()
+        errors = {}
+        values = {"MEDIA_GROUP": ARTWORK_MEDIA_GROUPS, "MOOD": ARTWORK_MOODS}
+        if self.value not in values.get(self.axis, ()):
+            errors["value"] = "Artwork features require an approved stable code."
+        if self.source_record_id and self.artwork_id and self.source_record_id != self.artwork.source_record_id:
+            errors["source_record"] = "Feature evidence must match the current artwork source."
+        if errors:
+            raise ValidationError(errors)
+
+    def save(self, *args: object, **kwargs: object) -> None:
+        self.full_clean()
+        super().save(*args, **kwargs)
