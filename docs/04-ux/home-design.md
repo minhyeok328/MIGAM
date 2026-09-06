@@ -1,7 +1,7 @@
 ---
 title: "몰입형 홈과 전시 탐색 경로 분리 설계"
 status: APPROVED
-version: "1.0.5"
+version: "1.0.6"
 last_updated: "2026-09-05"
 authoritative_for:
   - "TP-006의 홈·탐색 경로 분리 구현 설계"
@@ -28,6 +28,8 @@ Houston Group에서는 고정 헤더, 첫 화면을 채우는 미디어, 큰 선
 - `/discover#recommend`: 비민감한 초기 탭 식별자로만 사용한다. 검색어·필터·추천 payload는 fragment, query, history state 또는 브라우저 저장소에 쓰지 않는다.
 - 그 밖의 경로는 존재하지 않는 페이지임을 알리고 본문의 `/` 링크로 홈에 돌아갈 수 있게 한다.
 - 두 경로는 실제 `<a href>` 문서 이동을 사용한다. 두 고정 경로만을 위해 라우터 의존성이나 자체 `pushState` 라우터를 추가하지 않는다.
+
+2026-09-05 승인한 Vercel 홈 디자인 임시 공유에서는 `home-preview` 빌드 모드만 사용한다. 홈의 구성과 CTA는 유지하되 `/discover`와 `/discover#recommend`는 “지금은 홈 디자인을 살펴보는 중이에요.” 안내와 홈 복귀 링크를 제공한다. 이 모드에서는 discovery provider와 API를 마운트하지 않으며, 일반 개발·데모·프로덕션 빌드의 탐색 동작은 기존 계약을 따른다.
 
 ## 홈 시각 시스템
 

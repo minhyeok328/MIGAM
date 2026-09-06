@@ -1,7 +1,7 @@
 ---
 title: "TP-006 프론트엔드 홈과 검색·추천 분리"
 status: APPROVED
-version: "2.2.1"
+version: "2.2.2"
 last_updated: "2026-09-05"
 authoritative_for:
   - "첫 React 프론트엔드의 브랜드 홈과 검색·추천 경로 범위와 검증"
@@ -29,6 +29,8 @@ related_documents:
 같은 날 2.2.0은 제목·전시명에 마루 부리, 본문·입력·필터·버튼·내비게이션에 SUIT를 적용하는 사용자 승인을 반영한다. 기존 화면에 공통 서체 역할을 적용하며 추천 폼·카드·홈의 구성이나 동작은 변경하지 않는다. OD-004의 폰트 패밀리만 확정하고 워드마크·로고 형식과 포괄 UX 문서의 검토 상태는 유지한다.
 
 홈의 구성·미디어·공통 셸 세부 사항은 [홈·탐색 분리 설계](../../04-ux/home-design.md)를 따른다. 2.2.1은 문서·자산 위치를 정리한 버전이며 화면 동작과 데이터 계약은 그대로 유지한다.
+
+2.2.2는 2026-09-05 사용자의 “Vercel 임시 배포, 친구들에게 홈 디자인만 먼저 공유” 요청을 반영한다. `home-preview` 빌드는 기존 홈 디자인과 로컬 미디어를 제공하고 `/discover` 및 `/discover#recommend`에는 홈 디자인 확인용 안내와 홈 복귀 링크만 표시한다. API·검색 입력·추천 입력·가상 전시 결과를 제공하지 않는다. Vercel에는 `frontend/`만 배포하고 백엔드·DB·루트 `.env`는 포함하지 않는다. 검색엔진 색인 제외 헤더를 적용하며 정식 서비스 운영, 사용자 추적, 유료 기능 추가는 범위에 포함하지 않는다.
 
 ## 포함 범위
 
@@ -60,7 +62,7 @@ related_documents:
 
 ## 제외 범위
 
-실제 취향 테스트/프로필 계산·홈 추천 6건과 전시 소식·관심/최근 본 저장·비교·상세 API/화면·작품/작가·지도/위치·운영시간/휴관일·실제 Source 특성 백필·staff UI·외부 배포는 포함하지 않는다. OD-004의 최종 워드마크·로고 형식은 확정하지 않는다.
+실제 취향 테스트/프로필 계산·홈 추천 6건과 전시 소식·관심/최근 본 저장·비교·상세 API/화면·작품/작가·지도/위치·운영시간/휴관일·실제 Source 특성 백필·staff UI·정식 서비스 외부 배포는 포함하지 않는다. 외부 배포 예외는 위에서 승인한 홈 디자인 확인용 정적 프리뷰에 한정한다. OD-004의 최종 워드마크·로고 형식은 확정하지 않는다.
 
 ## 레퍼런스와 시각 방향
 
@@ -155,3 +157,12 @@ related_documents:
 - MP4는 H.264 High, WebM은 VP9 Profile 0이며 둘 다 1920×1080·30fps·10.77초·오디오 0이다. 파일 크기는 MP4 2,367,495 bytes, WebM 813,262 bytes, 1920 poster 76,270 bytes, 960 poster 23,100 bytes다.
 - 자체 생성 PNG 6개를 원본 크기로 검수하고 WebP·film 파생본과 생성 제약을 `docs/04-ux/assets/home/README.md`에 기록했다. 기존 갈색 v1 원본·파생본은 보존하되 프론트 런타임 참조가 없음을 검색으로 확인했다.
 - 미실행 검증: 실제 모바일 기기, 200% 브라우저 확대, 실제 스크린리더, Chromium 외 브라우저와 전체 P0 접근성·사용성 검수. 백엔드 코드는 변경하지 않아 2026-09-03의 전체 Django 회귀 검증을 반복하지 않았다.
+
+## 홈 디자인 임시 배포 실행 증거 · 2026-09-05
+
+- 사용자 승인 범위인 홈 디자인만 별도 Vercel 프로젝트 `min-hyeok-s-projects/migam-home-preview`에 배포했다. 공유 주소는 <https://migam-home-preview.vercel.app/>이며 배포 ID는 `dpl_3HzwgjHCSamxxPEqJDmG4rR2psTL`이다. Vercel의 첫 배포는 해당 디자인 전용 프로젝트의 Production으로 생성됐다. 정식 미감 서비스 운영을 의미하지 않는다.
+- 배포 전 `deploy --dry --json`에서 기준 경로가 `frontend`이고 `.env.local`·`.vercel`·`dist`·`node_modules`가 제외됐음을 확인했다. 백엔드·DB·루트 `.env`는 업로드하지 않았다. Git 연결 시도는 실패했으며 Git 자동 배포는 연결되지 않았다. 유료 기능·자동 만료는 설정하지 않았다.
+- `npm test`: 7개 파일·62개 테스트 통과. `npm run build:preview`의 TypeScript 검사와 Vite 빌드, `npm run format:check`, `git diff --check` 통과. 문서 3개의 별도 Prettier 경고는 변경 전 HEAD에서도 재현돼 기존 문서 전체를 재포맷하지 않았다.
+- Vercel 빌드가 `npm run build:preview`로 실행되고 `READY`가 된 것을 확인했다. 인증 정보 없는 HTTP 요청에서 `/`·`/discover`·홈 poster가 200이며 `X-Robots-Tag: noindex, nofollow`였다.
+- 실제 배포 URL의 1280px 홈에서 영상 재생과 가로 넘침 없음을 확인했다. 390×844에서는 영상 없이 모바일 poster를 사용하고 모든 홈 이미지가 정상 로드됐으며 `scrollWidth === clientWidth === 390`이었다. 홈 CTA의 `/discover#recommend` 진입에서 디자인 미리보기 안내와 홈 복귀 링크를 확인했다.
+- 실제 모바일 기기·스크린리더·전체 P0 접근성·운영 준비 검수는 이번 디자인 공유 범위에 포함하지 않았다. 커밋·푸시는 하지 않았다.
