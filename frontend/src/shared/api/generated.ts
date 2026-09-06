@@ -34,10 +34,271 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/internal/v1/exhibitions/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 출처와 방문 근거를 포함한 전시 상세
+         * @description 검색 적격성 게이트를 통과한 전시만 반환합니다. 운영일은 Asia/Seoul의 오늘부터 종료일까지 해석하며 종료·취소 전시의 방문 가능성을 만들지 않습니다.
+         */
+        get: operations["getExhibitionDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/internal/v1/institutions/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 기관 정보와 노출 가능한 전시 목록 */
+        get: operations["getInstitutionDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/internal/v1/artworks/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 작품 메타데이터 목록
+         * @description 승인된 실제 작품 Source가 없어 일반 모드는 SOURCE_PENDING과 빈 목록을 반환합니다. 가상 작품은 명시적인 격리 데모 모드에서만 보입니다. 검색어를 저장하지 않으며 이미지 URL을 반환하지 않습니다.
+         */
+        get: operations["listArtworks"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/internal/v1/artworks/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * 작품 근거와 확인된 유사 관계
+         * @description 제작자·소장기관의 유사성은 출품 관계가 아닙니다. 공식 출품 관계 모델이 없으므로 exhibition_links는 UNCONFIRMED와 빈 배열입니다. 일반 모드의 미승인 데이터와 데모 행은 모두 404입니다.
+         */
+        get: operations["getArtworkDetail"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        ArtworkListResponse: {
+            total: number;
+            page: number;
+            page_size: number;
+            has_more: boolean;
+            /** @enum {string} */
+            availability: "DEMO" | "SOURCE_PENDING";
+            results: components["schemas"]["ArtworkResult"][];
+        };
+        ArtworkResult: {
+            /** @enum {string} */
+            type: "ARTWORK";
+            id: number;
+            source_artwork_id: string;
+            title: string;
+            creator: components["schemas"]["ArtworkCreator"];
+            production_year: string;
+            medium: string;
+            collection_institution: components["schemas"]["InstitutionReference"];
+            cultural_context: components["schemas"]["ArtworkCulture"];
+            /** Format: uri */
+            official_url: string;
+            /** Format: date-time */
+            last_verified_at: string;
+            /** @enum {string} */
+            eligibility: "VERIFIED" | "DEMO";
+            is_demo: boolean;
+            source: components["schemas"]["SourceEvidence"];
+            media: components["schemas"]["ArtworkHiddenMedia"];
+            features: components["schemas"]["DetailFeature"][];
+        };
+        ArtworkCreator: {
+            name: string;
+            official_id: string | null;
+            /** @enum {string} */
+            state: "KNOWN" | "UNKNOWN";
+        } & unknown;
+        ArtworkCulture: {
+            /** @enum {string} */
+            state: "CONFIRMED" | "UNKNOWN";
+            value: string | null;
+            is_korean: boolean | null;
+        } & unknown;
+        ArtworkHiddenMedia: {
+            /** @enum {string} */
+            status: "HIDDEN";
+            media_url: null;
+            page_url: null;
+            credit_line: null;
+        };
+        ArtworkDetailResponse: {
+            artwork: components["schemas"]["ArtworkResult"];
+            similar_artworks: components["schemas"]["SimilarArtwork"][];
+            exhibition_links: {
+                /** @enum {string} */
+                state: "UNCONFIRMED";
+                exhibitions: components["schemas"]["ExhibitionSearchResult"][];
+            };
+        };
+        SimilarArtwork: {
+            artwork: components["schemas"]["ArtworkResult"];
+            reasons: ("SAME_CREATOR" | "SAME_COLLECTION")[];
+        };
+        ArtworkError: {
+            error: {
+                /** @enum {string} */
+                code: "INVALID_ARTWORK_QUERY" | "NOT_FOUND";
+                message: string;
+                details: {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        ExhibitionDetailResponse: {
+            exhibition: components["schemas"]["ExhibitionSearchResult"];
+            visit_information: components["schemas"]["VisitInformation"];
+            features: components["schemas"]["DetailFeature"][];
+            operating_schedule: components["schemas"]["DetailOperatingSchedule"];
+        };
+        InstitutionDetailResponse: {
+            institution: components["schemas"]["InstitutionSearchResult"];
+            total: number;
+            page: number;
+            page_size: number;
+            has_more: boolean;
+            exhibitions: components["schemas"]["ExhibitionSearchResult"][];
+        };
+        DetailEvidence: {
+            /** @enum {string} */
+            scope: "EXHIBITION" | "INSTITUTION";
+            /** Format: date-time */
+            verified_at: string;
+            source: components["schemas"]["SourceEvidence"];
+        };
+        /** @enum {string} */
+        EvidenceState: "CONFIRMED" | "UNKNOWN" | "CONFLICT";
+        VisitInformation: {
+            price: components["schemas"]["DetailPrice"];
+            reservation: components["schemas"]["DetailReservation"];
+            duration: components["schemas"]["DetailDuration"];
+            accessibility: components["schemas"]["DetailAccessibility"][];
+            sensory: components["schemas"]["DetailSensory"][];
+        };
+        /** @description 일반 성인 기본 관람권의 확인된 비교 금액입니다. 공식 가격 범위가 있으면 상한을 쓰고 할인·단체권을 대신 쓰지 않습니다. 미확인·충돌 시 금액은 null입니다. */
+        DetailPrice: {
+            state: components["schemas"]["EvidenceState"];
+            amount: number | null;
+            currency: string | null;
+            is_free: boolean | null;
+            evidence: components["schemas"]["DetailEvidence"][];
+        };
+        DetailReservation: {
+            state: components["schemas"]["EvidenceState"];
+            /** @enum {string|null} */
+            reservation_type: "NOT_REQUIRED" | "REQUIRED" | "RECOMMENDED" | "TIMED_ENTRY" | "ON_SITE" | "FIRST_COME" | "PROGRAM_ONLY" | null;
+            official_urls: string[];
+            guidance: string[];
+            evidence: components["schemas"]["DetailEvidence"][];
+        };
+        DetailDuration: {
+            state: components["schemas"]["EvidenceState"];
+            minimum_minutes: number | null;
+            maximum_minutes: number | null;
+            evidence: components["schemas"]["DetailEvidence"][];
+        };
+        DetailAccessibility: {
+            /** @enum {string} */
+            kind: "WHEELCHAIR_ACCESS" | "MOBILITY_ACCESS" | "CAPTIONS" | "SIGN_LANGUAGE" | "AUDIO_DESCRIPTION" | "AGE_CONDITION";
+            state: components["schemas"]["EvidenceState"];
+            /** @enum {string|null} */
+            value: "CONFIRMED_POSITIVE" | "CONFIRMED_NEGATIVE" | null;
+            details: string[];
+            evidence: components["schemas"]["DetailEvidence"][];
+        };
+        DetailSensory: {
+            /** @enum {string} */
+            kind: "LOUD_SOUND" | "SUDDEN_SOUND" | "FLASHING_LIGHTS" | "DARK_SPACE" | "NARROW_OR_ENCLOSED_SPACE";
+            state: components["schemas"]["EvidenceState"];
+            /** @enum {string|null} */
+            value: "CONFIRMED_POSITIVE" | "CONFIRMED_NEGATIVE" | null;
+            details: string[];
+            evidence: components["schemas"]["DetailEvidence"][];
+        };
+        DetailFeature: {
+            /** @enum {string} */
+            axis: "MEDIA_GROUP" | "MEDIA_DETAIL" | "THEME" | "MOOD" | "EXPERIENCE" | "SPACE_TYPE" | "EVENT_FORMAT";
+            value: string;
+            /** @enum {string} */
+            evidence_kind: "DIRECT" | "DERIVED";
+            rule_version: string | null;
+            source: components["schemas"]["SourceEvidence"];
+        };
+        DetailOperatingSchedule: {
+            /** @enum {string} */
+            state: "OPEN" | "CLOSED" | "UNKNOWN";
+            visit_availability: components["schemas"]["VisitAvailability"];
+            rules: components["schemas"]["DetailScheduleRule"][];
+        };
+        DetailScheduleRule: {
+            /** @enum {string} */
+            status: "CONFIRMED" | "UNKNOWN";
+            /** @enum {string} */
+            kind: "REGULAR" | "OVERRIDE";
+            /** Format: date */
+            effective_from: string;
+            /** Format: date */
+            effective_to: string;
+            weekdays: number[];
+            is_open: boolean | null;
+            opens_at: string | null;
+            closes_at: string | null;
+            rule_version: string;
+            evidence: components["schemas"]["DetailEvidence"];
+        };
+        DetailError: {
+            error: {
+                /** @enum {string} */
+                code: "NOT_FOUND" | "INVALID_DETAIL_QUERY";
+                message: string;
+                details: {
+                    [key: string]: unknown;
+                };
+            };
+        };
         RecommendationRequest: {
             region?: components["schemas"]["RecommendationRegion"];
             visit_dates?: components["schemas"]["VisitDateRange"];
@@ -89,6 +350,15 @@ export interface components {
             recommendations: components["schemas"]["ExhibitionRecommendation"][];
             needs_verification: components["schemas"]["VerificationCandidate"][];
         };
+        /** @description First officially confirmed open day in the requested date range; not a reservation or seat availability guarantee. */
+        VisitAvailability: {
+            /** Format: date */
+            first_open_date: string;
+            opens_at: string;
+            closes_at: string;
+            /** Format: date-time */
+            verified_at: string;
+        } | null;
         ExhibitionRecommendation: {
             /** @enum {string} */
             type: "EXHIBITION";
@@ -115,6 +385,7 @@ export interface components {
             media: components["schemas"]["MediaPresentation"];
             /** @enum {string} */
             match_level: "VERY_CLOSE" | "GOOD_MATCH" | "SOME_MATCH" | "GENERAL" | "EXPLORATION";
+            visit_availability?: components["schemas"]["VisitAvailability"];
             is_exploration: boolean;
             reasons: components["schemas"]["RecommendationReason"][];
         };
@@ -142,6 +413,7 @@ export interface components {
             last_verified_at: string;
             source: components["schemas"]["SourceEvidence"];
             media: components["schemas"]["MediaPresentation"];
+            visit_availability?: components["schemas"]["VisitAvailability"];
             verification_reasons: ("PRICE_UNKNOWN" | "RESERVATION_UNKNOWN" | "DURATION_UNKNOWN")[];
         };
         RecommendationReason: {
@@ -325,6 +597,146 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["RecommendationError"];
+                };
+            };
+        };
+    };
+    getExhibitionDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 전시 상세 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExhibitionDetailResponse"];
+                };
+            };
+            /** @description 없거나 사용자에게 노출할 수 없는 전시 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailError"];
+                };
+            };
+        };
+    };
+    getInstitutionDetail: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 현재·예정·종료·취소 순서의 안전한 기관 전시 목록 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InstitutionDetailResponse"];
+                };
+            };
+            /** @description 페이지 조건 오류 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailError"];
+                };
+            };
+            /** @description 없거나 노출 가능한 전시가 없는 기관 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["DetailError"];
+                };
+            };
+        };
+    };
+    listArtworks: {
+        parameters: {
+            query?: {
+                q?: string;
+                institution_id?: number;
+                media_group?: "PAINTING" | "SCULPTURE" | "CRAFT" | "PHOTOGRAPHY" | "VIDEO" | "SOUND" | "INSTALLATION" | "PERFORMANCE" | "INTERACTIVE" | "MEDIA_ART" | "DESIGN" | "ARCHITECTURE";
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 작품 목록 또는 출처 승인 대기 상태 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArtworkListResponse"];
+                };
+            };
+            /** @description 잘못된 검색·페이지 조건 또는 지원하지 않는·중복 조건 */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArtworkError"];
+                };
+            };
+        };
+    };
+    getArtworkDetail: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 노출 가능한 작품 상세 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArtworkDetailResponse"];
+                };
+            };
+            /** @description 없거나 노출할 수 없는 작품 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ArtworkError"];
                 };
             };
         };

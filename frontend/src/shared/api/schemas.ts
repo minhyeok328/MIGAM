@@ -95,18 +95,38 @@ const reason = z.strictObject({
   text,
   feature: feature.nullable(),
 });
+const visitAvailability = z
+  .strictObject({
+    first_open_date: z.iso.date(),
+    opens_at: z.iso.time({ precision: 0 }),
+    closes_at: z.iso.time({ precision: 0 }),
+    verified_at: z.iso.datetime({ offset: true }),
+  })
+  .refine((row) => row.opens_at < row.closes_at)
+  .nullable()
+  .optional();
+const validVisitDate = (row: {
+  start_date: string;
+  end_date: string;
+  visit_availability?: z.infer<typeof visitAvailability>;
+}) =>
+  row.start_date <= row.end_date &&
+  (!row.visit_availability ||
+    (row.start_date <= row.visit_availability.first_open_date &&
+      row.visit_availability.first_open_date <= row.end_date));
 const recommendation = z
   .strictObject({
     ...exhibitionFields,
     lifecycle: z.enum(['CURRENT', 'UPCOMING']),
     match_level: z.enum(['VERY_CLOSE', 'GOOD_MATCH', 'SOME_MATCH', 'GENERAL', 'EXPLORATION']),
     is_exploration: z.boolean(),
+    visit_availability: visitAvailability,
     reasons: z.array(reason).min(1).max(3),
   })
-  .refine(
-    (row) =>
-      row.start_date <= row.end_date && row.is_exploration === (row.match_level === 'EXPLORATION'),
-  ) satisfies z.ZodType<components['schemas']['ExhibitionRecommendation']>;
+  .refine(validVisitDate)
+  .refine((row) => row.is_exploration === (row.match_level === 'EXPLORATION')) satisfies z.ZodType<
+  components['schemas']['ExhibitionRecommendation']
+>;
 const verification = z
   .strictObject({
     ...exhibitionFields,
@@ -115,10 +135,9 @@ const verification = z
       .array(z.enum(['PRICE_UNKNOWN', 'RESERVATION_UNKNOWN', 'DURATION_UNKNOWN']))
       .min(1)
       .max(3),
+    visit_availability: visitAvailability,
   })
-  .refine((row) => row.start_date <= row.end_date) satisfies z.ZodType<
-  components['schemas']['VerificationCandidate']
->;
+  .refine(validVisitDate) satisfies z.ZodType<components['schemas']['VerificationCandidate']>;
 
 export type MatchLevel = components['schemas']['ExhibitionRecommendation']['match_level'];
 export type ExhibitionView = ReturnType<typeof presentExhibition> & {
@@ -126,6 +145,7 @@ export type ExhibitionView = ReturnType<typeof presentExhibition> & {
   matchLevel?: MatchLevel;
   exploration?: boolean;
   verification?: string[];
+  visitAvailability?: z.infer<typeof visitAvailability>;
 };
 export type InstitutionView = {
   kind: 'institution';
@@ -147,7 +167,7 @@ export type RecommendationPage = {
   candidateCount: number;
 };
 
-function presentExhibition(row: components['schemas']['ExhibitionSearchResult']) {
+export function presentExhibition(row: components['schemas']['ExhibitionSearchResult']) {
   return {
     kind: 'exhibition' as const,
     id: row.id,
@@ -167,6 +187,203 @@ function presentExhibition(row: components['schemas']['ExhibitionSearchResult'])
     mediaPage: row.media.status === 'HIDDEN' ? null : row.media.page_url,
     credit: row.media.status === 'INLINE' ? row.media.credit_line : null,
   };
+}
+
+const evidence = z.strictObject({
+  scope: z.enum(['EXHIBITION', 'INSTITUTION']),
+  verified_at: timestamp,
+  source,
+});
+const evidenceFields = {
+  state: z.enum(['CONFIRMED', 'UNKNOWN', 'CONFLICT']),
+  evidence: z.array(evidence),
+};
+const factFields = {
+  ...evidenceFields,
+  value: z.enum(['CONFIRMED_POSITIVE', 'CONFIRMED_NEGATIVE']).nullable(),
+  details: z.array(z.string()),
+};
+const detailSchema = z.strictObject({
+  exhibition,
+  visit_information: z.strictObject({
+    price: z.strictObject({
+      ...evidenceFields,
+      amount: z.number().nonnegative().nullable(),
+      currency: z.string().nullable(),
+      is_free: z.boolean().nullable(),
+    }),
+    reservation: z.strictObject({
+      ...evidenceFields,
+      reservation_type: z
+        .enum([
+          'NOT_REQUIRED',
+          'REQUIRED',
+          'RECOMMENDED',
+          'TIMED_ENTRY',
+          'ON_SITE',
+          'FIRST_COME',
+          'PROGRAM_ONLY',
+        ])
+        .nullable(),
+      official_urls: z.array(safeUrl),
+      guidance: z.array(z.string()),
+    }),
+    duration: z.strictObject({
+      ...evidenceFields,
+      minimum_minutes: id.nullable(),
+      maximum_minutes: id.nullable(),
+    }),
+    accessibility: z.array(
+      z.strictObject({
+        ...factFields,
+        kind: z.enum([
+          'WHEELCHAIR_ACCESS',
+          'MOBILITY_ACCESS',
+          'CAPTIONS',
+          'SIGN_LANGUAGE',
+          'AUDIO_DESCRIPTION',
+          'AGE_CONDITION',
+        ]),
+      }),
+    ),
+    sensory: z.array(
+      z.strictObject({
+        ...factFields,
+        kind: z.enum([
+          'LOUD_SOUND',
+          'SUDDEN_SOUND',
+          'FLASHING_LIGHTS',
+          'DARK_SPACE',
+          'NARROW_OR_ENCLOSED_SPACE',
+        ]),
+      }),
+    ),
+  }),
+  features: z.array(
+    feature.extend({
+      evidence_kind: z.enum(['DIRECT', 'DERIVED']),
+      rule_version: z.string().nullable(),
+      source,
+    }),
+  ),
+  operating_schedule: z.strictObject({
+    state: z.enum(['OPEN', 'CLOSED', 'UNKNOWN']),
+    visit_availability: visitAvailability.unwrap(),
+    rules: z.array(
+      z.strictObject({
+        status: z.enum(['CONFIRMED', 'UNKNOWN']),
+        kind: z.enum(['REGULAR', 'OVERRIDE']),
+        effective_from: date,
+        effective_to: date,
+        weekdays: z.array(z.number().int().min(0).max(6)),
+        is_open: z.boolean().nullable(),
+        opens_at: z.iso.time({ precision: 0 }).nullable(),
+        closes_at: z.iso.time({ precision: 0 }).nullable(),
+        rule_version: z.string(),
+        evidence,
+      }),
+    ),
+  }),
+}) satisfies z.ZodType<components['schemas']['ExhibitionDetailResponse']>;
+
+export function parseExhibitionDetail(input: unknown) {
+  const parsed = detailSchema.parse(input);
+  return { ...parsed, item: presentExhibition(parsed.exhibition) };
+}
+export type ExhibitionDetail = ReturnType<typeof parseExhibitionDetail>;
+
+const artwork = z
+  .strictObject({
+    type: z.literal('ARTWORK'),
+    id,
+    source_artwork_id: text.max(255),
+    title: text.max(500),
+    creator: z
+      .strictObject({
+        name: text.max(255),
+        official_id: text.max(255).nullable(),
+        state: z.enum(['KNOWN', 'UNKNOWN']),
+      })
+      .refine((v) => v.state !== 'UNKNOWN' || v.official_id === null),
+    production_year: text.max(100),
+    medium: text.max(500),
+    collection_institution: z.strictObject({ id, name: text }),
+    cultural_context: z
+      .strictObject({
+        state: z.enum(['CONFIRMED', 'UNKNOWN']),
+        value: text.max(255).nullable(),
+        is_korean: z.boolean().nullable(),
+      })
+      .refine((v) => v.state !== 'UNKNOWN' || (v.value === null && v.is_korean === null)),
+    official_url: safeUrl.refine((v) => v.startsWith('https://')),
+    last_verified_at: timestamp,
+    eligibility: z.enum(['VERIFIED', 'DEMO']),
+    is_demo: z.boolean(),
+    source,
+    media: z.strictObject({
+      status: z.literal('HIDDEN'),
+      media_url: z.null(),
+      page_url: z.null(),
+      credit_line: z.null(),
+    }),
+    features: detailSchema.shape.features,
+  })
+  .refine((v) => v.is_demo === (v.eligibility === 'DEMO')) satisfies z.ZodType<
+  components['schemas']['ArtworkResult']
+>;
+export type ArtworkView = z.infer<typeof artwork>;
+export function parseArtworkList(input: unknown) {
+  return z
+    .strictObject({
+      total: z.number().int().nonnegative(),
+      page: id,
+      page_size: id.max(24),
+      has_more: z.boolean(),
+      availability: z.enum(['DEMO', 'SOURCE_PENDING']),
+      results: z.array(artwork).max(24),
+    })
+    .refine(
+      (v) =>
+        v.availability !== 'SOURCE_PENDING' || (v.total === 0 && !v.results.length && !v.has_more),
+    )
+    .refine((v) => v.availability !== 'DEMO' || v.results.every((item) => item.is_demo))
+    .parse(input);
+}
+export function parseArtworkDetail(input: unknown) {
+  return z
+    .strictObject({
+      artwork,
+      similar_artworks: z
+        .array(
+          z.strictObject({
+            artwork,
+            reasons: z
+              .array(z.enum(['SAME_CREATOR', 'SAME_COLLECTION']))
+              .min(1)
+              .max(2),
+          }),
+        )
+        .max(6),
+      exhibition_links: z.strictObject({
+        state: z.literal('UNCONFIRMED'),
+        exhibitions: z.array(exhibition).max(0),
+      }),
+    })
+    .parse(input);
+}
+
+export function parseInstitutionDetail(input: unknown) {
+  const parsed = z
+    .strictObject({
+      institution,
+      total: z.number().int().nonnegative(),
+      page: id,
+      page_size: id.max(24),
+      has_more: z.boolean(),
+      exhibitions: z.array(exhibition).max(24),
+    })
+    .parse(input);
+  return { ...parsed, items: parsed.exhibitions.map(presentExhibition) };
 }
 
 export function parseSearchResponse(input: unknown): SearchPage {
@@ -225,10 +442,12 @@ export function parseRecommendationResponse(input: unknown): RecommendationPage 
       reason: row.reasons[0].text,
       matchLevel: row.match_level,
       exploration: row.is_exploration,
+      visitAvailability: row.visit_availability,
     })),
     needsVerification: parsed.needs_verification.map((row) => ({
       ...presentExhibition(row),
       verification: row.verification_reasons.map((code) => verificationLabels[code]),
+      visitAvailability: row.visit_availability,
     })),
   };
 }

@@ -29,6 +29,25 @@ export const searchFixture = {
   results: [exhibitionFixture],
 };
 
+export const detailFixture = {
+  exhibition: exhibitionFixture,
+  visit_information: {
+    price: { state: 'UNKNOWN', amount: null, currency: null, is_free: null, evidence: [] },
+    reservation: {
+      state: 'UNKNOWN',
+      reservation_type: null,
+      official_urls: [],
+      guidance: [],
+      evidence: [],
+    },
+    duration: { state: 'UNKNOWN', minimum_minutes: null, maximum_minutes: null, evidence: [] },
+    accessibility: [],
+    sensory: [],
+  },
+  features: [],
+  operating_schedule: { state: 'UNKNOWN', visit_availability: null, rules: [] },
+};
+
 export const recommendationFixture = {
   algorithm_version: 'p0-recommendation-1.0.0',
   candidate_count: 2,

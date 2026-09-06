@@ -73,6 +73,46 @@ describe('API boundary', () => {
     expect(result.recommendations[0]).not.toHaveProperty('score');
   });
 
+  it('preserves confirmed opening evidence and rejects impossible opening hours', () => {
+    const availability = {
+      first_open_date: '2026-09-08',
+      opens_at: '10:00:00',
+      closes_at: '18:00:00',
+      verified_at: '2026-09-06T03:00:00Z',
+    };
+    const response = {
+      ...recommendationFixture,
+      recommendations: [
+        { ...recommendationFixture.recommendations[0], visit_availability: availability },
+      ],
+    };
+    expect(parseRecommendationResponse(response).recommendations[0]).toHaveProperty(
+      'visitAvailability',
+      availability,
+    );
+    for (const invalid of [{ first_open_date: '2025-01-01' }, { opens_at: '10:00' }]) {
+      expect(() =>
+        parseRecommendationResponse({
+          ...response,
+          recommendations: [
+            { ...response.recommendations[0], visit_availability: { ...availability, ...invalid } },
+          ],
+        }),
+      ).toThrow();
+    }
+    expect(() =>
+      parseRecommendationResponse({
+        ...response,
+        recommendations: [
+          {
+            ...response.recommendations[0],
+            visit_availability: { ...availability, closes_at: '09:00:00' },
+          },
+        ],
+      }),
+    ).toThrow();
+  });
+
   it('rejects ended recommendations and duplicated IDs across the two groups', () => {
     expect(() =>
       parseRecommendationResponse({
