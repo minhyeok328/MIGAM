@@ -1,8 +1,8 @@
 ---
 title: "미감 문서 인덱스"
 status: DRAFT
-version: "0.5.10"
-last_updated: "2026-09-05"
+version: "0.5.13"
+last_updated: "2026-09-06"
 authoritative_for:
   - "프로젝트 문서 목록과 읽기 순서"
   - "문서별 권한·상태·열린 결정 현황"
@@ -15,7 +15,9 @@ related_documents:
 
 ## 1. 현재 문서 세트
 
-문서별 상태와 버전은 front matter에 기록한다. Project Brief, Domain Rules, Source Qualification, Source Registry, 홈·탐색 분리 설계와 범위가 닫힌 `TP-001`~`TP-006`은 `APPROVED`이며, P0 PRD를 포함한 나머지 포괄 문서는 계속 `DRAFT`다. `APPROVED` 문서와 제품 책임자의 최신 승인 결정만 해당 권위 범위의 구현 기준이 될 수 있고, 실제 구현에는 범위를 직접 정의·검증하는 승인 작업 패킷이 필요하다.
+문서별 상태와 버전은 front matter에 기록한다. Project Brief, Domain Rules, Source Qualification, Source Registry, 작품 조회 계약, 홈·탐색 분리 설계, Staff Operations, Local Delivery와 `TP-001`~`TP-008`은 `APPROVED`이며, P0 PRD를 포함한 나머지 포괄 문서는 계속 `DRAFT`다. `APPROVED`는 해당 범위의 구현 권한이며 전체 P0 완료 판정은 아니다. 실제 구현에는 범위를 직접 정의·검증하는 승인 작업 패킷과 제품 책임자의 최신 결정을 함께 적용한다.
+
+2026-09-06 TP-008은 상세·관심·비교·취향·작품 경로, staff 운영과 키 없는 로컬 통합 실행을 진행 중이다. 지도는 사용자의 선택에 따라 외부 카카오맵 링크를 유지한다. 실제 작품 Source는 `HOLD`이며 가상 데모와 분리한다. 최신 완료·미검증 범위는 [구현 준비도](07-execution/implementation-readiness.md)와 [현재 구현 증거](06-quality/traceability-matrix.md#11-현재-구현-증거)를 따른다.
 
 | 영역 | 문서 | 권위 범위 | 상태 |
 | --- | --- | --- | --- |
@@ -27,23 +29,27 @@ related_documents:
 | 도메인 | [Domain Rules](01-product/domain-rules.md) | 용어·분류·상태·판정 불변식 | `APPROVED 1.0.1` |
 | 데이터 | [Data Source Policy](02-data/data-source-policy.md) | 허용 출처·출처 우선순위·미디어 권리 | `DRAFT` |
 | 데이터 | [Source Qualification](02-data/source-qualification.md) | OD-003 후보 기관 표본·출처 접근·권리 심사 증거 | `APPROVED` |
-| 데이터 | [Source Registry](../sources.yaml) | 승인 Source 3개와 `PROVISIONAL` 기관 5곳의 실행 설정 | `APPROVED` |
+| 데이터 | [Source Registry](../sources.yaml) | 승인 Source 3개와 `PROVISIONAL` 기관 9곳의 실행 설정 | `APPROVED` |
 | 데이터 | [Data Model](02-data/data-model.md) | 논리 엔티티·관계·제약·상태축 | `DRAFT` |
+| 데이터 | [작품 조회 계약](02-data/artwork-contract.md) | 작품 정본·목록·상세·근거 관계와 실제 Source 보류·가상 데모 경계 | `APPROVED 1.0.0` |
 | 데이터 | [Data Pipeline](02-data/data-pipeline.md) | 수집·검증·병합·갱신 흐름 | `DRAFT` |
 | 데이터 | [Normalization Rules](02-data/normalization-rules.md) | 원본에서 canonical 값으로의 변환 규칙 | `DRAFT` |
 | 추천 | [Recommendation Spec](03-recommendation/recommendation-spec.md) | 후보·신호·필터·다양성·탐색·이유 | `DRAFT` |
 | 추천 | [Recommendation Evaluation](03-recommendation/recommendation-evaluation.md) | 추천 평가셋·시나리오·통과 게이트 | `DRAFT` |
 | UX | [User Flows](04-ux/user-flows.md) | 화면 간 사용자 흐름과 분기 | `DRAFT` |
 | UX | [Screen Spec](04-ux/screen-spec.md) | 화면별 정보·행동·상태·반응형 요구 | `DRAFT` |
-| UX | [홈·탐색 분리 설계](04-ux/home-design.md) | TP-006 홈 구성·미디어·공통 셸과 탐색 분리 | `APPROVED 1.0.5` |
+| UX | [홈·탐색 분리 설계](04-ux/home-design.md) | TP-006 홈 구성·미디어·공통 셸과 탐색 분리 | `APPROVED 1.0.6` |
 | UX | [UI Guidelines](04-ux/ui-guidelines.md) | 브랜드·시각 언어·공통 문구·접근성 표현 | `DRAFT` |
 | UX | [Design Reference](04-ux/design-reference.md) | 화면·컴포넌트·상태·반응형의 검토용 시각 표본 | `DRAFT` |
 | 기술 | [System Architecture](05-engineering/system-architecture.md) | 런타임·저장소·컴포넌트 경계 | `DRAFT` |
 | 기술 | [Security & Privacy](05-engineering/security-privacy.md) | 개인정보·인증·로그·비밀값 원칙 | `DRAFT` |
 | 기술 | [API Guidelines](05-engineering/api-guidelines.md) | 내부 API와 OpenAPI 계약 원칙 | `DRAFT` |
-| 기술 계약 | [Internal OpenAPI v1](../openapi/internal-v1.yaml) | 전시·기관 검색과 조건 보존 추천 요청·응답·오류의 기계 계약 | `1.1.1` |
+| 기술 계약 | [Internal OpenAPI v1](../openapi/internal-v1.yaml) | 전시·기관 검색·상세, 작품 목록·상세, 공식 개관일과 조건 추천 요청·응답·오류 | `1.4.0` |
+| 기술 | [Staff Operations](05-engineering/staff-operations.md) | staff 인증·권한별 운영 데이터 조회와 Admin 연결 | `APPROVED 1.0.0` |
+| 기술 | [Local Delivery](05-engineering/local-delivery.md) | 키 없는 단일 origin 데모와 로컬 Docker 재현 | `APPROVED 1.0.0` |
 | 품질 | [Acceptance Criteria](06-quality/acceptance-criteria.md) | 요구사항별 관찰 가능한 합격 조건 | `DRAFT` |
 | 품질 | [Test Plan](06-quality/test-plan.md) | 테스트 계층·환경·fixture·검증 범위 | `DRAFT` |
+| 품질 | [TP-008 검증 기록](06-quality/tp-008-verification.md) | 273개 백엔드·80개 프론트 검사, 브라우저 연결과 실제 데이터 제약·잔여 작업 | `DRAFT 1.0.0` |
 | 품질 | [Traceability Matrix](06-quality/traceability-matrix.md) | 요구사항·화면·API·테스트 연결 | `DRAFT` |
 | 실행 | [Implementation Readiness](07-execution/implementation-readiness.md) | 구현 착수 게이트와 미결정 의존성 | `DRAFT` |
 | 실행 | [Task Packet Template](07-execution/task-packet-template.md) | 작업 단위 명세 형식 | `DRAFT` |
@@ -52,7 +58,9 @@ related_documents:
 | 실행 | [TP-003 선택 관람 정보와 미디어 권리 모델](07-execution/task-packets/TP-003-visit-information-and-media-rights.md) | 선택 정보 UNKNOWN 정본, MediaAsset·MediaRights 이력과 안전한 노출 판정 | `APPROVED 1.0.1` |
 | 실행 | [TP-004 내부 OpenAPI와 FTS5 검색](07-execution/task-packets/TP-004-internal-search-openapi.md) | 전시·기관 내부 검색 API, SearchDocument·SearchService·SQLite FTS5 | `APPROVED 1.0.1` |
 | 실행 | [TP-005 조건 보존 설명형 추천](07-execution/task-packets/TP-005-explainable-recommendation.md) | ContentFeatureSnapshot, 하드 조건·UNKNOWN·점수·다양성·이유와 내부 추천 API | `APPROVED 1.0.1` |
-| 실행 | [TP-006 프론트엔드 홈과 검색·추천 분리](07-execution/task-packets/TP-006-frontend-discovery.md) | API 없는 몰입형 홈 `/`, 검색·추천 `/discover`, 생성 타입·Zod, 조건 보존·권리 경계와 격리 데모 | `APPROVED 2.2.1` |
+| 실행 | [TP-006 프론트엔드 홈과 검색·추천 분리](07-execution/task-packets/TP-006-frontend-discovery.md) | API 없는 몰입형 홈 `/`, 검색·추천 `/discover`, 생성 타입·Zod, 조건 보존·권리 경계와 격리 데모 | `APPROVED 2.2.2` |
+| 실행 | [TP-007 실데이터 연결과 공식 관람 근거](07-execution/task-packets/TP-007-live-data-and-visit-evidence.md) | DB 보존·업그레이드, 실제 재확인 입력, 선택 필드 백필과 공식 운영일 추천 | `APPROVED 1.0.0` |
+| 실행 | [TP-008 P0 제품 E2E 완성](07-execution/task-packets/TP-008-p0-product-completion.md) | 데이터 확대·상세·관심·비교·취향·작품·외부 지도 링크·staff·통합 검증 위임 | `APPROVED 1.0.0` |
 | 저장소 | [AGENTS.md](../AGENTS.md) | 저장소 작업·검증 규칙 | `APPROVED 1.1.0` |
 | 저장소 | [README.md](../README.md) | 프로젝트 소개와 임시 UI/UX 안내 | 현재 상태 안내 |
 | 저장소 | [Frontend README](../frontend/README.md) | 키 없는 데모·로컬 실행과 프론트 검증 명령 | 현재 실행 안내 |
@@ -73,7 +81,7 @@ related_documents:
 1. Domain Rules
 2. Data Source Policy
 3. Source Qualification
-4. Data Model
+4. Data Model / 작품 조회 계약
 5. Normalization Rules
 6. Data Pipeline
 7. Recommendation Spec
@@ -134,12 +142,14 @@ Project Brief
 
 다음 산출물은 확정 정보나 승인된 상위 문서가 부족하므로 현재 세트에 포함하지 않는다.
 
-- 상세·비교·staff 상태까지 포함하는 완전한 P0 OpenAPI: 각 후속 범위가 승인될 때 [`internal-v1.yaml`](../openapi/internal-v1.yaml)을 호환 확장
-- TP-006 이후의 포괄 구현계획: 다음 범위와 완료 조건이 승인되기 전에 미리 만들지 않음
-- 공개 운영 runbook: 로컬 실행은 Frontend README에 기록하며 공개 운영 환경이 결정된 뒤 별도 작성
+- 미승인 작품 Source의 수집·정규화 계약과 외부 공개 API: 작품 조회 계약의 `SOURCE_PENDING` 경계를 유지하며 실제 출처 심사와 OD-005 결정 후 필요한 범위만 확장
+- P1 이후의 포괄 구현계획: 다음 범위와 완료 조건이 승인되기 전에 미리 만들지 않음
+- 공개 운영 runbook: 로컬 실행과 staff 조회는 Local Delivery·Staff Operations·Frontend README에 기록하며 공개 운영 환경이 결정된 뒤 별도 작성
 - 배포·장애 대응 문서: OD-006과 실제 운영 환경 확정 후 작성
 
 비어 있는 문서나 추측으로 채운 계약을 먼저 만들지 않는다.
+
+전시·기관 상세와 작품 조회의 내부 OpenAPI는 이미 포함되어 있다. 관심·비교·취향 보존은 브라우저 상태이며 별도 서버 프로필 API를 만들지 않는다. staff 상태는 Django 세션·모델 권한으로 보호되는 HTML 화면이다.
 
 ## 6. 검토 순서
 

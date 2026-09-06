@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 테스트 계획"
 status: DRAFT
-version: "0.3.5"
-last_updated: "2026-09-05"
+version: "0.3.6"
+last_updated: "2026-09-06"
 authoritative_for:
   - "P0 계층별 테스트 전략과 검증 범위"
   - "데이터·추천·백엔드·프론트·E2E·브라우저·접근성 테스트 시나리오"
@@ -180,6 +180,8 @@ TP-006은 `TEST-017`·`TEST-018`·`TEST-027`의 일부를 컴포넌트 수준에
 
 ### 5.1 기본 모드
 
+TP-007은 앞선 패킷의 후속 범위 중 실제 Source 재확인 입력, 등록된 선택 가격·매체·일정 변환과 OperatingSchedule을 구현했다. `test_live_refresh.py`·`test_sync_command.py`는 명시적 입력과 과거 fixture 대체 금지를, `test_source_enrichment.py`는 근거·변환 버전·기존 특성·반복 재확인과 날짜 경과를, `test_operating_schedule.py`는 공식 개관일·휴관·임시 변경·충돌·UNKNOWN·긴 기간을, `test_local_preparation.py`는 migration 전 백업과 기존 데이터 보존을 검증한다. 추천 API와 프론트 경계 검증은 첫 관람일·시간의 전달 및 무효 응답 거부를 포함한다. 실데이터 재확인 성공량·외부 실패·브라우저 확인 범위는 [TP-007 실행 증거](../07-execution/task-packets/TP-007-live-data-and-visit-evidence.md)를 따른다. 전체 P0 E2E 완료 상태는 바뀌지 않는다.
+
 - 단위·통합·컴포넌트·E2E는 외부 네트워크 호출을 기본 차단하고 고정 픽스처를 사용한다.
 - 개발 이벤트 검증은 네트워크·분석 SDK·서버 DB·브라우저 영속을 모두 차단한 상태에서 수행하고, 운영 빌드에서는 no-op을 확인한다.
 - 시간·현재 날짜·위치·지도 응답을 제어할 수 있어야 한다.
@@ -271,6 +273,8 @@ Firefox와 WebKit에서는 다음을 최소 수행한다.
 동기화 관리 명령의 이름·범위는 `AC-023`의 확정 계약을 따른다. 현재 Django 검증 명령은 `uv run --project backend python backend/manage.py test tests --verbosity 1`이며, 실행 결과의 발견·통과·실패 수를 변경 증거에 기록한다.
 
 ## 11. 열린 결정
+
+2026-09-06 TP-008 통합 실행은 [별도 검증 기록](tp-008-verification.md)을 따른다. 백엔드 273개·프론트 80개와 실제 브라우저 핵심 흐름이 통과했으며, 실제 작품 Source·관람 정보 커버리지·CI 브라우저 회귀·실제 기기·Docker·공개 운영은 남은 범위로 구분한다.
 
 - `OD-003`: `RESOLVED`. 출처 계약 픽스처는 [`source-qualification.json`](../../fixtures/source-qualification.json)이며 3개 Source·5개 기관·24개 `PASS`·1개 격리를 검증한다. 실제 허용 필드와 호출 제약은 [`sources.yaml`](../../sources.yaml)을 따른다.
 - `OD-004`: DEC-101로 확정한 마루 부리·SUIT는 라이선스·로딩 실패·한국어 렌더링 검증을 현재 적용하고 `TEST-030`·`TEST-034`에 연결한다. 최종 워드마크·로고 형식과 해당 자산의 시각 승인은 남아 있다.
