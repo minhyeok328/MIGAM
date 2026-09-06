@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, time
 from decimal import Decimal
 from hashlib import sha256
 from importlib import import_module, util
@@ -12,6 +12,7 @@ from backend.apps.catalog.models import (
     Exhibition,
     ExhibitionSourceLink,
     Institution,
+    OperatingSchedule,
     PriceOption,
     ReservationInfo,
     SensoryNotice,
@@ -157,10 +158,16 @@ class RecommendationServiceTests(TestCase):
 
     def test_region_and_inclusive_date_range_are_hard_filters(self) -> None:
         module, service = self.feature()
-        seoul_match, _ = self.create_exhibition(
+        seoul_match, seoul_source = self.create_exhibition(
             "서울 경계일 전시",
             start_date=date(2026, 9, 10),
             end_date=date(2026, 9, 20),
+        )
+        OperatingSchedule.objects.create(
+            exhibition=seoul_match, source_record=seoul_source,
+            status="CONFIRMED", kind="REGULAR", weekdays=[6], is_open=True,
+            opens_at=time(10), closes_at=time(18), rule_version="test-v1",
+            effective_from=seoul_match.start_date, effective_to=seoul_match.end_date,
         )
         self.create_exhibition(
             "서울 기간 밖 전시",
@@ -627,7 +634,7 @@ class RecommendationServiceTests(TestCase):
         second = service.recommend(query)
 
         self.assertEqual(first, second)
-        self.assertEqual(first.algorithm_version, "p0-recommendation-1.0.0")
+        self.assertEqual(first.algorithm_version, "p0-recommendation-1.1.0")
         self.assertEqual(
             self.ids(first.recommendations),
             sorted(self.ids(first.recommendations)),

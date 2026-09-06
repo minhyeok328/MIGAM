@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, time
 from decimal import Decimal
 from hashlib import sha256
 
@@ -13,6 +13,7 @@ from backend.apps.catalog.models import (
     Institution,
     MediaAsset,
     MediaRights,
+    OperatingSchedule,
     PriceOption,
     ReservationInfo,
     SensoryNotice,
@@ -121,6 +122,12 @@ class InternalRecommendationAPITests(TestCase):
         )
 
     def add_required_visit_evidence(self) -> None:
+        OperatingSchedule.objects.create(
+            exhibition=self.featured, source_record=self.featured_source,
+            status="CONFIRMED", kind="REGULAR", weekdays=[1], is_open=True,
+            opens_at=time(10), closes_at=time(18), rule_version="test-v1",
+            effective_from=self.featured.start_date, effective_to=self.featured.end_date,
+        )
         AccessibilityFact.objects.create(
             exhibition=self.featured,
             source_record=self.featured_source,
@@ -199,7 +206,7 @@ class InternalRecommendationAPITests(TestCase):
                 "needs_verification",
             },
         )
-        self.assertEqual(payload["algorithm_version"], "p0-recommendation-1.0.0")
+        self.assertEqual(payload["algorithm_version"], "p0-recommendation-1.1.0")
         self.assertEqual(payload["candidate_count"], 3)
         self.assertEqual(len(payload["recommendations"]), 3)
         first = payload["recommendations"][0]
@@ -224,9 +231,11 @@ class InternalRecommendationAPITests(TestCase):
                 "match_level",
                 "is_exploration",
                 "reasons",
+                "visit_availability",
             },
         )
         self.assertNotIn("score", first)
+        self.assertIsNone(first["visit_availability"])
         self.assertNotIn("percentage", first)
         self.assertEqual(set(first["reasons"][0]), {"code", "text", "feature"})
         self.assertNotIn("응답 금지", response.content.decode())
@@ -247,6 +256,9 @@ class InternalRecommendationAPITests(TestCase):
             [self.featured.pk],
         )
         item = payload["recommendations"][0]
+        self.assertEqual(item["visit_availability"]["first_open_date"], "2026-09-15")
+        self.assertEqual(item["visit_availability"]["opens_at"], "10:00:00")
+        self.assertEqual(item["visit_availability"]["closes_at"], "18:00:00")
         self.assertEqual(item["match_level"], "GOOD_MATCH")
         self.assertEqual(item["reasons"][0]["code"], "PREFERRED_FEATURE")
         self.assertEqual(

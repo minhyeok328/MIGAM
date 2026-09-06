@@ -10,6 +10,7 @@ from backend.apps.catalog.models import (
     AccessibilityFact,
     Exhibition,
     ExhibitionSourceLink,
+    OperatingSchedule,
     PriceOption,
     ReservationInfo,
     SensoryNotice,
@@ -23,9 +24,10 @@ from backend.apps.discovery.visit_conditions import (
     VisitEvidenceResolver,
 )
 from backend.apps.discovery.models import ContentFeatureAssertion
+from backend.apps.discovery.operating_schedule import OperatingScheduleResolver, ResolvedOperatingSchedule
 
 
-ALGORITHM_VERSION = "p0-recommendation-1.0.0"
+ALGORITHM_VERSION = "p0-recommendation-1.1.0"
 DEFAULT_LIMIT = 6
 MAX_LIMIT = 24
 MAX_SIGNAL_ITEMS = 100
@@ -114,12 +116,14 @@ class RecommendationHit:
     match_level: MatchLevel
     is_exploration: bool
     reasons: tuple[RecommendationReason, ...]
+    visit_availability: ResolvedOperatingSchedule | None = None
 
 
 @dataclass(frozen=True, slots=True)
 class VerificationCandidate:
     exhibition_id: int
     verification_reasons: tuple[str, ...]
+    visit_availability: ResolvedOperatingSchedule | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,6 +145,7 @@ class _RankedCandidate:
     personal_score: int
     features: frozenset[FeaturePreference]
     contributions: tuple["_Contribution", ...]
+    visit_availability: ResolvedOperatingSchedule | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -172,7 +177,7 @@ class ORMRecommendationService:
             )
             .exclude(source_conflicts__status=SourceConflict.Status.OPEN)
             .select_related("institution")
-            .prefetch_related(*_visit_evidence_prefetches())
+            .prefetch_related(*_visit_evidence_prefetches(include_schedules=validated.visit_dates is not None))
             .distinct()
         )
 
@@ -187,9 +192,17 @@ class ORMRecommendationService:
 
         ranked: list[_RankedCandidate] = []
         verification: list[VerificationCandidate] = []
+        schedule_resolver = OperatingScheduleResolver()
         for exhibition in candidates:
             if not _matches_region_and_dates(exhibition, validated):
                 continue
+            visit_availability = None
+            if validated.visit_dates is not None:
+                visit_availability = schedule_resolver.resolve(
+                    exhibition, validated.visit_dates.start, validated.visit_dates.end,
+                )
+                if visit_availability.first_open_date is None:
+                    continue
             evidence = self.evidence_resolver.resolve(exhibition)
             excluded, verification_reasons = _apply_hard_conditions(
                 evidence,
@@ -202,6 +215,7 @@ class ORMRecommendationService:
                     VerificationCandidate(
                         exhibition_id=exhibition.pk,
                         verification_reasons=verification_reasons,
+                        visit_availability=visit_availability,
                     )
                 )
                 continue
@@ -225,6 +239,7 @@ class ORMRecommendationService:
                     personal_score=personal_score,
                     features=features,
                     contributions=contributions,
+                    visit_availability=visit_availability,
                 )
             )
 
@@ -253,7 +268,7 @@ def get_recommendation_service() -> RecommendationService:
     return ORMRecommendationService()
 
 
-def _visit_evidence_prefetches() -> tuple[Prefetch, ...]:
+def _visit_evidence_prefetches(*, include_schedules: bool = False) -> tuple[Prefetch, ...]:
     prefetches: list[Prefetch] = [
         Prefetch(
             "source_links",
@@ -263,13 +278,16 @@ def _visit_evidence_prefetches() -> tuple[Prefetch, ...]:
             to_attr="recommendation_source_links",
         )
     ]
-    for related_name, model in (
+    evidence_models = (
         ("priceoption_records", PriceOption),
         ("reservationinfo_records", ReservationInfo),
         ("visitduration_records", VisitDuration),
         ("accessibilityfact_records", AccessibilityFact),
         ("sensorynotice_records", SensoryNotice),
-    ):
+    )
+    if include_schedules:
+        evidence_models += (("operatingschedule_records", OperatingSchedule),)
+    for related_name, model in evidence_models:
         queryset = model.objects.select_related("source_record")
         prefetches.append(
             Prefetch(
@@ -755,6 +773,7 @@ def _to_hit(
             match_level=MatchLevel.EXPLORATION,
             is_exploration=True,
             reasons=_exploration_reasons(candidate),
+            visit_availability=candidate.visit_availability,
         )
     reasons = tuple(
         RecommendationReason(
@@ -771,6 +790,7 @@ def _to_hit(
         match_level=_match_level(candidate.personal_score),
         is_exploration=False,
         reasons=reasons,
+        visit_availability=candidate.visit_availability,
     )
 
 

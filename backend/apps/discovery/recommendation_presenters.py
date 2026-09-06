@@ -51,6 +51,7 @@ def _present_recommendation(
         "match_level": hit.match_level.value,
         "is_exploration": hit.is_exploration,
         "reasons": [_present_reason(reason) for reason in hit.reasons],
+        "visit_availability": _present_availability(hit.visit_availability),
     }
 
 
@@ -77,4 +78,16 @@ def _present_verification(
     return {
         **exhibition,
         "verification_reasons": list(candidate.verification_reasons),
+        "visit_availability": _present_availability(candidate.visit_availability),
+    }
+
+
+def _present_availability(availability) -> dict[str, str] | None:
+    if availability is None:
+        return None
+    return {
+        "first_open_date": availability.first_open_date.isoformat(),
+        "opens_at": availability.opens_at.isoformat(),
+        "closes_at": availability.closes_at.isoformat(),
+        "verified_at": availability.verified_at.isoformat(),
     }
