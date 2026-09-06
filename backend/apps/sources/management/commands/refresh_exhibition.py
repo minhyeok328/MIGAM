@@ -1,17 +1,16 @@
 from datetime import date
-from pathlib import Path
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, CommandParser
 from django.utils import timezone
 
 from backend.apps.catalog.models import Exhibition
-from backend.data_pipeline.fixture_loader import load_qualification_fixture
 from backend.data_pipeline.freshness.execution import (
     RefreshExecutionError,
     refresh_exhibitions,
 )
 from backend.data_pipeline.registry import SourceRegistry
+from backend.data_pipeline.source_inputs import add_refresh_inputs, refresh_collector
 
 
 class Command(BaseCommand):
@@ -21,13 +20,10 @@ class Command(BaseCommand):
         parser.add_argument("--id", type=int, required=True)
         parser.add_argument(
             "--fixture",
-            default=str(
-                settings.REPOSITORY_ROOT
-                / "fixtures"
-                / "source-qualification.json"
-            ),
+            default=None,
             help="Approved offline source snapshot used by the P0 demo collector.",
         )
+        add_refresh_inputs(parser)
         parser.add_argument(
             "--as-of",
             dest="as_of",
@@ -45,11 +41,13 @@ class Command(BaseCommand):
         now = timezone.now()
         as_of = _as_of_date(options.get("as_of"), now=now)
         registry = SourceRegistry.load(settings.REPOSITORY_ROOT / "sources.yaml")
-        fixture_path = Path(str(options["fixture"])).resolve()
+        if options.get("source") and not exhibition.source_links.filter(source_id=options["source"]).exists():
+            raise CommandError("source does not match the exhibition")
+        collect = refresh_collector([exhibition], registry, options)
         try:
             summary = refresh_exhibitions(
                 [exhibition],
-                collect=lambda: load_qualification_fixture(fixture_path, registry),
+                collect=collect,
                 registry=registry,
                 as_of=as_of,
                 now=now,

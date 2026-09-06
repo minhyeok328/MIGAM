@@ -1,5 +1,4 @@
 from datetime import date
-from pathlib import Path
 
 from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError, CommandParser
@@ -10,7 +9,6 @@ from backend.data_pipeline.collection_gate import (
     CollectionGateError,
     select_collectible_entries,
 )
-from backend.data_pipeline.fixture_loader import load_qualification_fixture
 from backend.data_pipeline.freshness.execution import (
     RefreshExecutionError,
     refresh_exhibitions,
@@ -18,6 +16,7 @@ from backend.data_pipeline.freshness.execution import (
 from backend.data_pipeline.freshness.schedule import refresh_schedule_for
 from backend.data_pipeline.registry import SourceRegistry
 from backend.data_pipeline.registry_state import sync_registry_state
+from backend.data_pipeline.source_inputs import add_refresh_inputs, refresh_collector
 
 
 class Command(BaseCommand):
@@ -26,13 +25,10 @@ class Command(BaseCommand):
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument(
             "--fixture",
-            default=str(
-                settings.REPOSITORY_ROOT
-                / "fixtures"
-                / "source-qualification.json"
-            ),
+            default=None,
             help="Approved offline source snapshot used by the P0 demo collector.",
         )
+        add_refresh_inputs(parser)
         parser.add_argument(
             "--as-of",
             dest="as_of",
@@ -44,9 +40,12 @@ class Command(BaseCommand):
         now = timezone.now()
         as_of = _as_of_date(options.get("as_of"), now=now)
         registry = SourceRegistry.load(settings.REPOSITORY_ROOT / "sources.yaml")
+        source_id = options.get("source")
+        if source_id and source_id not in registry.source_ids:
+            raise CommandError(f"unknown source: {source_id}")
         sync_registry_state(registry)
         try:
-            collectible_entries = select_collectible_entries()
+            collectible_entries = select_collectible_entries(source_ids=(source_id,) if source_id else None)
         except CollectionGateError:
             collectible_entries = ()
         collectible_institution_ids = {
@@ -62,11 +61,11 @@ class Command(BaseCommand):
             self.stdout.write("target=0 success=0 failure=0")
             return
 
-        fixture_path = Path(str(options["fixture"])).resolve()
+        collect = refresh_collector(targets, registry, options)
         try:
             summary = refresh_exhibitions(
                 targets,
-                collect=lambda: load_qualification_fixture(fixture_path, registry),
+                collect=collect,
                 registry=registry,
                 as_of=as_of,
                 now=now,

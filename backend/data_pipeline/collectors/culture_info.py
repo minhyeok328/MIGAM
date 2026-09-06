@@ -243,6 +243,25 @@ class CultureInfoApiCollector:
                 return institution
         return None
 
+    def collect_ids(self, record_ids: list[str]) -> list[RawExhibitionRecord]:
+        """Recheck the requested identities without collecting an unrelated period."""
+        source = self.registry.source(self.SOURCE_ID)
+        endpoint = source["base_url"].rstrip("/") + source["endpoints"]["detail"]
+        records = []
+        for seq in dict.fromkeys(record_ids):
+            if not seq.isdigit():
+                raise ValueError("culture record ID must contain only digits")
+            payload = self.transport.get(endpoint, {
+                source["authentication"]["parameter"]: self.service_key, "seq": seq,
+            })
+            detail = next((row for row in _parse_response(payload).records if row.get("seq") == seq), None)
+            if detail is None:
+                raise CultureInfoApiError(f"detail response omitted seq {seq}")
+            institution = self._matching_institution(detail)
+            if institution is not None:
+                records.append(self._to_record(source, institution, detail))
+        return records
+
     def _to_record(
         self,
         source: Mapping[str, object],
@@ -257,6 +276,8 @@ class CultureInfoApiCollector:
             source_field: _clean(detail.get(source_field))
             for source_field in fields.values()
         }
+        for source_field in source.get("optional_fields", {}).values():
+            selected_raw[source_field] = _clean(detail.get(source_field))
         return RawExhibitionRecord(
             source_id=self.SOURCE_ID,
             institution_id=str(institution["id"]),

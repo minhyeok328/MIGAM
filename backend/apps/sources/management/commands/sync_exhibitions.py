@@ -69,16 +69,17 @@ class Command(BaseCommand):
     def add_arguments(self, parser: CommandParser) -> None:
         parser.add_argument(
             "--fixture",
-            default=str(
-                settings.REPOSITORY_ROOT
-                / "fixtures"
-                / "source-qualification.json"
-            ),
+            default=None,
             help="Path to an approved qualification fixture JSON file.",
         )
         parser.add_argument(
             "--source",
             help="Restrict the sync to one registered source ID.",
+        )
+        parser.add_argument(
+            "--institution",
+            action="append",
+            help="Restrict the sync to this registered institution (repeatable).",
         )
         parser.add_argument(
             "--qualification",
@@ -138,6 +139,11 @@ class Command(BaseCommand):
         culture_requested = bool(
             options.get("culture_from") or options.get("culture_to")
         )
+        official_inputs = bool(sejong_csv or sema_csv or culture_requested)
+        if options.get("fixture") and official_inputs:
+            raise CommandError("--fixture cannot be combined with official inputs")
+        if not options.get("fixture") and not official_inputs:
+            raise CommandError("Explicit input required: official CSV/API period or --fixture for offline tests")
         try:
             if sejong_csv and source_id and source_id != SEJONG_SOURCE_ID:
                 raise ValueError(
@@ -179,13 +185,32 @@ class Command(BaseCommand):
             sema_csv=bool(sema_csv),
             culture_requested=culture_requested,
         )
+        requested_institution_ids = tuple(dict.fromkeys(options.get("institution") or ()))
         try:
+            for institution_id in requested_institution_ids:
+                entry = registry.institution(institution_id)
+                if entry["source_id"] not in requested_source_ids:
+                    raise ValueError(f"institution does not belong to requested source: {institution_id}")
             sync_registry_state(registry)
             institutions = select_collectible_entries(
                 source_ids=requested_source_ids,
+                institution_ids=requested_institution_ids,
             )
         except (CollectionGateError, ValueError, KeyError) as error:
             raise CommandError(str(error)) from error
+
+        fixture_records = ()
+        if options.get("fixture"):
+            try:
+                fixture_records = load_qualification_fixture(
+                    Path(str(options["fixture"])).resolve(), registry,
+                )
+            except (OSError, ValueError, KeyError) as error:
+                raise CommandError(str(error)) from error
+            fixture_ids = {record.institution_id for record in fixture_records}
+            institutions = tuple(entry for entry in institutions if entry.registry_id in fixture_ids)
+            if not institutions:
+                raise CommandError("no fixture records in collectible requested scope")
 
         eligible_source_ids = {entry.source.registry_id for entry in institutions}
         eligible_institution_ids = {entry.registry_id for entry in institutions}
@@ -237,10 +262,9 @@ class Command(BaseCommand):
                     if record.institution_id in eligible_institution_ids
                 )
             else:
-                fixture_path = Path(str(options["fixture"])).resolve()
                 records = tuple(
                     record
-                    for record in load_qualification_fixture(fixture_path, registry)
+                    for record in fixture_records
                     if record.institution_id in eligible_institution_ids
                 )
             with transaction.atomic():

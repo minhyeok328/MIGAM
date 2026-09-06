@@ -71,6 +71,45 @@ def culture_api_response(request: object, timeout: float) -> StaticResponse:
 
 
 class SyncExhibitionsCommandTests(TestCase):
+    def test_scopes_fixture_to_requested_institution(self) -> None:
+        call_command(
+            "sync_exhibitions", fixture=str(FIXTURE),
+            institution=["sema-photo"], stdout=StringIO(),
+        )
+        self.assertEqual(SourceRecord.objects.count(), 5)
+        self.assertEqual(
+            list(InstitutionRunResult.objects.values_list(
+                "institution__registry_id", flat=True)), ["sema-photo"],
+        )
+
+    def test_rejects_unknown_or_mismatched_institution_before_run(self) -> None:
+        for institution in ("not-registered", "sema-photo"):
+            with self.subTest(institution=institution), self.assertRaises(CommandError):
+                call_command(
+                    "sync_exhibitions", fixture=str(FIXTURE),
+                    source="seoul-oa-2708-sejong", institution=[institution],
+                    stdout=StringIO(),
+                )
+        self.assertFalse(IngestionRun.objects.exists())
+
+    def test_rejects_fixture_without_records_in_requested_institution(self) -> None:
+        with self.assertRaisesRegex(CommandError, "no fixture records"):
+            call_command(
+                "sync_exhibitions", fixture=str(FIXTURE),
+                institution=["sema-seosomun"], stdout=StringIO(),
+            )
+        self.assertFalse(IngestionRun.objects.exists())
+
+    def test_requires_explicit_input_without_creating_a_run(self) -> None:
+        with self.assertRaisesRegex(CommandError, "Explicit input required"):
+            call_command("sync_exhibitions", stdout=StringIO())
+        self.assertFalse(IngestionRun.objects.exists())
+
+    def test_rejects_mixing_fixture_and_official_inputs(self) -> None:
+        with self.assertRaisesRegex(CommandError, "cannot be combined"):
+            call_command("sync_exhibitions", fixture=str(FIXTURE), sema_csv="unused.csv")
+        self.assertFalse(IngestionRun.objects.exists())
+
     def test_imports_sejong_csv_file_through_live_collector(self) -> None:
         with TemporaryDirectory() as directory:
             csv_path = Path(directory) / "sejong.csv"
@@ -294,12 +333,18 @@ class SyncExhibitionsCommandTests(TestCase):
         self.assertEqual(PromotionEvidence.objects.count(), 5)
         self.assertEqual(
             set(
-                InstitutionAllowlistEntry.objects.values_list(
+                InstitutionAllowlistEntry.objects.filter(
+                    registry_id__in={record["institution_id"] for record in
+                                     json.loads(FIXTURE.read_text(encoding="utf-8"))["records"]}
+                ).values_list(
                     "lifecycle",
                     flat=True,
                 )
             ),
             {InstitutionAllowlistEntry.Lifecycle.ACTIVE},
+        )
+        self.assertEqual(
+            InstitutionAllowlistEntry.objects.filter(lifecycle="PROVISIONAL").count(), 4,
         )
         self.assertTrue(
             all(

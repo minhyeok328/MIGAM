@@ -7,6 +7,7 @@ import json
 from django.db import transaction
 from django.utils import timezone
 
+from backend.apps.catalog.models import ExhibitionSourceLink
 from backend.apps.data_quality.models import ExhibitionCandidate
 from backend.apps.discovery.projection import rebuild_search_documents
 from backend.apps.sources.models import (
@@ -15,6 +16,7 @@ from backend.apps.sources.models import (
     SourceRecord,
 )
 from backend.data_pipeline.canonicalization import canonicalize_candidates
+from backend.data_pipeline.enrichment import backfill_source_evidence
 from backend.data_pipeline.models import RawExhibitionRecord
 from backend.data_pipeline.pipeline import ProcessedExhibition, process_records
 from backend.data_pipeline.registry import SourceRegistry
@@ -70,11 +72,14 @@ def persist_records(
                     ingestion_run=run,
                     source_record=source_record,
                 )
-                candidate, _ = ExhibitionCandidate.objects.get_or_create(
+                candidate, candidate_created = ExhibitionCandidate.objects.get_or_create(
                     source_record=source_record,
                     rule_version=item.normalized.rule_version,
                     defaults=_candidate_fields(item),
                 )
+                if not candidate_created and candidate.lifecycle != item.normalized.lifecycle:
+                    candidate.lifecycle = item.normalized.lifecycle
+                    candidate.save(update_fields=("lifecycle",))
                 candidates.append(candidate)
 
             canonicalize_candidates(
@@ -82,6 +87,9 @@ def persist_records(
                 registry=registry,
                 ingestion_run=run,
             )
+            backfill_source_evidence(registry, exhibition_ids=ExhibitionSourceLink.objects.filter(
+                latest_source_record_id__in=[candidate.source_record_id for candidate in candidates],
+            ).values_list("exhibition_id", flat=True))
             rebuild_search_documents()
 
             run.received_count = len(processed)
