@@ -1,0 +1,17 @@
+name: migam-local-demo
+services:
+  demo:
+    build:
+      context: .
+      target: demo
+    ports:
+      - "127.0.0.1:5181:8080"
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,noexec,size=256m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    init: true
+    stop_grace_period: 15s

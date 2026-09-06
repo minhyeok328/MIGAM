@@ -11,6 +11,7 @@ for (const method of ['info', 'warn', 'warnOnce', 'error'] as const) {
 }
 
 export default defineConfig(({ mode }) => ({
+  envDir: mode === 'demo' ? false : undefined,
   customLogger: logger,
   plugins: [react(), tailwindcss()],
   server: {
