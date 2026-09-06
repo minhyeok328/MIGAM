@@ -90,6 +90,8 @@ class SeoulCsvCollector:
                 source_field: _clean(row.get(columns[field_name]))
                 for field_name, source_field in fields.items()
             }
+            for source_field in source.get("optional_fields", {}).values():
+                selected_raw[source_field] = _clean(row.get(source_field))
             records.append(
                 RawExhibitionRecord(
                     source_id=self.source_id,

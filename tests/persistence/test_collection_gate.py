@@ -43,7 +43,7 @@ class CollectionGateTests(TestCase):
         active.lifecycle = InstitutionAllowlistEntry.Lifecycle.ACTIVE
         active.save(update_fields=("lifecycle", "updated_at"))
 
-        entries = select_entries(source_ids=(SEMA_SOURCE,))
+        entries = select_entries(source_ids=(SEMA_SOURCE,), institution_ids=("sema-seoseoul", "sema-photo"))
 
         self.assertEqual(
             {entry.registry_id for entry in entries},
@@ -62,7 +62,7 @@ class CollectionGateTests(TestCase):
         suspended.save(update_fields=("lifecycle", "updated_at"))
 
         with self.assertRaisesRegex(CollectionGateError, "no collectible institution"):
-            select_entries(source_ids=(SEMA_SOURCE,))
+            select_entries(source_ids=(SEMA_SOURCE,), institution_ids=("sema-seoseoul", "sema-photo"))
 
     def test_non_normal_source_is_rejected(self) -> None:
         select_entries, CollectionGateError = self.feature()
@@ -92,7 +92,7 @@ class CollectionGateTests(TestCase):
 
         self.assertEqual(
             tuple(entry.registry_id for entry in entries),
-            ("sema-photo",),
+            ("sema-art-archive", "sema-bukseoul", "sema-namseoul", "sema-photo", "sema-seosomun"),
         )
 
     def test_source_critical_blocks_every_connected_entry(self) -> None:

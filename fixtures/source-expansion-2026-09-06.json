@@ -1,0 +1,307 @@
+{
+  "verified_at": "2026-09-06",
+  "source_dataset": "https://data.seoul.go.kr/dataList/OA-15323/S/1/datasetView.do",
+  "download_sha256": "25862cf046a97ce8319493356155b3612a5ba788d6ef4419a21011ad660e6906",
+  "records": [
+    {
+      "institution_id": "sema-seosomun",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1559068",
+      "title": "《린 허쉬만 리슨: 나의 [나]들》",
+      "start_date": "2026-10-21",
+      "end_date": "2027-02-21",
+      "venue": "서울시립미술관 서소문본관",
+      "region": {
+        "area": "서울",
+        "district": "중구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1559068",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-seosomun",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1529410",
+      "title": "2026년 한국 근대 거장전 《유영국: 산은 내 안에 있다》",
+      "start_date": "2026-05-19",
+      "end_date": "2026-10-25",
+      "venue": "서울시립미술관 서소문본관",
+      "region": {
+        "area": "서울",
+        "district": "중구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1529410",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-seosomun",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1523485",
+      "title": "난지미술창작스튜디오 20주년 기념전 《사랑의 기원》",
+      "start_date": "2026-04-30",
+      "end_date": "2026-09-06",
+      "venue": "서울시립미술관 서소문본관",
+      "region": {
+        "area": "서울",
+        "district": "중구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1523485",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-seosomun",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1509709",
+      "title": "가나아트컬렉션 《기술의 저변: 경계에 선 장면들》",
+      "start_date": "2026-04-16",
+      "end_date": "2026-11-22",
+      "venue": "서울시립미술관 서소문본관",
+      "region": {
+        "area": "서울",
+        "district": "중구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1509709",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-seosomun",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1478064",
+      "title": "《최재은: 약속》",
+      "start_date": "2025-12-23",
+      "end_date": "2026-04-05",
+      "venue": "서울시립미술관 서소문본관",
+      "region": {
+        "area": "서울",
+        "district": "중구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1478064",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-bukseoul",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1563285",
+      "title": "2026 타이틀 매치 《오인환 vs. 장서영: 휴먼 에러》",
+      "start_date": "2026-08-13",
+      "end_date": "2026-10-25",
+      "venue": "서울시립 북서울미술관",
+      "region": {
+        "area": "서울",
+        "district": "노원구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1563285",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-bukseoul",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1549929",
+      "title": "유휴공간 전시 《보편타당한 당신 ? 심이다은》",
+      "start_date": "2026-06-25",
+      "end_date": "2027-04-11",
+      "venue": "서울시립 북서울미술관",
+      "region": {
+        "area": "서울",
+        "district": "노원구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1549929",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-bukseoul",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1538201",
+      "title": "《권병준: 내 마음속에 너는》",
+      "start_date": "2026-06-11",
+      "end_date": "2027-05-16",
+      "venue": "서울시립 북서울미술관",
+      "region": {
+        "area": "서울",
+        "district": "노원구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1538201",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-bukseoul",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1521429",
+      "title": "《글짓, 쓰는 예술》",
+      "start_date": "2026-04-23",
+      "end_date": "2026-07-12",
+      "venue": "서울시립 북서울미술관",
+      "region": {
+        "area": "서울",
+        "district": "노원구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1521429",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-bukseoul",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1512457",
+      "title": "유휴공간 프로젝트 전시 《몸을 위한 간주곡 ? 소목장세미》",
+      "start_date": "2026-04-02",
+      "end_date": "2027-05-30",
+      "venue": "서울시립 북서울미술관",
+      "region": {
+        "area": "서울",
+        "district": "노원구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1512457",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-namseoul",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1556711",
+      "title": "2026년 한국 대표 조각가전 《조숙진: 지나가는 자리》",
+      "start_date": "2026-07-29",
+      "end_date": "2026-11-15",
+      "venue": "서울시립 남서울미술관",
+      "region": {
+        "area": "서울",
+        "district": "관악구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1556711",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-namseoul",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1544638",
+      "title": "제14회 서울미디어시티비엔날레 사전프로그램 《포란》",
+      "start_date": "2026-05-20",
+      "end_date": "2026-07-05",
+      "venue": "서울시립 남서울미술관",
+      "region": {
+        "area": "서울",
+        "district": "관악구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1544638",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-namseoul",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1446062",
+      "title": "전국광: 쌓는 친구, 허무는 친구",
+      "start_date": "2025-09-24",
+      "end_date": "2026-02-22",
+      "venue": "서울시립 남서울미술관",
+      "region": {
+        "area": "서울",
+        "district": "관악구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1446062",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-namseoul",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1348834",
+      "title": "건축의 장면",
+      "start_date": "2024-11-22",
+      "end_date": "2025-06-01",
+      "venue": "서울시립 남서울미술관",
+      "region": {
+        "area": "서울",
+        "district": "관악구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1348834",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-namseoul",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1299359",
+      "title": "SeMA 옴니버스 《제9행성》",
+      "start_date": "2024-07-31",
+      "end_date": "2024-10-27",
+      "venue": "서울시립 남서울미술관",
+      "region": {
+        "area": "서울",
+        "district": "관악구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1299359",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-art-archive",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1576838",
+      "title": "《오윤》",
+      "start_date": "2026-08-27",
+      "end_date": "2027-02-14",
+      "venue": "서울시립 미술아카이브",
+      "region": {
+        "area": "서울",
+        "district": "종로구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1576838",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-art-archive",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1550876",
+      "title": "2026 폴리오 스튜디오 결과보고전 《아크 아크 아크》",
+      "start_date": "2026-06-17",
+      "end_date": "2026-06-21",
+      "venue": "서울시립 미술아카이브",
+      "region": {
+        "area": "서울",
+        "district": "종로구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1550876",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-art-archive",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1513028",
+      "title": "알렉사에게",
+      "start_date": "2026-03-26",
+      "end_date": "2026-07-26",
+      "venue": "서울시립 미술아카이브",
+      "region": {
+        "area": "서울",
+        "district": "종로구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1513028",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-art-archive",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1432256",
+      "title": "서울시립 미술아카이브 《다시, 지구: 다른 감각으로 응답하기》",
+      "start_date": "2025-08-28",
+      "end_date": "2026-02-22",
+      "venue": "서울시립 미술아카이브",
+      "region": {
+        "area": "서울",
+        "district": "종로구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1432256",
+      "expected_core_result": "PASS"
+    },
+    {
+      "institution_id": "sema-art-archive",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1375994",
+      "title": "우리는 끊임없이 다른 강에 스며든다",
+      "start_date": "2025-03-06",
+      "end_date": "2025-07-27",
+      "venue": "서울시립 미술아카이브",
+      "region": {
+        "area": "서울",
+        "district": "종로구"
+      },
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1375994",
+      "expected_core_result": "PASS"
+    }
+  ]
+}

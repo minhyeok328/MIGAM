@@ -79,7 +79,8 @@ class SeoulCsvCollectorTests(unittest.TestCase):
         csv_text = """DP_EX_NO,DP_NAME,DP_START,DP_END,DP_PLACE,DP_LNK
 1576627,플레이 라운지,2026-09-01,2026-10-11,서울시립 서서울미술관,https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1576627
 1553791,마틴 파,2026-07-16,2026-10-18,서울시립 사진미술관,https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1553791
-1111111,다른 분관 전시,2026-07-16,2026-10-18,서울시립 북서울미술관,https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1111111
+1111111,승인된 추가 분관 전시,2026-07-16,2026-10-18,서울시립 북서울미술관,https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1111111
+2222222,미등록 장소 전시,2026-07-16,2026-10-18,기타,https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=2222222
 """
 
         records = collector.collect(csv_text)
@@ -89,6 +90,7 @@ class SeoulCsvCollectorTests(unittest.TestCase):
             [
                 ("1576627", "sema-seoseoul"),
                 ("1553791", "sema-photo"),
+                ("1111111", "sema-bukseoul"),
             ],
         )
 

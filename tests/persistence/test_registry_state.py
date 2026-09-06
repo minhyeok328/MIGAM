@@ -38,7 +38,7 @@ class RegistryStateTests(TestCase):
         synchronize(registry)
 
         self.assertEqual(Source.objects.count(), 3)
-        self.assertEqual(InstitutionAllowlistEntry.objects.count(), 5)
+        self.assertEqual(InstitutionAllowlistEntry.objects.count(), 9)
         self.assertEqual(CollectionIssue.objects.count(), 1)
         entry = InstitutionAllowlistEntry.objects.get(registry_id="nfm-seoul-main")
         self.assertEqual(entry.source.registry_id, "kcisa-cultureinfo")

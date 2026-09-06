@@ -1,5 +1,7 @@
-schema_version: "1.0"
+schema_version: "1.2"
 approved_at: "2026-08-30"
+expanded_at: "2026-09-06"
+expansion_task_packet: "TP-008"
 decision_id: "OD-003"
 qualification_fixture: "fixtures/source-qualification.json"
 
@@ -91,10 +93,22 @@ sources:
       DP_END: "전시끝기간"
       DP_PLACE: "전시장소"
       DP_LNK: "바로가기링크"
+    optional_fields:
+      price: "관람료(원)"
+      operating_schedule: "전시(관람)시간"
+      media: "전시부문"
+    optional_fields_review:
+      approved_at: "2026-09-06"
+      task_packet: "TP-007"
+      evidence: "공식 CSV의 해당 열과 데이터셋 공공누리 1유형 확인"
     source_filter:
       venues:
         - "서울시립 서서울미술관"
         - "서울시립 사진미술관"
+        - "서울시립미술관 서소문본관"
+        - "서울시립 북서울미술관"
+        - "서울시립 남서울미술관"
+        - "서울시립 미술아카이브"
       official_url_host: "sema.seoul.go.kr"
       official_url_path: "/kr/whatson/exhibition/detail"
       official_url_query:
@@ -134,13 +148,18 @@ sources:
       region: "area"
       district: "sigungu"
       official_url: "url"
+    optional_fields:
+      price: "price"
+    optional_fields_review:
+      approved_at: "2026-09-06"
+      task_packet: "TP-007"
+      evidence: "공공데이터포털의 가격 제공과 이용허락범위 제한 없음 확인"
     excluded_fields:
       - "contents1"
       - "imgUrl"
       - "gpsX"
       - "gpsY"
       - "phone"
-      - "price"
 
 institution_allowlist:
   - id: "sejong-center-main-exhibition"
@@ -191,6 +210,78 @@ institution_allowlist:
       result: "PASS"
       core_pass: 5
       sample_count: 5
+
+  - id: "sema-seosomun"
+    name: "서울시립미술관 서소문본관"
+    source_id: "seoul-oa-15323-sema"
+    lifecycle: "PROVISIONAL"
+    health: "HEALTHY"
+    promotion_validation_started_at: "2026-09-06"
+    consecutive_final_failed_count: 0
+    source_filter:
+      DP_PLACE: "서울시립미술관 서소문본관"
+    region:
+      area: "서울"
+      district: "중구"
+    qualification:
+      result: "PASS"
+      core_pass: 5
+      sample_count: 5
+      evidence: "fixtures/source-expansion-2026-09-06.json"
+
+  - id: "sema-bukseoul"
+    name: "서울시립 북서울미술관"
+    source_id: "seoul-oa-15323-sema"
+    lifecycle: "PROVISIONAL"
+    health: "HEALTHY"
+    promotion_validation_started_at: "2026-09-06"
+    consecutive_final_failed_count: 0
+    source_filter:
+      DP_PLACE: "서울시립 북서울미술관"
+    region:
+      area: "서울"
+      district: "노원구"
+    qualification:
+      result: "PASS"
+      core_pass: 5
+      sample_count: 5
+      evidence: "fixtures/source-expansion-2026-09-06.json"
+
+  - id: "sema-namseoul"
+    name: "서울시립 남서울미술관"
+    source_id: "seoul-oa-15323-sema"
+    lifecycle: "PROVISIONAL"
+    health: "HEALTHY"
+    promotion_validation_started_at: "2026-09-06"
+    consecutive_final_failed_count: 0
+    source_filter:
+      DP_PLACE: "서울시립 남서울미술관"
+    region:
+      area: "서울"
+      district: "관악구"
+    qualification:
+      result: "PASS"
+      core_pass: 5
+      sample_count: 5
+      evidence: "fixtures/source-expansion-2026-09-06.json"
+
+  - id: "sema-art-archive"
+    name: "서울시립 미술아카이브"
+    source_id: "seoul-oa-15323-sema"
+    lifecycle: "PROVISIONAL"
+    health: "HEALTHY"
+    promotion_validation_started_at: "2026-09-06"
+    consecutive_final_failed_count: 0
+    source_filter:
+      DP_PLACE: "서울시립 미술아카이브"
+    region:
+      area: "서울"
+      district: "종로구"
+    qualification:
+      result: "PASS"
+      core_pass: 5
+      sample_count: 5
+      evidence: "fixtures/source-expansion-2026-09-06.json"
 
   - id: "suma-haenggung"
     name: "수원시립미술관 행궁 본관"

@@ -2,7 +2,7 @@
 title: "미감 결정 등록부"
 status: DRAFT
 version: "0.5.0"
-last_updated: "2026-09-05"
+last_updated: "2026-09-06"
 authoritative_for:
   - "제품 기획의 확정·폐기·미확정 결정 추적"
   - "후반 결정이 대체한 초기안 기록"
@@ -156,6 +156,8 @@ related_documents:
 | SUP-013 | `SUPERSEDED` | `PROVISIONAL` 기관은 원본·검증 이력만 만들고 정본·검색·추천·사용자 서비스에 사용할 수 없음 | DEC-098 |
 
 ## 9. 열린 결정
+
+2026-09-06 TP-008 위임과 추가 심사에 따라 OD-003은 공식 Source 3개·기관 9곳으로 확대했다. 서소문본관·북서울미술관·남서울미술관·미술아카이브의 최근 전시 각 5건이 모두 CORE_PASS다. 추가 20건의 근거는 [확대 심사 fixture](../../fixtures/source-expansion-2026-09-06.json)와 [Source Qualification](../02-data/source-qualification.md)에 기록한다. 초기 5곳의 심사 기록과 보류 기관의 HOLD는 유지하며, 추가 기관의 첫 lifecycle도 PROVISIONAL이다.
 
 | ID | 상태 | 결정이 필요한 내용 | 영향 문서 |
 | --- | --- | --- | --- |
