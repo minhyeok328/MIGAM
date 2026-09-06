@@ -1,8 +1,8 @@
 ---
 title: "미감(美感) Data Model"
 status: DRAFT
-version: "0.3.4"
-last_updated: "2026-09-02"
+version: "0.3.5"
+last_updated: "2026-09-06"
 authoritative_for:
   - "공식 전시 데이터의 개념 엔터티와 관계"
   - "원본·정규화값·출처 증거·검증 이력의 분리"
@@ -98,8 +98,8 @@ Exhibition과 Institution 사이의 역할을 표현한다. 개최 장소, 운�
 
 | 개념 | 모델 경계 |
 | --- | --- |
-| OperatingSchedule | 정규 운영시간, 휴관 규칙, 임시 변경을 구분 |
-| PriceOption | 대상, 금액 또는 범위, 무료 여부, 기본권·할인·프로그램 구분과 `UNKNOWN` 근거 상태 |
+| OperatingSchedule | 전시 또는 기관, 현재 SourceRecord, 적용 시작·종료일, 정기 요일별 개관·휴관과 임시 변경, `CONFIRMED | UNKNOWN`을 구분 |
+| PriceOption | 대상, 금액 또는 범위, 무료 여부, 기본권·할인·프로그램 구분과 `UNKNOWN` 근거 상태, 자동 변환한 가격의 `rule_version` |
 | ReservationInfo | 예약 유형 또는 `UNKNOWN`, 공식 링크, 안내 문구; 잔여석·매진 상태는 포함하지 않음 |
 | VisitDuration | 기관이 직접 안내한 공식값과 `UNKNOWN`을 구분 |
 | AccessibilityFact | 휠체어 접근, 이동, 자막, 수어, 오디오 설명, 연령 조건의 긍정·부정·`UNKNOWN` 상태 |
@@ -110,6 +110,10 @@ Exhibition과 Institution 사이의 역할을 표현한다. 개최 장소, 운�
 요금, 예약, 관람시간, 접근성, 감각 정보는 값의 부재만으로 의미를 추측하지 않도록 근거 상태에 `UNKNOWN`을 명시할 수 있어야 한다. 물리 저장 방식이 null과 상태 필드를 조합하더라도 API·도메인 경계에서는 `UNKNOWN`과 확인된 부정·해당 없음·수집 실패를 구분한다.
 
 `TP-003`의 물리 정본은 다섯 선택 정보마다 Exhibition 또는 Institution 중 정확히 한 대상, SourceRecord와 확인 시각을 요구한다. 가격의 `CONFIRMED | UNKNOWN`, 예약의 8개 정본값, 관람시간의 `OFFICIAL | UNKNOWN`, 접근성·감각의 `CONFIRMED_POSITIVE | CONFIRMED_NEGATIVE | UNKNOWN`은 저장 단계부터 분리한다. `UNKNOWN` 행에는 금액·무료 여부·예약 링크·시간 범위처럼 확인된 사실로 오해할 값을 함께 저장하지 않는다. SourceRecord의 기관 식별자와 대상 기관이 다른 행은 정본 근거로 승인하지 않는다.
+
+`TP-007`의 OperatingSchedule도 같은 대상·SourceRecord·확인 시각 계약을 따른다. `REGULAR`은 명시한 요일(월요일 0~일요일 6)의 개관 또는 휴관을, `OVERRIDE`는 적용 기간 전체의 임시 개관·휴관을 나타낸다. 각 행은 유효한 적용 시작·종료일과 정규화 규칙 버전을 보존한다. 개관 행은 개관·폐관 시각을 모두 가지며 개관이 폐관보다 빨라야 한다. 휴관 행은 시각을 갖지 않는다. `UNKNOWN`은 개관 여부·요일·시각을 추정해 채우지 않으며 원문 근거는 SourceRecord와 안내 문구에 보존한다. 요일별 운영시간이 다르면 행을 나누고, 공식 근거가 없는 요일은 휴관 또는 개관으로 간주하지 않는다. 야간 자정 넘김·공휴일 예외처럼 승인 파서로 완전하게 표현할 수 없는 원문은 `UNKNOWN`이다.
+
+운영일 판정은 전시 기간과 요청 기간의 교집합 안에서 적용되는 현재 출처 근거만 사용한다. 임시 변경이 정기 규칙에 우선하고 같은 종류에서는 전시 근거가 기관 근거에 우선한다. 같은 우선순위에서 개관 여부나 시간이 다르면 `UNKNOWN`이며 임의로 최신 행 하나를 선택하지 않는다. 정본 출처 연결이 갱신되면 이전 SourceRecord의 일정은 현재 관람 가능일 근거에서 제외한다.
 
 ## 6. 분류와 설명 데이터
 

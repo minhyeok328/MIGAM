@@ -1,8 +1,8 @@
 ---
 title: "미감(美感) Data Pipeline"
 status: DRAFT
-version: "0.3.2"
-last_updated: "2026-09-01"
+version: "0.3.3"
+last_updated: "2026-09-06"
 authoritative_for:
   - "공식 출처에서 정본·검색·추천 데이터로 이어지는 처리 단계"
   - "증분 수집·재시도·충돌·중복·실패 복구 원칙"
@@ -107,18 +107,26 @@ P0에서는 새 전시, 종료일 변경·연장, 요금 변경, 장소 변경, 
 
 ### 2.3 P0 관리 명령과 스케줄러 계약
 
+TP-007부터 자격 심사 fixture는 `--fixture`로 명시한 오프라인 검증에만 사용한다. 실제 `refresh_exhibition`·`refresh_due_exhibitions`는 문화정보 API의 해당 `seq` 상세를 순차 재확인하고, 서울 Source는 `--sejong-csv`·`--sema-csv`로 전달한 최신 공식 다운로드를 사용한다. 필요한 파일·키가 없으면 과거 fixture로 대체하지 않는다. `--source`는 due 대상의 Source를 제한한다. 선택된 기관의 수집 게이트를 통과한 뒤 네트워크에 접근한다.
+
+`rebuild_discovery_data`는 registry 초기화·시간 경과 생명주기/최신성·선택정보 백필·검색 파생본을 갱신하는 오프라인 명령이다. 원본 재조회, 마지막 공식 확인 시각 갱신, VerificationRecord·승격 성공 생성을 하지 않는다. 기존 DB 업그레이드는 `scripts/prepare_local_data.py`의 SQLite backup → migrate → 이 명령 순서로 수행하며 백업은 Git에서 제외된 `data/incoming/backups/`에 보관한다.
+
 P0의 동기화·재확인 실행은 다음 명령 계약을 사용한다.
 
+TP-008에서 `sync_exhibitions --institution=<institution_key>`는 반복 지정 가능한 기관 범위다. 등록된 Source와 일치하는 기관만 선택하며 공통 수집 게이트는 그대로 적용한다. 명시적 fixture는 그 파일에 포함된 기관에만 실행 결과를 만든다. registry에 나중에 추가된 무관한 기관을 성공·실패·승격 검증 대상으로 포함하지 않는다.
+
 ```text
-uv run python manage.py sync_exhibitions
-uv run python manage.py refresh_due_exhibitions
-uv run python manage.py sync_exhibitions --source=<source_key>
-uv run python manage.py sync_exhibitions --qualification
-uv run python manage.py refresh_exhibition --id=<canonical_id>
+uv run python manage.py sync_exhibitions --sema-csv=<latest_official_csv>
+uv run python manage.py sync_exhibitions --sema-csv=<latest_official_csv> --institution=<institution_key>
+uv run python manage.py refresh_due_exhibitions --source=seoul-oa-15323-sema --sema-csv=<latest_official_csv>
+uv run python manage.py refresh_due_exhibitions --source=kcisa-cultureinfo
+uv run python manage.py sync_exhibitions --source=<source_key> --fixture=<approved_offline_fixture>
+uv run python manage.py sync_exhibitions --qualification --fixture=<approved_offline_fixture>
+uv run python manage.py refresh_exhibition --id=<canonical_id> --sema-csv=<latest_official_csv>
 uv run python manage.py show_refresh_schedule
 ```
 
-- 인자 없는 `sync_exhibitions`는 `PROVISIONAL` 또는 `ACTIVE` InstitutionAllowlistEntry, 정상 Source, 영향 scope의 미해결 Critical CollectionIssue 0건을 모두 충족한 기관 범위를 증분 동기화한다. `--source=<source_key>`도 이 수집 전 게이트를 통과한 연결 기관이 하나 이상일 때만 시작한다. 알 수 없거나 미등록·일시 중단·사용 중지인 Source, `CANDIDATE`·`SUSPENDED`, 미해결 Critical 영향 범위는 네트워크 수집 전에 거부한다. `DEGRADED` health만으로 실행을 막지 않으며 우선 재검증 근거로 사용한다. 허용된 공유 Source가 반환한 각 레코드는 연결된 기관 lifecycle과 CollectionIssue scope를 다시 판정하고, `PROVISIONAL`과 `ACTIVE` 모두 같은 레코드 게이트와 정상 게시 경로를 사용한다.
+- `sync_exhibitions`는 공식 CSV/API 기간 또는 명시적 fixture 입력이 필요하며 입력이 없거나 두 모드가 혼합되면 실행 전에 거부한다. `PROVISIONAL` 또는 `ACTIVE` InstitutionAllowlistEntry, 정상 Source, 영향 scope의 미해결 Critical CollectionIssue 0건을 모두 충족한 기관 범위를 증분 동기화한다. `--source=<source_key>`도 이 수집 전 게이트를 통과한 연결 기관이 하나 이상일 때만 시작한다. 알 수 없거나 미등록·일시 중단·사용 중지인 Source, `CANDIDATE`·`SUSPENDED`, 미해결 Critical 영향 범위는 네트워크 수집 전에 거부한다. `DEGRADED` health만으로 실행을 막지 않으며 우선 재검증 근거로 사용한다. 허용된 공유 Source가 반환한 각 레코드는 연결된 기관 lifecycle과 CollectionIssue scope를 다시 판정하고, `PROVISIONAL`과 `ACTIVE` 모두 같은 레코드 게이트와 정상 게시 경로를 사용한다.
 - `sync_exhibitions --qualification`은 승인 표본의 핵심 대상 수를 완전히 처리했는지 확인하는 명시적 승격 검증 실행이다. 이 모드에서만 `PROVISIONAL` 기관별 InstitutionQualificationRun과 승격 성공일을 만들며, 일반 sync와 전시 단위 refresh를 승격 증거로 세지 않는다. 기관별 `CORE_PASS + VERIFIED + 비격리` 대상과 같은 기관·Source·source_record_id의 열린 `RECORD_EXCEPTION + ENTRY + QUARANTINE_RECORD` 근거가 일치하는 승인 단건 격리를 합친 핵심 처리 완료 수가 `qualification_target_count`에 미달하면 그 기관 결과와 QualificationRun, 전체 자격 IngestionRun을 최종 `FAILED`로 기록한다. 승인된 단건 격리는 처리 완료로 인정하되 의미 변경 근거에서는 제외하고, 그 밖의 `CORE_FAIL`은 완료 수에 포함하지 않는다.
 - `refresh_due_exhibitions`는 상태·시작일·마지막 성공 공식 확인 시각과 출처별 허용 호출 조건으로 재확인 대상을 계산하고, 그 대상만 같은 수집·정규화·품질 흐름으로 처리한다.
 - `refresh_exhibition --id=<canonical_id>`는 운영자가 지정한 정본 전시의 공식 근거를 즉시 재확인하되, 연결 기관이 `PROVISIONAL` 또는 `ACTIVE`이고 Source가 정상이며 미해결 Critical 영향 범위 밖일 때만 사용한다. `CANDIDATE`·`SUSPENDED`, 미해결 Critical 또는 미등록·일시 중단·사용 중지 Source를 ID 지정으로 우회하지 않는다.
