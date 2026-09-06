@@ -88,6 +88,13 @@ function ExhibitionDetails({
     <div className="card-body">
       {showImage && <h3 className="image-card-title">{item.title}</h3>}
       {item.matchLevel && <div className="match-label">{matches[item.matchLevel]}</div>}
+      {item.visitAvailability && (
+        <p className="card-meta">
+          확인된 첫 관람일: {day(item.visitAvailability.first_open_date)} ·{' '}
+          {item.visitAvailability.opens_at.slice(0, 5)}–
+          {item.visitAvailability.closes_at.slice(0, 5)}
+        </p>
+      )}
       {item.reason && <p className="reason">{item.reason}</p>}
       {item.verification && (
         <ul className="verification-labels">
@@ -122,6 +129,14 @@ function ExhibitionDetails({
           <br />
           확인: {new Date(item.verifiedAt).toLocaleString('ko-KR', { timeZone: 'Asia/Seoul' })}
         </p>
+        {item.visitAvailability && (
+          <p>
+            운영일 확인:{' '}
+            {new Date(item.visitAvailability.verified_at).toLocaleString('ko-KR', {
+              timeZone: 'Asia/Seoul',
+            })}
+          </p>
+        )}
         {!demo && item.mediaPage && (
           <a
             href={item.mediaPage}
@@ -134,6 +149,9 @@ function ExhibitionDetails({
         )}
       </details>
       <div className="card-footer">
+        <a href={`/exhibitions/${item.id}`} aria-label={`${item.title} 상세 보기`}>
+          상세 보기 →
+        </a>
         {demo ? (
           <span className="demo-card-note">가상 전시 · UI 체험용</span>
         ) : (

@@ -3,12 +3,14 @@ import { useDiscovery } from '../app/providers';
 import { SiteShell } from '../app/SiteShell';
 import { SearchPanel } from '../features/discovery/SearchPanel';
 import { RecommendationPanel } from '../features/discovery/RecommendationPanel';
+import { ProductNavigation } from '../features/personal/PersonalControls';
 
 export function DiscoveryPage() {
   const { state, demo } = useDiscovery();
 
   return (
     <SiteShell currentPage="discover" tone="paper" demo={demo}>
+      <ProductNavigation />
       <main id="main-content" className="discovery-page" tabIndex={-1}>
         <section
           id="discovery-tools"

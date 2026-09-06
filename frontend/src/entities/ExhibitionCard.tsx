@@ -27,6 +27,9 @@ export function InstitutionCard({ item }: { item: InstitutionView }) {
         <span className="editorial-label">문화예술 공간</span>
       </div>
       <h3>{item.name}</h3>
+      <a className="text-button" href={`/institutions/${item.id}`}>
+        {item.name} 상세 보기 →
+      </a>
       <p>
         {item.area} {item.district}
       </p>

@@ -45,6 +45,11 @@
     align-self: start;
   }
 
+  .exhibition-card--catalog .card-cover:not(.has-image) {
+    aspect-ratio: auto;
+    min-height: 200px;
+  }
+
   .exhibition-card--editorial .card-cover {
     aspect-ratio: 4 / 5;
   }
@@ -155,6 +160,7 @@
 
   .card-footer {
     @apply mt-2 flex min-h-12 items-center border-t border-line;
+    flex-wrap: wrap;
   }
 
   .card-footer a {
@@ -189,6 +195,11 @@
   .institution-count {
     @apply mt-8 flex justify-between border-t border-line pt-5;
   }
+}
+
+.exhibition-card .card-cover:not(.has-image) {
+  aspect-ratio: auto;
+  min-height: 250px;
 }
 
 @media (max-width: 1100px) {

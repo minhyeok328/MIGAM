@@ -1,19 +1,69 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, Info } from 'lucide-react';
-import { useDiscovery } from '../../app/providers';
+import { useDiscovery, usePersonal } from '../../app/providers';
+import { recommendationSignals } from '../personal/store';
 import { areas, moods, accessibilityOptions, sensoryOptions, reservationOptions } from './forms';
 import { ConditionDialog } from './ConditionDialog';
 import { ExhibitionCard } from '../../entities/ExhibitionCard';
 import { EmptyState, ErrorNotice, FormError, LoadingState } from '../../shared/ui/Feedback';
+import type { TasteFeature } from '../personal/store';
 
 export function RecommendationPanel() {
   const { state, api, demo } = useDiscovery();
+  const personal = usePersonal();
+  const signals = recommendationSignals(personal.data);
+  const preferences = [
+    ...(signals.preferred_features ?? []),
+    ...(state.recommendationRequest.preferred_features ?? []),
+  ];
+  const preferredFeatures = preferences.filter(
+    (value, index) =>
+      preferences.findIndex((other) => other.axis === value.axis && other.value === value.value) ===
+      index,
+  );
   const [error, setError] = useState('');
   const draft = state.recommendationDraft;
   const query = useQuery({
-    queryKey: ['recommendations', state.recommendationRevision],
-    queryFn: ({ signal }) => api.recommend(state.recommendationRequest, signal),
+    queryKey: ['recommendations', state.recommendationRevision, personal.revision],
+    queryFn: async ({ signal }) => {
+      const artworkFeatures: TasteFeature[] = [];
+      let skippedArtworks = 0;
+      for (let offset = 0; offset < personal.data.artworks.length; offset += 8) {
+        signal.throwIfAborted();
+        const results = await Promise.allSettled(
+          personal.data.artworks.slice(offset, offset + 8).map((id) => api.artwork(id, signal)),
+        );
+        for (const result of results) {
+          if (result.status !== 'fulfilled' || result.value.artwork.is_demo !== demo) {
+            skippedArtworks++;
+            continue;
+          }
+          artworkFeatures.push(
+            ...result.value.artwork.features.map(({ axis, value }) => ({ axis, value })),
+          );
+        }
+      }
+      signal.throwIfAborted();
+      const allFeatures = [...preferredFeatures, ...artworkFeatures];
+      const uniqueFeatures = allFeatures
+        .filter(
+          (feature, index) =>
+            allFeatures.findIndex(
+              (other) => other.axis === feature.axis && other.value === feature.value,
+            ) === index,
+        )
+        .slice(0, 100);
+      const result = await api.recommend(
+        {
+          ...signals,
+          ...state.recommendationRequest,
+          ...(uniqueFeatures.length ? { preferred_features: uniqueFeatures } : {}),
+        },
+        signal,
+      );
+      return { ...result, skippedArtworks };
+    },
   });
   const applied = state.recommendationRequest;
   return (
@@ -89,8 +139,8 @@ export function RecommendationPanel() {
           </label>
         </div>
         <p className="helper-note">
-          날짜는 전시 기간과 비교합니다. 휴관일·개관 시간·예약 가능 여부는 공식 페이지에서
-          확인해주세요.
+          날짜를 선택하면 공식 일정에서 개관일이 확인된 전시만 추천합니다. 운영일 미확인 전시는
+          제외하며, 예약 가능 여부는 공식 페이지에서 확인해주세요.
         </p>
         <fieldset className="mood-section">
           <legend>
@@ -152,6 +202,10 @@ export function RecommendationPanel() {
           </p>
         </div>
         <div className="applied-tags" aria-label="적용한 추천 조건">
+          {!!personal.data.taste.length && <span>저장한 취향 반영</span>}
+          {!!personal.data.artworks.length && <span>관심 작품의 확인된 특성 반영</span>}
+          {!!personal.data.exhibitions.length && <span>관심 전시 반영</span>}
+          {!!personal.data.institutions.length && <span>관심 기관 반영</span>}
           <span>
             {applied.region
               ? `${applied.region.area} ${applied.region.district ?? ''}`
@@ -202,10 +256,21 @@ export function RecommendationPanel() {
             ))}
         </div>
         <p className="result-caution">
-          전시 기간 기준의 추천입니다. 실제 개관 여부는 방문 전에 확인해주세요.
+          {applied.visit_dates
+            ? '선택 기간에 공식 개관 일정이 확인된 전시만 추천합니다. 예약 가능 여부는 공식 안내에서 확인해주세요.'
+            : '방문 날짜를 선택하면 공식 개관 일정이 확인된 전시로 좁힐 수 있습니다.'}
         </p>
         {query.isPending && <LoadingState />}
         {query.isError && <ErrorNotice error={query.error} retry={() => void query.refetch()} />}
+        {!!query.data?.skippedArtworks && (
+          <p role="status">
+            관심 작품 {query.data.skippedArtworks}개의 정보를 확인하지 못해 해당 작품의 특성은
+            제외했어요.{' '}
+            <button className="text-button" onClick={() => void query.refetch()}>
+              다시 확인
+            </button>
+          </p>
+        )}
         {query.data && !query.data.recommendations.length && <EmptyState recommendation />}
         <div className="results-grid editorial-results-grid">
           {query.data?.recommendations.map((item, index) => (
