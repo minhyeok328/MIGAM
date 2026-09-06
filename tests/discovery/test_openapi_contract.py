@@ -75,7 +75,7 @@ class InternalOpenAPIContractTests(SimpleTestCase):
         )
 
     def test_document_defines_recommendation_post_request_contract(self) -> None:
-        self.assertEqual(self.document["info"]["version"], "1.1.1")
+        self.assertEqual(self.document["info"]["version"], "1.4.0")
         operation = self.document["paths"][
             "/api/internal/v1/recommendations/"
         ]["post"]
@@ -203,3 +203,27 @@ class InternalOpenAPIContractTests(SimpleTestCase):
             ]["code"]["enum"],
             ["INVALID_RECOMMENDATION_REQUEST"],
         )
+
+    def test_detail_contract_has_bounded_institution_listing_and_fact_provenance(self) -> None:
+        paths = self.document["paths"]
+        exhibition = paths["/api/internal/v1/exhibitions/{id}/"]["get"]
+        institution = paths["/api/internal/v1/institutions/{id}/"]["get"]
+        self.assertEqual(exhibition["operationId"], "getExhibitionDetail")
+        self.assertEqual(set(exhibition["responses"]), {"200", "404"})
+        self.assertEqual(institution["operationId"], "getInstitutionDetail")
+        parameters = {item["name"]: item for item in institution["parameters"]}
+        self.assertEqual(parameters["page_size"]["schema"]["maximum"], 24)
+        schemas = self.document["components"]["schemas"]
+        self.assertEqual(set(schemas["ExhibitionDetailResponse"]["required"]), {
+            "exhibition", "visit_information", "features", "operating_schedule",
+        })
+        self.assertEqual(schemas["EvidenceState"]["enum"], ["CONFIRMED", "UNKNOWN", "CONFLICT"])
+        self.assertEqual(set(schemas["DetailEvidence"]["required"]), {"scope", "verified_at", "source"})
+        for name in ("DetailPrice", "DetailReservation", "DetailDuration", "DetailAccessibility", "DetailSensory"):
+            self.assertIn("evidence", schemas[name]["required"])
+            self.assertFalse(schemas[name]["additionalProperties"])
+        self.assertEqual(schemas["DetailOperatingSchedule"]["properties"]["visit_availability"], {
+            "$ref": "#/components/schemas/VisitAvailability",
+        })
+        for field in ("payload", "content_hash", "origin_url", "registry_id", "health"):
+            self.assertNotIn(field, schemas["ExhibitionDetailResponse"]["properties"])

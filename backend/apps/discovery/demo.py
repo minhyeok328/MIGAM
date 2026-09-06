@@ -1,6 +1,6 @@
 """Fictional, opt-in records for an isolated TP-006 demonstration database."""
 
-from datetime import timedelta
+from datetime import time, timedelta
 from decimal import Decimal
 from hashlib import sha256
 
@@ -9,8 +9,8 @@ from django.db import transaction
 from django.utils import timezone
 
 from backend.apps.catalog.models import (
-    AccessibilityFact, Exhibition, ExhibitionSourceLink, Institution,
-    PriceOption, ReservationInfo, SensoryNotice, VisitDuration,
+    AccessibilityFact, Artwork, ArtworkFeatureAssertion, Exhibition, ExhibitionSourceLink, Institution,
+    OperatingSchedule, PriceOption, ReservationInfo, SensoryNotice, VisitDuration,
 )
 from backend.apps.discovery.features import FeatureAssertionInput, record_content_feature_snapshot
 from backend.apps.discovery.projection import rebuild_search_documents
@@ -21,7 +21,7 @@ from backend.apps.sources.models import SourceRecord
 def seed_demo() -> None:
     if not getattr(settings, "MIGAM_DEMO_MODE", False):
         raise RuntimeError("Demo seeding requires explicit isolated demo mode.")
-    if Institution.objects.exists() or Exhibition.objects.exists() or SourceRecord.objects.exists():
+    if Institution.objects.exists() or Exhibition.objects.exists() or SourceRecord.objects.exists() or Artwork.objects.exists():
         raise RuntimeError("Demo seeding refuses a database containing existing records.")
 
     institutions = [
@@ -74,6 +74,15 @@ def seed_demo() -> None:
             exhibition=exhibition, source_id=source.source_id,
             source_record_id=source.source_record_id, latest_source_record=source,
         )
+        for weekdays, is_open in (([1, 2, 3, 4, 5, 6], True), ([0], False)):
+            OperatingSchedule.objects.create(
+                exhibition=exhibition, source_record=source,
+                status=OperatingSchedule.Status.CONFIRMED, kind=OperatingSchedule.Kind.REGULAR,
+                effective_from=start, effective_to=end, weekdays=weekdays, is_open=is_open,
+                opens_at=time(10) if is_open else None, closes_at=time(18) if is_open else None,
+                details="가상 데모 일정: 화~일 10:00~18:00, 월요일 휴관",
+                rule_version="fictional-demo-v1",
+            )
         record_content_feature_snapshot(exhibition=exhibition, assertions=(
             FeatureAssertionInput(axis="MOOD", value=mood, evidence_kind="DIRECT", source_record=source),
             FeatureAssertionInput(axis="MEDIA_GROUP", value=media, evidence_kind="DIRECT", source_record=source),
@@ -103,4 +112,33 @@ def seed_demo() -> None:
             exhibition=exhibition, source_record=source, kind=SensoryNotice.Kind.FLASHING_LIGHTS,
             state=SensoryNotice.State.CONFIRMED_NEGATIVE if index % 2 == 0 else SensoryNotice.State.UNKNOWN,
         )
+    _seed_artworks(institutions)
     rebuild_search_documents()
+
+
+def _seed_artworks(institutions: list[Institution]) -> None:
+    """Private helper called only inside the guarded, atomic isolated demo seed."""
+    for index, (title, creator, creator_id, year, medium, media, mood, institution_index) in enumerate((
+        ("푸른 여백 · 가상", "가상 작가 하나", "fictional-creator-1", "2024", "캔버스에 유채", "PAINTING", "CALM", 0),
+        ("겹친 계절 · 가상", "가상 작가 하나", "fictional-creator-1", "2025", "종이에 채색", "PAINTING", "REFLECTIVE", 1),
+        ("오후의 기록 · 가상", "가상 작가 둘", "fictional-creator-2", "2023", "사진", "PHOTOGRAPHY", "CALM", 0),
+        ("이름 없는 공간 · 가상", "작자 미상 · 가상", "", "제작연도 미상", "복합 재료", "INSTALLATION", "EXPERIMENTAL", 2),
+    )):
+        institution = institutions[institution_index]
+        record_id = f"fictional-artwork-{index}"
+        source = SourceRecord.objects.create(
+            source_id="fictional-demo-only", institution_id=institution.registry_id,
+            source_record_id=record_id, source_owner=institution.name,
+            payload={"fictional": True, "title": title, "media": media, "mood": mood},
+            content_hash=sha256(record_id.encode()).hexdigest(),
+        )
+        artwork = Artwork.objects.create(
+            source_id=source.source_id, source_artwork_id=record_id, source_record=source,
+            title=title, creator_name=creator, creator_official_id=creator_id,
+            creator_state="KNOWN" if creator_id else "UNKNOWN", production_year=year, medium=medium,
+            collection_institution=institution, culture_state="UNKNOWN",
+            official_url=f"https://example.com/fictional/artworks/{index}",
+            last_verified_at=source.last_seen_at, eligibility="DEMO", is_demo=True,
+        )
+        for axis, value in (("MEDIA_GROUP", media), ("MOOD", mood)):
+            ArtworkFeatureAssertion.objects.create(artwork=artwork, source_record=source, axis=axis, value=value)

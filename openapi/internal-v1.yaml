@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: 미감 내부 API
-  version: 1.1.1
+  version: 1.4.0
   description: 로컬 프론트엔드와 후속 챗봇이 사용하는 비공개 내부 계약입니다.
 paths:
   /api/internal/v1/search/:
@@ -108,8 +108,468 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/RecommendationError"
+  /api/internal/v1/exhibitions/{id}/:
+    get:
+      operationId: getExhibitionDetail
+      summary: 출처와 방문 근거를 포함한 전시 상세
+      description: 검색 적격성 게이트를 통과한 전시만 반환합니다. 운영일은 Asia/Seoul의 오늘부터 종료일까지 해석하며 종료·취소 전시의 방문 가능성을 만들지 않습니다.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: 전시 상세
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ExhibitionDetailResponse"
+        "404":
+          description: 없거나 사용자에게 노출할 수 없는 전시
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetailError"
+  /api/internal/v1/institutions/{id}/:
+    get:
+      operationId: getInstitutionDetail
+      summary: 기관 정보와 노출 가능한 전시 목록
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: page_size
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 24, default: 24 }
+      responses:
+        "200":
+          description: 현재·예정·종료·취소 순서의 안전한 기관 전시 목록
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InstitutionDetailResponse"
+        "400":
+          description: 페이지 조건 오류
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetailError"
+        "404":
+          description: 없거나 노출 가능한 전시가 없는 기관
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DetailError"
+  /api/internal/v1/artworks/:
+    get:
+      operationId: listArtworks
+      summary: 작품 메타데이터 목록
+      description: 승인된 실제 작품 Source가 없어 일반 모드는 SOURCE_PENDING과 빈 목록을 반환합니다. 가상 작품은 명시적인 격리 데모 모드에서만 보입니다. 검색어를 저장하지 않으며 이미지 URL을 반환하지 않습니다.
+      parameters:
+        - name: q
+          in: query
+          schema: { type: string, maxLength: 100 }
+        - name: institution_id
+          in: query
+          schema: { type: integer, minimum: 1 }
+        - name: media_group
+          in: query
+          schema:
+            type: string
+            enum: [PAINTING, SCULPTURE, CRAFT, PHOTOGRAPHY, VIDEO, SOUND, INSTALLATION, PERFORMANCE, INTERACTIVE, MEDIA_ART, DESIGN, ARCHITECTURE]
+        - name: page
+          in: query
+          schema: { type: integer, minimum: 1, default: 1 }
+        - name: page_size
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 24, default: 24 }
+      responses:
+        "200":
+          description: 작품 목록 또는 출처 승인 대기 상태
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtworkListResponse"
+        "400":
+          description: 잘못된 검색·페이지 조건 또는 지원하지 않는·중복 조건
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtworkError"
+  /api/internal/v1/artworks/{id}/:
+    get:
+      operationId: getArtworkDetail
+      summary: 작품 근거와 확인된 유사 관계
+      description: 제작자·소장기관의 유사성은 출품 관계가 아닙니다. 공식 출품 관계 모델이 없으므로 exhibition_links는 UNCONFIRMED와 빈 배열입니다. 일반 모드의 미승인 데이터와 데모 행은 모두 404입니다.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: 노출 가능한 작품 상세
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtworkDetailResponse"
+        "404":
+          description: 없거나 노출할 수 없는 작품
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ArtworkError"
 components:
   schemas:
+    ArtworkListResponse:
+      type: object
+      additionalProperties: false
+      required: [total, page, page_size, has_more, results, availability]
+      properties:
+        total: { type: integer, minimum: 0 }
+        page: { type: integer, minimum: 1 }
+        page_size: { type: integer, minimum: 1, maximum: 24 }
+        has_more: { type: boolean }
+        availability: { type: string, enum: [DEMO, SOURCE_PENDING] }
+        results:
+          type: array
+          maxItems: 24
+          items:
+            $ref: "#/components/schemas/ArtworkResult"
+    ArtworkResult:
+      type: object
+      additionalProperties: false
+      required: [type, id, source_artwork_id, title, creator, production_year, medium, collection_institution, cultural_context, official_url, last_verified_at, eligibility, is_demo, source, media, features]
+      properties:
+        type: { type: string, enum: [ARTWORK] }
+        id: { type: integer, minimum: 1 }
+        source_artwork_id: { type: string, minLength: 1, maxLength: 255 }
+        title: { type: string, minLength: 1, maxLength: 500 }
+        creator:
+          $ref: "#/components/schemas/ArtworkCreator"
+        production_year: { type: string, minLength: 1, maxLength: 100 }
+        medium: { type: string, minLength: 1, maxLength: 500 }
+        collection_institution:
+          $ref: "#/components/schemas/InstitutionReference"
+        cultural_context:
+          $ref: "#/components/schemas/ArtworkCulture"
+        official_url: { type: string, format: uri, pattern: "^https://" }
+        last_verified_at: { type: string, format: date-time }
+        eligibility: { type: string, enum: [VERIFIED, DEMO] }
+        is_demo: { type: boolean }
+        source:
+          $ref: "#/components/schemas/SourceEvidence"
+        media:
+          $ref: "#/components/schemas/ArtworkHiddenMedia"
+        features:
+          type: array
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/DetailFeature"
+    ArtworkCreator:
+      type: object
+      additionalProperties: false
+      required: [name, official_id, state]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 255 }
+        official_id: { type: [string, "null"], minLength: 1, maxLength: 255 }
+        state: { type: string, enum: [KNOWN, UNKNOWN] }
+      allOf:
+        - if:
+            properties:
+              state: { const: UNKNOWN }
+          then:
+            properties:
+              official_id: { type: "null" }
+    ArtworkCulture:
+      type: object
+      additionalProperties: false
+      required: [state, value, is_korean]
+      properties:
+        state: { type: string, enum: [CONFIRMED, UNKNOWN] }
+        value: { type: [string, "null"], minLength: 1, maxLength: 255 }
+        is_korean: { type: [boolean, "null"] }
+      allOf:
+        - if:
+            properties:
+              state: { const: UNKNOWN }
+          then:
+            properties:
+              value: { type: "null" }
+              is_korean: { type: "null" }
+    ArtworkHiddenMedia:
+      type: object
+      additionalProperties: false
+      required: [status, media_url, page_url, credit_line]
+      properties:
+        status: { type: string, enum: [HIDDEN] }
+        media_url: { type: "null" }
+        page_url: { type: "null" }
+        credit_line: { type: "null" }
+    ArtworkDetailResponse:
+      type: object
+      additionalProperties: false
+      required: [artwork, similar_artworks, exhibition_links]
+      properties:
+        artwork:
+          $ref: "#/components/schemas/ArtworkResult"
+        similar_artworks:
+          type: array
+          maxItems: 6
+          items:
+            $ref: "#/components/schemas/SimilarArtwork"
+        exhibition_links:
+          type: object
+          additionalProperties: false
+          required: [state, exhibitions]
+          properties:
+            state: { type: string, enum: [UNCONFIRMED] }
+            exhibitions:
+              type: array
+              maxItems: 0
+              items:
+                $ref: "#/components/schemas/ExhibitionSearchResult"
+    SimilarArtwork:
+      type: object
+      additionalProperties: false
+      required: [artwork, reasons]
+      properties:
+        artwork:
+          $ref: "#/components/schemas/ArtworkResult"
+        reasons:
+          type: array
+          minItems: 1
+          maxItems: 2
+          uniqueItems: true
+          items: { type: string, enum: [SAME_CREATOR, SAME_COLLECTION] }
+    ArtworkError:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, details]
+          properties:
+            code: { type: string, enum: [INVALID_ARTWORK_QUERY, NOT_FOUND] }
+            message: { type: string }
+            details: { type: object, additionalProperties: true }
+    ExhibitionDetailResponse:
+      type: object
+      additionalProperties: false
+      required: [exhibition, visit_information, features, operating_schedule]
+      properties:
+        exhibition:
+          $ref: "#/components/schemas/ExhibitionSearchResult"
+        visit_information:
+          $ref: "#/components/schemas/VisitInformation"
+        features:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetailFeature"
+        operating_schedule:
+          $ref: "#/components/schemas/DetailOperatingSchedule"
+    InstitutionDetailResponse:
+      type: object
+      additionalProperties: false
+      required: [institution, total, page, page_size, has_more, exhibitions]
+      properties:
+        institution:
+          $ref: "#/components/schemas/InstitutionSearchResult"
+        total: { type: integer, minimum: 1 }
+        page: { type: integer, minimum: 1 }
+        page_size: { type: integer, minimum: 1, maximum: 24 }
+        has_more: { type: boolean }
+        exhibitions:
+          type: array
+          maxItems: 24
+          items:
+            $ref: "#/components/schemas/ExhibitionSearchResult"
+    DetailEvidence:
+      type: object
+      additionalProperties: false
+      required: [scope, verified_at, source]
+      properties:
+        scope: { type: string, enum: [EXHIBITION, INSTITUTION] }
+        verified_at: { type: string, format: date-time }
+        source:
+          $ref: "#/components/schemas/SourceEvidence"
+    EvidenceState:
+      type: string
+      enum: [CONFIRMED, UNKNOWN, CONFLICT]
+    VisitInformation:
+      type: object
+      additionalProperties: false
+      required: [price, reservation, duration, accessibility, sensory]
+      properties:
+        price:
+          $ref: "#/components/schemas/DetailPrice"
+        reservation:
+          $ref: "#/components/schemas/DetailReservation"
+        duration:
+          $ref: "#/components/schemas/DetailDuration"
+        accessibility:
+          type: array
+          maxItems: 6
+          items:
+            $ref: "#/components/schemas/DetailAccessibility"
+        sensory:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/DetailSensory"
+    DetailPrice:
+      type: object
+      description: 일반 성인 기본 관람권의 확인된 비교 금액입니다. 공식 가격 범위가 있으면 상한을 쓰고 할인·단체권을 대신 쓰지 않습니다. 미확인·충돌 시 금액은 null입니다.
+      additionalProperties: false
+      required: [state, amount, currency, is_free, evidence]
+      properties:
+        state:
+          $ref: "#/components/schemas/EvidenceState"
+        amount: { type: [number, "null"], minimum: 0 }
+        currency: { type: [string, "null"] }
+        is_free: { type: [boolean, "null"] }
+        evidence:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetailEvidence"
+    DetailReservation:
+      type: object
+      additionalProperties: false
+      required: [state, reservation_type, official_urls, guidance, evidence]
+      properties:
+        state:
+          $ref: "#/components/schemas/EvidenceState"
+        reservation_type:
+          type: [string, "null"]
+          enum: [NOT_REQUIRED, REQUIRED, RECOMMENDED, TIMED_ENTRY, ON_SITE, FIRST_COME, PROGRAM_ONLY, null]
+        official_urls:
+          type: array
+          uniqueItems: true
+          items: { type: string, format: uri }
+        guidance:
+          type: array
+          uniqueItems: true
+          items: { type: string, maxLength: 2000 }
+        evidence:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetailEvidence"
+    DetailDuration:
+      type: object
+      additionalProperties: false
+      required: [state, minimum_minutes, maximum_minutes, evidence]
+      properties:
+        state:
+          $ref: "#/components/schemas/EvidenceState"
+        minimum_minutes: { type: [integer, "null"], minimum: 1 }
+        maximum_minutes: { type: [integer, "null"], minimum: 1 }
+        evidence:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetailEvidence"
+    DetailAccessibility:
+      type: object
+      additionalProperties: false
+      required: [kind, state, value, details, evidence]
+      properties:
+        kind:
+          type: string
+          enum: [WHEELCHAIR_ACCESS, MOBILITY_ACCESS, CAPTIONS, SIGN_LANGUAGE, AUDIO_DESCRIPTION, AGE_CONDITION]
+        state:
+          $ref: "#/components/schemas/EvidenceState"
+        value: { type: [string, "null"], enum: [CONFIRMED_POSITIVE, CONFIRMED_NEGATIVE, null] }
+        details:
+          type: array
+          uniqueItems: true
+          items: { type: string, maxLength: 2000 }
+        evidence:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetailEvidence"
+    DetailSensory:
+      type: object
+      additionalProperties: false
+      required: [kind, state, value, details, evidence]
+      properties:
+        kind:
+          type: string
+          enum: [LOUD_SOUND, SUDDEN_SOUND, FLASHING_LIGHTS, DARK_SPACE, NARROW_OR_ENCLOSED_SPACE]
+        state:
+          $ref: "#/components/schemas/EvidenceState"
+        value: { type: [string, "null"], enum: [CONFIRMED_POSITIVE, CONFIRMED_NEGATIVE, null] }
+        details:
+          type: array
+          uniqueItems: true
+          items: { type: string, maxLength: 2000 }
+        evidence:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetailEvidence"
+    DetailFeature:
+      type: object
+      additionalProperties: false
+      required: [axis, value, evidence_kind, rule_version, source]
+      properties:
+        axis:
+          type: string
+          enum: [MEDIA_GROUP, MEDIA_DETAIL, THEME, MOOD, EXPERIENCE, SPACE_TYPE, EVENT_FORMAT]
+        value: { type: string, pattern: "^[A-Z0-9][A-Z0-9_:-]{0,63}$" }
+        evidence_kind: { type: string, enum: [DIRECT, DERIVED] }
+        rule_version: { type: [string, "null"] }
+        source:
+          $ref: "#/components/schemas/SourceEvidence"
+    DetailOperatingSchedule:
+      type: object
+      additionalProperties: false
+      required: [state, visit_availability, rules]
+      properties:
+        state: { type: string, enum: [OPEN, CLOSED, UNKNOWN] }
+        visit_availability:
+          $ref: "#/components/schemas/VisitAvailability"
+        rules:
+          type: array
+          items:
+            $ref: "#/components/schemas/DetailScheduleRule"
+    DetailScheduleRule:
+      type: object
+      additionalProperties: false
+      required: [status, kind, effective_from, effective_to, weekdays, is_open, opens_at, closes_at, rule_version, evidence]
+      properties:
+        status: { type: string, enum: [CONFIRMED, UNKNOWN] }
+        kind: { type: string, enum: [REGULAR, OVERRIDE] }
+        effective_from: { type: string, format: date }
+        effective_to: { type: string, format: date }
+        weekdays:
+          type: array
+          uniqueItems: true
+          maxItems: 7
+          items: { type: integer, minimum: 0, maximum: 6 }
+        is_open: { type: [boolean, "null"] }
+        opens_at: { type: [string, "null"], pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$" }
+        closes_at: { type: [string, "null"], pattern: "^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$" }
+        rule_version: { type: string }
+        evidence:
+          $ref: "#/components/schemas/DetailEvidence"
+    DetailError:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          type: object
+          additionalProperties: false
+          required: [code, message, details]
+          properties:
+            code: { type: string, enum: [NOT_FOUND, INVALID_DETAIL_QUERY] }
+            message: { type: string }
+            details: { type: object, additionalProperties: true }
     RecommendationRequest:
       type: object
       additionalProperties: false
@@ -293,6 +753,24 @@ components:
           maxItems: 24
           items:
             $ref: "#/components/schemas/VerificationCandidate"
+    VisitAvailability:
+      type: [object, "null"]
+      additionalProperties: false
+      description: First officially confirmed open day in the requested date range; not a reservation or seat availability guarantee.
+      required: [first_open_date, opens_at, closes_at, verified_at]
+      properties:
+        first_open_date:
+          type: string
+          format: date
+        opens_at:
+          type: string
+          pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$'
+        closes_at:
+          type: string
+          pattern: '^([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$'
+        verified_at:
+          type: string
+          format: date-time
     ExhibitionRecommendation:
       type: object
       additionalProperties: false
@@ -358,6 +836,8 @@ components:
         match_level:
           type: string
           enum: [VERY_CLOSE, GOOD_MATCH, SOME_MATCH, GENERAL, EXPLORATION]
+        visit_availability:
+          $ref: "#/components/schemas/VisitAvailability"
         is_exploration:
           type: boolean
         reasons:
@@ -426,6 +906,8 @@ components:
           $ref: "#/components/schemas/SourceEvidence"
         media:
           $ref: "#/components/schemas/MediaPresentation"
+        visit_availability:
+          $ref: "#/components/schemas/VisitAvailability"
         verification_reasons:
           type: array
           minItems: 1
