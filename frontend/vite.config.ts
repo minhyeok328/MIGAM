@@ -11,7 +11,7 @@ for (const method of ['info', 'warn', 'warnOnce', 'error'] as const) {
 }
 
 export default defineConfig(({ mode }) => ({
-  envDir: mode === 'demo' ? false : undefined,
+  envDir: ['demo', 'local-data'].includes(mode) ? false : undefined,
   customLogger: logger,
   plugins: [react(), tailwindcss()],
   server: {
@@ -22,5 +22,10 @@ export default defineConfig(({ mode }) => ({
       },
     },
   },
-  test: { environment: 'jsdom', setupFiles: ['./src/test/setup.ts'], restoreMocks: true },
+  test: {
+    include: ['src/**/*.test.{ts,tsx}'],
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.ts'],
+    restoreMocks: true,
+  },
 }));

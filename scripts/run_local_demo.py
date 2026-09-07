@@ -42,9 +42,10 @@ class ThreadingDemoServer(ThreadingMixIn, WSGIServer):
 
 
 class DemoApplication:
-    def __init__(self, dist, api):
+    def __init__(self, dist, api, *, mode="fictional-demo"):
         self.dist = Path(dist).resolve()
         self.api = api
+        self.mode = mode
 
     def __call__(self, environ, start_response):
         path = environ.get("PATH_INFO", "/")
@@ -58,7 +59,7 @@ class DemoApplication:
                 with connection.cursor() as cursor:
                     cursor.execute("SELECT 1")
                     cursor.fetchone()
-                status, body = "200 OK", b'{"status":"ok","mode":"fictional-demo"}'
+                status, body = "200 OK", json.dumps({"status": "ok", "mode": self.mode}).encode()
             except Exception:
                 status, body = "503 Service Unavailable", b'{"status":"unavailable"}'
             finally:
@@ -96,7 +97,7 @@ class DemoApplication:
         return contents()
 
 
-def build_assets(destination):
+def build_assets(destination, *, mode="demo"):
     node = shutil.which("node")
     frontend = ROOT / "frontend"
     if node is None or not (frontend / "node_modules" / "vite" / "bin" / "vite.js").is_file():
@@ -104,7 +105,7 @@ def build_assets(destination):
     environment = {key: value for key, value in os.environ.items() if not key.startswith("VITE_")}
     for script, arguments in [
         ("typescript/bin/tsc", ["--noEmit"]),
-        ("vite/bin/vite.js", ["build", "--mode", "demo", "--outDir", str(destination), "--emptyOutDir"]),
+        ("vite/bin/vite.js", ["build", "--mode", mode, "--outDir", str(destination), "--emptyOutDir"]),
     ]:
         subprocess.run([node, str(frontend / "node_modules" / script), *arguments],
                        cwd=frontend, env=environment, check=True)
