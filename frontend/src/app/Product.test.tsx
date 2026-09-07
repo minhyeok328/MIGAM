@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, expect, it } from 'vitest';
 import { App } from './App';
@@ -80,12 +80,20 @@ it('connects discovery to detail, saved comparison and confirmed local reset', a
   await user.type(screen.getByRole('searchbox'), '사적인 입력');
   await user.click(await screen.findByRole('link', { name: '고요의 형태 상세 보기' }));
   expect(await screen.findByRole('heading', { level: 1, name: '고요의 형태' })).toBeInTheDocument();
-  expect(screen.getAllByText('확인 필요').length).toBeGreaterThan(0);
+  const visitInfo = screen.getByRole('region', { name: '관람 안내' });
+  expect(within(visitInfo).getAllByRole('link', { name: '공식 전시 안내' }).length).toBe(1);
+  for (const link of within(visitInfo).getAllByRole('link', { name: '공식 전시 안내' })) {
+    expect(link).toHaveAttribute('href', detailFixture.exhibition.official_url);
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+  }
+  expect(within(visitInfo).queryByText('확인된 첫 관람일')).not.toBeInTheDocument();
   await user.click(screen.getByRole('button', { name: '관심 저장' }));
   await user.click(screen.getByRole('button', { name: '비교 추가' }));
   await user.click(screen.getByRole('link', { name: /비교.*1/ }));
   expect(await screen.findByRole('heading', { level: 1, name: '전시 비교' })).toBeInTheDocument();
   expect(await screen.findByRole('link', { name: '고요의 형태' })).toBeInTheDocument();
+  expect(screen.queryByRole('rowheader', { name: '확인된 첫 관람일' })).not.toBeInTheDocument();
+  expect(screen.getAllByRole('link', { name: '공식 안내에서 확인' }).length).toBeGreaterThan(0);
   await user.click(screen.getByRole('link', { name: '전시 찾기' }));
   expect(screen.getByRole('searchbox')).toHaveValue('사적인 입력');
   expect(localStorage.getItem('migam:personal:v1')).not.toContain('사적인 입력');
@@ -121,4 +129,81 @@ it('uses saved taste in recommendations without persisting conditions', async ()
       expect.objectContaining({ preferred_features: [{ axis: 'MEDIA_GROUP', value: 'PAINTING' }] }),
     ),
   );
+});
+
+it('keeps mixed opening evidence aligned with the correct exhibition in comparison', async () => {
+  const user = userEvent.setup();
+  const openDetail = {
+    ...detailFixture,
+    exhibition: { ...detailFixture.exhibition, id: 2, title: '개관일 확인 전시' },
+    operating_schedule: {
+      state: 'OPEN',
+      rules: [],
+      visit_availability: {
+        first_open_date: '2026-09-08',
+        opens_at: '10:00:00',
+        closes_at: '18:00:00',
+        verified_at: '2026-09-07T00:00:00Z',
+      },
+    },
+  };
+  window.history.replaceState(null, '', '/discover');
+  render(
+    <App
+      api={createDiscoveryApi(async (input) => {
+        const url = new Request(input).url;
+        return Response.json(
+          url.includes('/exhibitions/2/')
+            ? openDetail
+            : url.includes('/exhibitions/1/')
+              ? detailFixture
+              : {
+                  ...searchFixture,
+                  total: 2,
+                  results: [detailFixture.exhibition, openDetail.exhibition],
+                },
+        );
+      })}
+    />,
+  );
+  await user.click(await screen.findByRole('link', { name: '고요의 형태 상세 보기' }));
+  await user.click(await screen.findByRole('button', { name: '비교 추가' }));
+  await user.click(screen.getByRole('link', { name: '전시 찾기' }));
+  await user.click(await screen.findByRole('link', { name: '개관일 확인 전시 상세 보기' }));
+  await user.click(await screen.findByRole('button', { name: '비교 추가' }));
+  await user.click(screen.getByRole('link', { name: /비교.*2/ }));
+  const openingRow = (await screen.findByRole('rowheader', { name: '확인된 첫 관람일' })).closest(
+    'tr',
+  )!;
+  const cells = within(openingRow).getAllByRole('cell');
+  expect(within(cells[0]).getByRole('link', { name: '공식 안내에서 확인' })).toHaveAttribute(
+    'href',
+    detailFixture.exhibition.official_url,
+  );
+  expect(cells[1]).toHaveTextContent('2026-09-08');
+  const accessRow = screen.getByRole('rowheader', { name: '휠체어 접근' }).closest('tr')!;
+  expect(within(accessRow).getAllByRole('link', { name: '공식 안내에서 확인' })).toHaveLength(2);
+});
+
+it('keeps unknown and conflicting demo facts free of external guidance links', async () => {
+  window.history.replaceState(null, '', '/exhibitions/1');
+  render(
+    <App
+      demo
+      api={createDiscoveryApi(async () =>
+        Response.json({
+          ...detailFixture,
+          visit_information: {
+            ...detailFixture.visit_information,
+            price: { ...detailFixture.visit_information.price, state: 'CONFLICT' },
+          },
+        }),
+      )}
+    />,
+  );
+  const info = await screen.findByRole('region', { name: '관람 안내' });
+  expect(within(info).getByText('출처 간 정보 충돌 · 확인 필요')).toBeInTheDocument();
+  expect(within(info).queryByRole('link')).not.toBeInTheDocument();
+  expect(within(info).queryByText('무료')).not.toBeInTheDocument();
+  expect(within(info).queryByText('확인된 첫 관람일')).not.toBeInTheDocument();
 });

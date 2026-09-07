@@ -1,7 +1,7 @@
 import { useQueries } from '@tanstack/react-query';
 import { useDiscovery, usePersonal } from '../app/providers';
 import { ProductLayout } from './ProductLayout';
-import { visitRows, factRows, DetailFailure } from './DetailPage';
+import { visitRows, factRows, DetailFailure, VisitValue } from './DetailPage';
 import { accessibilityOptions, sensoryOptions } from '../features/discovery/forms';
 import { LikeButton, CompareButton } from '../features/personal/PersonalControls';
 
@@ -21,7 +21,10 @@ export function ComparePage() {
     '관람료',
     '예약',
     '예상 관람시간',
-    '확인된 첫 관람일',
+    '운영일·시간',
+    ...(queries.some((query) => query.data?.operating_schedule.visit_availability)
+      ? ['확인된 첫 관람일']
+      : []),
     ...Object.values(accessibilityOptions),
     ...Object.values(sensoryOptions),
     '연령 조건',
@@ -66,27 +69,43 @@ export function ComparePage() {
               </tr>
             </thead>
             <tbody>
-              {labels.map((label, row) => (
+              {labels.map((label) => (
                 <tr key={label}>
                   <th scope="row">{label}</th>
                   {queries.map((query, index) => {
                     const detail = query.data;
-                    const values = detail
+                    const rows = detail
                       ? [
-                          states[detail.item.lifecycle],
-                          `${detail.item.startDate} — ${detail.item.endDate}`,
-                          `${detail.item.area} ${detail.item.district} · ${detail.item.venue}`,
-                          ...visitRows(detail).map(([, value]) => value),
-                          ...factRows(detail).map(([, value]) => value),
-                          `${detail.item.sourceOwner} · ${detail.item.freshness === 'STALE' ? '재확인 필요 · ' : ''}${new Date(detail.item.verifiedAt).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}`,
+                          ['상태', states[detail.item.lifecycle]],
+                          ['기간', `${detail.item.startDate} — ${detail.item.endDate}`],
+                          [
+                            '장소',
+                            `${detail.item.area} ${detail.item.district} · ${detail.item.venue}`,
+                          ],
+                          ...visitRows(detail),
+                          ...factRows(detail),
+                          [
+                            '정보 확인',
+                            `${detail.item.sourceOwner} · ${detail.item.freshness === 'STALE' ? '재확인 필요 · ' : ''}${new Date(detail.item.verifiedAt).toLocaleDateString('ko-KR', { timeZone: 'Asia/Seoul' })}`,
+                          ],
                         ]
                       : [];
+                    const cell = rows.find(([name]) => name === label);
                     return (
                       <td
                         key={personal.compare[index]}
                         data-title={detail?.item.title ?? `전시 ${index + 1}`}
                       >
-                        {values[row] ?? '확인 필요'}
+                        {detail ? (
+                          <VisitValue
+                            value={cell?.[1] ?? '확인 필요'}
+                            state={cell?.[2] ?? (cell ? undefined : 'UNKNOWN')}
+                            officialUrl={detail.item.officialUrl}
+                            demo={demo}
+                          />
+                        ) : (
+                          '확인 필요'
+                        )}
                       </td>
                     );
                   })}
