@@ -1,0 +1,69 @@
+name: Local product regression
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: local-regression-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  local-product:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CI: "true"
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24.15.0"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d # v10.0.1
+        with:
+          version: "0.12.0"
+          python-version: "3.11"
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Install locked dependencies
+        run: |
+          uv sync --project backend --locked
+          npm ci --prefix frontend
+      - name: Check backend and local runtime
+        run: |
+          backend/.venv/bin/python backend/manage.py test tests --verbosity 1
+          backend/.venv/bin/python backend/manage.py makemigrations --check --dry-run
+      - name: Check frontend and API contract
+        working-directory: frontend
+        run: |
+          npm test
+          npm run api:check
+          npm run build
+          npm run format:check
+      - name: Install test browsers
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Exercise the isolated local product
+        working-directory: frontend
+        run: npm run test:e2e:all
+      - name: Upload fictional test failures only
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: local-browser-failure
+          path: |
+            output/playwright/report/
+            output/playwright/results/
+          if-no-files-found: ignore
+          retention-days: 7

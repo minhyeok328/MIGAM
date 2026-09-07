@@ -13,10 +13,13 @@
     "build:preview": "tsc --noEmit && vite build --mode home-preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
+    "test:e2e": "playwright test --project=chromium --project=mobile-chromium --project=webkit --project=official-guidance",
+    "test:e2e:all": "playwright test --project=chromium --project=mobile-chromium --project=firefox --project=webkit --project=official-guidance",
+    "test:e2e:install": "playwright install chromium firefox webkit",
     "api:generate": "node scripts/generate-api.mjs",
     "api:check": "node scripts/generate-api.mjs --check",
-    "format": "prettier --write src scripts vite.config.ts tsconfig.json package.json index.html",
-    "format:check": "prettier --check src scripts vite.config.ts tsconfig.json package.json index.html"
+    "format": "prettier --write src scripts e2e playwright.config.ts vite.config.ts tsconfig.json package.json index.html",
+    "format:check": "prettier --check src scripts e2e playwright.config.ts vite.config.ts tsconfig.json package.json index.html"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "1.1.23",
@@ -30,6 +33,7 @@
     "zustand": "5.0.15"
   },
   "devDependencies": {
+    "@playwright/test": "1.63.0",
     "@tailwindcss/vite": "4.3.3",
     "@testing-library/jest-dom": "7.0.1",
     "@testing-library/react": "16.3.3",

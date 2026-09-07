@@ -21,6 +21,7 @@ frontend/node_modules/
 frontend/dist/
 frontend/coverage/
 frontend/*.tsbuildinfo
+output/playwright/
 
 # Local Vercel project link
 .vercel/
