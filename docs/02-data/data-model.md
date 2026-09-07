@@ -1,8 +1,8 @@
 ---
 title: "미감(美感) Data Model"
 status: DRAFT
-version: "0.3.5"
-last_updated: "2026-09-06"
+version: "0.3.6"
+last_updated: "2026-09-07"
 authoritative_for:
   - "공식 전시 데이터의 개념 엔터티와 관계"
   - "원본·정규화값·출처 증거·검증 이력의 분리"
@@ -59,6 +59,10 @@ related_documents:
 최소 품질 판정은 별도 콘텐츠 엔터티가 아니라 Exhibition과 FieldEvidence, Source의 현재 상태에서 계산하는 품질 결과다. 모든 핵심 항목이 유효한 결과를 `CORE_PASS`로 기록한다. 하나라도 없거나 무효·미확인·해결되지 않은 충돌이면 `CORE_PASS`가 아니며 정상 검색·추천 파생본을 만들지 않는다. 생명주기 `ENDED`와 `CANCELED`는 유효한 사실 상태이므로 `CORE_PASS`일 수 있지만 현재 추천에는 들어가지 않는다.
 
 요금, 예약, 관람시간, 접근성, 감각 정보는 핵심 게이트 밖의 선택 방문 정보다. 이 값들의 `UNKNOWN`은 게이트 합격을 막지 않으며, 해당 값을 요구하는 추천 요청이 들어왔을 때 후보 충족 여부를 별도로 제한한다.
+
+### 3.1.1 ExhibitionContent · TP-011
+
+선택적 소개 스냅샷으로 현재 SourceRecord·정본 식별 fingerprint에 묶어 소개, 볼거리, 관람 안내 문구, 공식 URL·책임 기관·검토 시각·만료 시각·자료 hash를 보존한다. 원본 교체·정본 식별 변경·만료 시 표시에서 제외하며 core 확인 시각과 방문 조건 확정값을 변경하지 않는다. 세부 계약은 [TP-011](../07-execution/task-packets/TP-011-exhibition-content.md)을 따른다.
 
 ### 3.2 Institution
 

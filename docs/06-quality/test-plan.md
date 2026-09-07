@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 테스트 계획"
 status: DRAFT
-version: "0.3.6"
-last_updated: "2026-09-06"
+version: "0.3.7"
+last_updated: "2026-09-07"
 authoritative_for:
   - "P0 계층별 테스트 전략과 검증 범위"
   - "데이터·추천·백엔드·프론트·E2E·브라우저·접근성 테스트 시나리오"
@@ -23,7 +23,9 @@ related_documents:
 
 ## 1. 목적과 현재 상태
 
-이 문서는 P0를 데이터 입력부터 사용자 판단까지 반복 검증하는 방법을 정의한다. 현재 Django 데이터·서비스·API 테스트는 `backend/`에서 `uv run python manage.py test ../tests --verbosity 1`, 프론트 단위·컴포넌트 테스트는 `frontend/`에서 `npm test`로 실행한다. OpenAPI 생성 타입·Zod 경계와 격리 데모 API 테스트도 존재한다. 테스트 수와 통과 결과는 실행 날짜별 작업 패킷에 기록하며 고정된 현재 수치로 복제하지 않는다. 자동 브라우저 E2E 러너는 후속 범위다.
+이 문서는 P0를 데이터 입력부터 사용자 판단까지 반복 검증하는 방법을 정의한다. 현재 Django 데이터·서비스·API 테스트는 저장소 루트에서 `backend/.venv/bin/python backend/manage.py test tests --verbosity 1`(Windows는 `.\backend\.venv\Scripts\python.exe`), 프론트 단위·컴포넌트 테스트는 `frontend/`에서 `npm test`로 실행한다. OpenAPI 생성 타입·Zod 경계와 격리 데모 API 테스트도 존재한다. 테스트 수와 통과 결과는 실행 날짜별 작업 패킷에 기록하며 고정된 현재 수치로 복제하지 않는다.
+
+TP-010은 `frontend/e2e/`의 Playwright 회귀와 `.github/workflows/local-regression.yml`을 추가했다. 기본 `npm run test:e2e`는 Chromium·390px·WebKit의 실제 가상 Django API 흐름과 별도 공식 링크 fixture를 검사한다. `npm run test:e2e:all`은 Firefox를 포함하며 CI의 전체 검사 명령이다. 실패 trace·스크린샷은 `output/playwright/`에만 기록하고 CI에서는 가상 응답을 담은 실패 산출물만 7일 보관한다. 외부 사이트를 차단하고 실DB·사용자 브라우저 상태를 사용하지 않는다. 로컬 결과와 미실행 원격 CI를 구분하며 [TP-010 검증 기록](tp-010-verification.md)을 따른다.
 
 검증 기술의 방향은 다음과 같이 확정되어 있다.
 

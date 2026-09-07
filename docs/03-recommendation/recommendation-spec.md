@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 추천 명세"
 status: DRAFT
-version: "0.3.2"
-last_updated: "2026-09-06"
+version: "0.3.3"
+last_updated: "2026-09-07"
 authoritative_for:
   - "추천 후보 생성과 제외 규칙"
   - "개인화 신호와 점진적 개인화"
@@ -16,6 +16,10 @@ related_documents:
 ---
 
 # 미감 P0 추천 명세
+
+## 초기 출시 추천 · TP-009
+
+2026-09-07 사용자 승인으로 기본 UI는 `exhibition_dates`를 사용한다. 전시 기간과 요청 기간의 inclusive overlap만 확인하며 운영일 미확인만으로 제외하지 않는다. `visit_dates`는 기존 엄격한 개관일 계약을 유지하고 두 조건이 있으면 교집합에서 개관일을 찾는다. `exhibition_dates`만 전달한 응답은 확인된 관람일을 만들어 내지 않는다. 예산·예약·예상 관람시간 입력은 초기 화면에서 제외하지만 내부 API의 명시적 필수조건과 UNKNOWN 처리, 안전조건 판정은 그대로 적용한다.
 
 ## 1. 목적과 경계
 

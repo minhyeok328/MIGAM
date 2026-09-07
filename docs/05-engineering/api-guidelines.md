@@ -1,8 +1,8 @@
 ---
 title: "미감 API 가이드라인"
 status: DRAFT
-version: "0.2.4"
-last_updated: "2026-09-06"
+version: "0.2.6"
+last_updated: "2026-09-07"
 authoritative_for:
   - "P0 내부 API 계약 원칙"
   - "OpenAPI와 생성 클라이언트 경계"
@@ -14,6 +14,14 @@ related_documents:
 ---
 
 # 미감 API 가이드라인
+
+## TP-011 전시 콘텐츠 확장 · 2026-09-07
+
+현재 계약은 OpenAPI **1.6.0**이다. 전시 상세에 nullable `content`를 추가해 공식 페이지를 검토한 소개·볼거리·관람 안내 문구와 URL·책임 기관·검토일·만료일을 전달한다. 근거 원본 교체·정본 식별 변경·만료 시 `content=null`이며 상세 자체는 유지한다. 이 문구는 기존 `visit_information` 및 `operating_schedule`의 확정 상태나 추천 조건을 바꾸지 않는다. 생성 TypeScript와 Zod 경계를 함께 갱신한다.
+
+## TP-009 호환 확장 · 2026-09-07
+
+OpenAPI 1.5.0은 추천 요청에 선택적 `exhibition_dates: {start, end}`를 추가한다. 양 끝을 포함한 전시 기간 overlap이며 ISO 날짜·역전 구간을 검증한다. 기존 `visit_dates`의 공식 개관일 의미를 바꾸지 않는다. 함께 전달하면 두 기간의 교집합에서 두 조건을 모두 충족해야 하며 교집합이 없으면 추천 0건이다. 프론트는 새 필드만 날짜 입력으로 보내고, 기존 가격·예약·관람시간 필수조건은 내부 계약에서 보존한다. OpenAPI → 생성 TypeScript → UI 요청을 일치시키며 DB migration은 필요 없다.
 
 ## 적용 범위
 

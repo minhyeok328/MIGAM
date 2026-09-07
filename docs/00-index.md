@@ -1,8 +1,8 @@
 ---
 title: "미감 문서 인덱스"
 status: DRAFT
-version: "0.5.13"
-last_updated: "2026-09-06"
+version: "0.5.16"
+last_updated: "2026-09-07"
 authoritative_for:
   - "프로젝트 문서 목록과 읽기 순서"
   - "문서별 권한·상태·열린 결정 현황"
@@ -15,7 +15,13 @@ related_documents:
 
 ## 1. 현재 문서 세트
 
-문서별 상태와 버전은 front matter에 기록한다. Project Brief, Domain Rules, Source Qualification, Source Registry, 작품 조회 계약, 홈·탐색 분리 설계, Staff Operations, Local Delivery와 `TP-001`~`TP-008`은 `APPROVED`이며, P0 PRD를 포함한 나머지 포괄 문서는 계속 `DRAFT`다. `APPROVED`는 해당 범위의 구현 권한이며 전체 P0 완료 판정은 아니다. 실제 구현에는 범위를 직접 정의·검증하는 승인 작업 패킷과 제품 책임자의 최신 결정을 함께 적용한다.
+2026-09-07 DEC-119와 [TP-011](07-execution/task-packets/TP-011-exhibition-content.md) `APPROVED 1.0.0`은 현재·예정 전시의 실제 소개·볼거리·관람 안내와 상세 화면 보강을 승인한다. 현재 내부 API는 OpenAPI `1.6.0`이다. 17건 보강과 기존 데이터 보존, 화면 검증은 [TP-011 검증 기록](06-quality/tp-011-verification.md)을 따른다. TP-001~TP-011은 해당 범위에서 승인된 작업 패킷이다.
+
+2026-09-07 최신 DEC-118과 [`TP-010`](07-execution/task-packets/TP-010-local-completion-and-browser-regression.md) `APPROVED 1.0.0`은 공개 배포를 제외한 로컬 프로젝트 마무리를 승인한다. 단일 origin 실제 DB 실행·별도 파일 복구·브라우저 회귀와 CI 설정의 실행 증거와 제한은 [TP-010 검증 기록](06-quality/tp-010-verification.md)을 따른다.
+
+2026-09-07 [`TP-009`](07-execution/task-packets/TP-009-discovery-and-official-guidance.md) `APPROVED 1.0.0`이 초기 출시의 전시 기간 탐색·공식 관람 안내 연결을 승인한다. 전시 둘러보기는 유지하며, 포괄 P0의 방문 조건 자동 판정 범위와 구분한다. 당시 내부 계약은 OpenAPI `1.5.0`이며 후속 TP-011에서 확장했다.
+
+문서별 상태와 버전은 front matter에 기록한다. Project Brief, Domain Rules, Source Qualification, Source Registry, 작품 조회 계약, 홈·탐색 분리 설계, Staff Operations, Local Delivery와 `TP-001`~`TP-011`은 `APPROVED`이며, P0 PRD를 포함한 나머지 포괄 문서는 계속 `DRAFT`다. `APPROVED`는 해당 범위의 구현 권한이며 전체 P0 완료 판정은 아니다. 실제 구현에는 범위를 직접 정의·검증하는 승인 작업 패킷과 제품 책임자의 최신 결정을 함께 적용한다.
 
 2026-09-06 TP-008은 상세·관심·비교·취향·작품 경로, staff 운영과 키 없는 로컬 통합 실행을 진행 중이다. 지도는 사용자의 선택에 따라 외부 카카오맵 링크를 유지한다. 실제 작품 Source는 `HOLD`이며 가상 데모와 분리한다. 최신 완료·미검증 범위는 [구현 준비도](07-execution/implementation-readiness.md)와 [현재 구현 증거](06-quality/traceability-matrix.md#11-현재-구현-증거)를 따른다.
 
@@ -23,10 +29,10 @@ related_documents:
 | --- | --- | --- | --- |
 | 거버넌스 | [문서 관리 정책](00-governance/document-policy.md) | 상태·버전·권한·충돌·변경 규칙 | `DRAFT` |
 | 거버넌스 | [결정 등록부](00-governance/decision-register.md) | 현재·폐기·열린 결정 추적 | `DRAFT` |
-| 제품 | [Project Brief](01-product/project-brief.md) | 제품 정체성·사용자·단계 범위·비범위·성공 정의 | `APPROVED 1.0.1` |
+| 제품 | [Project Brief](01-product/project-brief.md) | 제품 정체성·사용자·단계 범위·비범위·성공 정의 | `APPROVED 1.0.3` |
 | 제품 | [P0 PRD](01-product/prd-p0.md) | P0 사용자 기능·예외·요구사항 ID | `DRAFT` |
 | 제품 | [Roadmap](01-product/roadmap.md) | P0 이후 후보 범위와 진입 조건 | `DRAFT` |
-| 도메인 | [Domain Rules](01-product/domain-rules.md) | 용어·분류·상태·판정 불변식 | `APPROVED 1.0.1` |
+| 도메인 | [Domain Rules](01-product/domain-rules.md) | 용어·분류·상태·판정 불변식 | `APPROVED 1.0.2` |
 | 데이터 | [Data Source Policy](02-data/data-source-policy.md) | 허용 출처·출처 우선순위·미디어 권리 | `DRAFT` |
 | 데이터 | [Source Qualification](02-data/source-qualification.md) | OD-003 후보 기관 표본·출처 접근·권리 심사 증거 | `APPROVED` |
 | 데이터 | [Source Registry](../sources.yaml) | 승인 Source 3개와 `PROVISIONAL` 기관 9곳의 실행 설정 | `APPROVED` |
@@ -44,12 +50,15 @@ related_documents:
 | 기술 | [System Architecture](05-engineering/system-architecture.md) | 런타임·저장소·컴포넌트 경계 | `DRAFT` |
 | 기술 | [Security & Privacy](05-engineering/security-privacy.md) | 개인정보·인증·로그·비밀값 원칙 | `DRAFT` |
 | 기술 | [API Guidelines](05-engineering/api-guidelines.md) | 내부 API와 OpenAPI 계약 원칙 | `DRAFT` |
-| 기술 계약 | [Internal OpenAPI v1](../openapi/internal-v1.yaml) | 전시·기관 검색·상세, 작품 목록·상세, 공식 개관일과 조건 추천 요청·응답·오류 | `1.4.0` |
+| 기술 계약 | [Internal OpenAPI v1](../openapi/internal-v1.yaml) | 전시·기관·작품 조회, 검토한 전시 콘텐츠, 전시 기간과 공식 방문일을 구분한 추천 | `1.6.0` |
 | 기술 | [Staff Operations](05-engineering/staff-operations.md) | staff 인증·권한별 운영 데이터 조회와 Admin 연결 | `APPROVED 1.0.0` |
-| 기술 | [Local Delivery](05-engineering/local-delivery.md) | 키 없는 단일 origin 데모와 로컬 Docker 재현 | `APPROVED 1.0.0` |
+| 기술 | [Local Delivery](05-engineering/local-delivery.md) | 실제 데이터·가상 데모 단일 origin 실행, 검토 콘텐츠 반영·별도 DB 복구와 브라우저 회귀 | `APPROVED 1.1.1` |
 | 품질 | [Acceptance Criteria](06-quality/acceptance-criteria.md) | 요구사항별 관찰 가능한 합격 조건 | `DRAFT` |
 | 품질 | [Test Plan](06-quality/test-plan.md) | 테스트 계층·환경·fixture·검증 범위 | `DRAFT` |
 | 품질 | [TP-008 검증 기록](06-quality/tp-008-verification.md) | 273개 백엔드·80개 프론트 검사, 브라우저 연결과 실제 데이터 제약·잔여 작업 | `DRAFT 1.0.0` |
+| 품질 | [TP-009 검증 기록](06-quality/tp-009-verification.md) | 전시 기간·공식 안내 연결의 128개 백엔드·78개 프론트 검사와 실제 브라우저 확인 | `DRAFT 1.0.0` |
+| 품질 | [TP-010 검증 기록](06-quality/tp-010-verification.md) | 로컬 실행·실제 복구·23개 브라우저·290개 백엔드·78개 프론트 검사와 환경 제한 | `DRAFT 1.0.0` |
+| 품질 | [TP-011 검증 기록](06-quality/tp-011-verification.md) | 실제 전시 17건 보강·기존 데이터 보존·상세 화면과 24개 브라우저 검사 | `DRAFT 1.0.0` |
 | 품질 | [Traceability Matrix](06-quality/traceability-matrix.md) | 요구사항·화면·API·테스트 연결 | `DRAFT` |
 | 실행 | [Implementation Readiness](07-execution/implementation-readiness.md) | 구현 착수 게이트와 미결정 의존성 | `DRAFT` |
 | 실행 | [Task Packet Template](07-execution/task-packet-template.md) | 작업 단위 명세 형식 | `DRAFT` |
@@ -61,6 +70,9 @@ related_documents:
 | 실행 | [TP-006 프론트엔드 홈과 검색·추천 분리](07-execution/task-packets/TP-006-frontend-discovery.md) | API 없는 몰입형 홈 `/`, 검색·추천 `/discover`, 생성 타입·Zod, 조건 보존·권리 경계와 격리 데모 | `APPROVED 2.2.2` |
 | 실행 | [TP-007 실데이터 연결과 공식 관람 근거](07-execution/task-packets/TP-007-live-data-and-visit-evidence.md) | DB 보존·업그레이드, 실제 재확인 입력, 선택 필드 백필과 공식 운영일 추천 | `APPROVED 1.0.0` |
 | 실행 | [TP-008 P0 제품 E2E 완성](07-execution/task-packets/TP-008-p0-product-completion.md) | 데이터 확대·상세·관심·비교·취향·작품·외부 지도 링크·staff·통합 검증 위임 | `APPROVED 1.0.0` |
+| 실행 | [TP-009 전시 발견과 공식 관람 안내](07-execution/task-packets/TP-009-discovery-and-official-guidance.md) | 둘러보기 유지·전시 기간 탐색·초기 필터 정리·공식 안내 연결 | `APPROVED 1.0.0` |
+| 실행 | [TP-010 로컬 마무리와 브라우저 회귀](07-execution/task-packets/TP-010-local-completion-and-browser-regression.md) | 공개 배포 제외·실제 로컬 실행·별도 DB 복원·격리 브라우저 검사와 CI | `APPROVED 1.0.0` |
+| 실행 | [TP-011 실제 전시 콘텐츠](07-execution/task-packets/TP-011-exhibition-content.md) | 공식 소개·볼거리·관람 안내의 불변 검토 자료와 내용 중심 상세 화면 | `APPROVED 1.0.0` |
 | 저장소 | [AGENTS.md](../AGENTS.md) | 저장소 작업·검증 규칙 | `APPROVED 1.1.0` |
 | 저장소 | [README.md](../README.md) | 프로젝트 소개와 임시 UI/UX 안내 | 현재 상태 안내 |
 | 저장소 | [Frontend README](../frontend/README.md) | 키 없는 데모·로컬 실행과 프론트 검증 명령 | 현재 실행 안내 |

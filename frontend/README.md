@@ -1,4 +1,10 @@
-# 미감 프론트엔드 · TP-006~008
+# 미감 프론트엔드 · TP-006~011
+
+2026-09-07 TP-011: 전시 상세에 공식 자료를 검토한 소개·볼거리·관람 안내를 표시합니다. 중복 목록 카드와 미확인 항목마다 반복하던 링크를 정리했습니다. 현재·예정 전시 17건의 확보량과 검증 결과는 [TP-011 검증 기록](../docs/06-quality/tp-011-verification.md)을 따릅니다.
+
+현재 마무리 기준은 공개 배포 없이 로컬에서 실행·검증하는 프로젝트입니다. 실제 데이터 단일 origin 실행·백업 복구는 [Local Delivery](../docs/05-engineering/local-delivery.md), 자동 브라우저 검사와 현재 제약은 [TP-010 검증 기록](../docs/06-quality/tp-010-verification.md)을 따릅니다.
+
+2026-09-07 TP-009: 전시 둘러보기는 유지하고 추천의 날짜 입력은 전시 기간 기준으로 바꿨습니다. 기본 요청은 `exhibition_dates`이며 기존 `visit_dates`의 개관일 계약과 구분합니다. 예산·예약·예상 관람시간 입력은 초기 화면에서 제외했고, 상세·비교의 미확인 관람 정보는 공식 전시 안내로 연결합니다. 확인된 값과 출처·확인일은 보존합니다. 최신 검증은 [TP-009 검증 기록](../docs/06-quality/tp-009-verification.md)을 따릅니다.
 
 React·TypeScript·Vite 기반의 미감 브랜드 홈과 전시·기관·작품 탐색 화면입니다. `/`는 자체 생성한 가상 미술관 필름, 세 이미지 섹션과 탐색 CTA를 제공하며 API를 호출하지 않습니다. `/discover`는 전시·기관 검색과 조건 추천을 소유하며, 검색은 카탈로그 카드, 추천은 에디토리얼 카드로 구분합니다. Tailwind CSS, 직접 사용하는 Radix Dialog/Tabs, Lucide React를 사용합니다. 상세·취향·관심·비교·초기화와 외부 지도 링크를 연결했고, 실제 작품은 출처 심사가 끝날 때까지 준비 상태로 표시합니다.
 
@@ -8,7 +14,7 @@ TP-008에서 전시·기관·작품 상세, 관심 목록·최근 본 전시, �
 
 키 없이 한 번에 실행하려면 루트에서 `.\backend\.venv\Scripts\python.exe -X utf8 scripts/run_local_demo.py`를 실행하고 `http://127.0.0.1:5181`을 연다. 임시 DB와 별도 임시 프론트 빌드를 사용한다. 자세한 실행·종료·Docker 검증 상태는 [Local Delivery](../docs/05-engineering/local-delivery.md), 실제 DB의 운영자 로그인과 권한은 [Staff Operations](../docs/05-engineering/staff-operations.md)를 따른다.
 
-지도는 `frontend/.env.local`의 `VITE_KAKAO_JAVASCRIPT_KEY` 공개 키와 Kakao Developers의 허용 도메인이 필요하다. 지도 버튼 전에는 SDK를 로드하지 않으며, 키 없을 때도 공식 안내와 외부 지도 검색 링크를 쓸 수 있다. demo 모드는 외부 키·지도를 사용하지 않는다.
+현재 지도는 외부 카카오맵 검색 링크이며 키·월렛 연결이 필요하지 않다. demo 모드는 외부 키·지도를 사용하지 않는다.
 
 Node.js 24.15 이상, npm, Python 3.11 이상, uv가 필요합니다. 검증 환경은 Windows, Node.js 24.15.0, npm 11.12.1입니다. 최초 의존성 설치에는 패키지 레지스트리 접근이 필요하지만 데모·자동 테스트에는 외부 API 키나 `.env`가 필요 없습니다.
 
@@ -41,6 +47,8 @@ npm run dev:demo
 
 ## 실제 로컬 DB 사용
 
+일상적인 실행은 루트에서 `.\backend\.venv\Scripts\python.exe -X utf8 scripts/run_local.py` 한 명령으로 시작하고 `http://127.0.0.1:5180`을 연다. DB를 읽기 전용으로 사용하며 코드 수정용 Vite 서버 없이 새 임시 빌드와 API를 함께 제공한다. 시작할 때 준비가 필요하다는 안내가 나오면 아래 백업·업그레이드를 수행한다. 다음 두 서버 구성은 코드 수정·HMR이 필요한 개발용이다.
+
 데모 대신 기존 정본을 읽으려면 저장소 루트에서 먼저 백업·업그레이드를 수행하고 API 서버를 실행합니다. 준비 스크립트는 기존 DB가 있을 때만 실행되며 `data/incoming/backups/`의 무결성 확인된 SQLite 백업을 만든 뒤 migration과 파생 데이터 재구축을 수행합니다. 공식 재확인 시각은 갱신하지 않습니다. 데모 체험만 할 때는 실행하지 않습니다.
 
 ```powershell
@@ -70,7 +78,7 @@ uv run --project backend python backend/manage.py refresh_due_exhibitions --sour
 - TanStack Query는 응답을 비영속 메모리에, Zustand는 draft와 적용 조건을 현재 페이지 메모리에만 둡니다. 새로고침하면 초기화됩니다. 입력을 페이지 URL·브라우저 저장소·로그·분석 서비스에 쓰지 않습니다.
 - `/`에서는 discovery provider를 마운트하지 않고 API를 호출하지 않습니다. `/discover#recommend`는 사용자 입력이 아닌 고정 초기 탭 식별자이며 검색어·필터·추천 payload는 fragment나 query에 넣지 않습니다.
 - 로컬 Django 접근 로그는 끄고 Vite 내부 API 프록시 오류의 query는 가립니다. 브라우저 자체 개발자 도구나 사용자가 설정한 기록 정책까지 통제하는 것은 아닙니다.
-- 필수조건은 자동 해제하지 않습니다. 예약·시간 기본값은 선호이고, API가 구분한 확인 필요 후보를 주요 추천과 섞지 않습니다. 날짜를 지정하면 전시 기간과 공식 운영일을 함께 판정해 확인된 첫 개관일·시간·근거 확인 시각을 표시합니다. 휴관·일정 미확인은 통과시키지 않으며, 예약 잔여석은 보장하지 않습니다.
+- 선택한 접근성·감각 필수조건은 자동 해제하지 않습니다. 화면의 날짜는 전시 기간 겹침만 판정하며 실제 개관을 보장하지 않습니다. 내부 API의 기존 `visit_dates`·예산·예약·관람시간 조건은 엄격한 계약을 유지하고, 확인 필요 후보를 주요 추천과 섞지 않습니다.
 - `INLINE` + 안전한 HTTP(S) URL만 이미지로 요청합니다. `HIDDEN`·`LINK_ONLY`·로드 실패는 텍스트 카드로 표시합니다. 외부 링크는 안전한 URL·새 탭·referrer 최소화 정책을 따릅니다.
 
 ## 검증
