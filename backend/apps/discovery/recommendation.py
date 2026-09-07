@@ -70,6 +70,12 @@ class VisitDateRange:
 
 
 @dataclass(frozen=True, slots=True)
+class ExhibitionDateRange:
+    start: date
+    end: date
+
+
+@dataclass(frozen=True, slots=True)
 class ReservationPreference:
     mode: PreferenceMode | str
     types: tuple[str, ...]
@@ -101,6 +107,7 @@ class RecommendationQuery:
     liked_exhibition_ids: tuple[int, ...] = ()
     liked_institution_ids: tuple[int, ...] = ()
     limit: int = DEFAULT_LIMIT
+    exhibition_dates: ExhibitionDateRange | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -162,6 +169,18 @@ class ORMRecommendationService:
 
     def recommend(self, query: RecommendationQuery) -> RecommendationResult:
         validated = _validate_query(query)
+        visit_dates = validated.visit_dates
+        if visit_dates is not None and validated.exhibition_dates is not None:
+            start = max(visit_dates.start, validated.exhibition_dates.start)
+            end = min(visit_dates.end, validated.exhibition_dates.end)
+            if start > end:
+                return RecommendationResult(
+                    algorithm_version=ALGORITHM_VERSION,
+                    candidate_count=0,
+                    recommendations=(),
+                    needs_verification=(),
+                )
+            visit_dates = VisitDateRange(start=start, end=end)
         candidates = list(
             Exhibition.objects.filter(
                 lifecycle__in=(
@@ -197,9 +216,9 @@ class ORMRecommendationService:
             if not _matches_region_and_dates(exhibition, validated):
                 continue
             visit_availability = None
-            if validated.visit_dates is not None:
+            if visit_dates is not None:
                 visit_availability = schedule_resolver.resolve(
-                    exhibition, validated.visit_dates.start, validated.visit_dates.end,
+                    exhibition, visit_dates.start, visit_dates.end,
                 )
                 if visit_availability.first_open_date is None:
                     continue
@@ -316,8 +335,12 @@ def _validate_query(query: RecommendationQuery) -> RecommendationQuery:
             raise InvalidRecommendationRequest("region.area is required")
         if not isinstance(query.region.district, str):
             raise InvalidRecommendationRequest("region.district must be a string")
-    if query.visit_dates is not None and query.visit_dates.start > query.visit_dates.end:
-        raise InvalidRecommendationRequest("visit_dates start must not exceed end")
+    for field, date_range in (
+        ("exhibition_dates", query.exhibition_dates),
+        ("visit_dates", query.visit_dates),
+    ):
+        if date_range is not None and date_range.start > date_range.end:
+            raise InvalidRecommendationRequest(f"{field} start must not exceed end")
     if query.max_budget_krw is not None and (
         isinstance(query.max_budget_krw, bool)
         or not isinstance(query.max_budget_krw, int)
@@ -429,11 +452,12 @@ def _matches_region_and_dates(
         district = query.region.district.strip()
         if district and exhibition.region_district != district:
             return False
-    if query.visit_dates is not None:
-        if exhibition.start_date > query.visit_dates.end:
-            return False
-        if exhibition.end_date < query.visit_dates.start:
-            return False
+    for date_range in (query.exhibition_dates, query.visit_dates):
+        if date_range is not None:
+            if exhibition.start_date > date_range.end:
+                return False
+            if exhibition.end_date < date_range.start:
+                return False
     return True
 
 

@@ -193,6 +193,14 @@ class RecommendationServiceTests(TestCase):
 
         self.assertEqual(self.ids(result.recommendations), [seoul_match.pk])
 
+    def test_reversed_exhibition_period_is_rejected_by_the_service(self) -> None:
+        module, service = self.feature()
+        query = module.RecommendationQuery(
+            exhibition_dates=module.ExhibitionDateRange(date(2026, 9, 30), date(2026, 9, 1)),
+        )
+        with self.assertRaisesRegex(module.InvalidRecommendationRequest, "exhibition_dates"):
+            service.recommend(query)
+
     def test_budget_uses_adult_standard_price_and_splits_unknown(self) -> None:
         module, service = self.feature()
         under, under_source = self.create_exhibition("예산 이하")

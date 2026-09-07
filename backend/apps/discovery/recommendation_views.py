@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 from django.db import transaction
@@ -14,6 +15,7 @@ from backend.apps.catalog.models import (
 from backend.apps.discovery.models import ContentFeatureAssertion
 from backend.apps.discovery.recommendation import (
     DurationPreference,
+    ExhibitionDateRange,
     FeaturePreference,
     InvalidRecommendationRequest,
     PreferenceMode,
@@ -70,6 +72,18 @@ class VisitDateRangeSerializer(StrictSerializer):
         return attrs
 
 
+class ExhibitionDateField(serializers.DateField):
+    def to_internal_value(self, value: Any) -> object:
+        if not isinstance(value, str) or re.fullmatch(r"[0-9]{4}-[0-9]{2}-[0-9]{2}", value) is None:
+            self.fail("invalid", format="YYYY-MM-DD")
+        return super().to_internal_value(value)
+
+
+class ExhibitionDateRangeSerializer(VisitDateRangeSerializer):
+    start = ExhibitionDateField()
+    end = ExhibitionDateField()
+
+
 class ReservationPreferenceSerializer(StrictSerializer):
     mode = serializers.ChoiceField(choices=tuple(item.value for item in PreferenceMode))
     types = serializers.ListField(
@@ -116,6 +130,7 @@ class FeaturePreferenceSerializer(StrictSerializer):
 
 class RecommendationRequestSerializer(StrictSerializer):
     region = RegionSerializer(required=False)
+    exhibition_dates = ExhibitionDateRangeSerializer(required=False)
     visit_dates = VisitDateRangeSerializer(required=False)
     max_budget_krw = serializers.IntegerField(required=False, min_value=0)
     required_accessibility = serializers.ListField(
@@ -176,6 +191,7 @@ class InternalRecommendationView(APIView):
 
 def _build_query(data: dict[str, object]) -> RecommendationQuery:
     region_data = data.get("region")
+    exhibition_date_data = data.get("exhibition_dates")
     visit_date_data = data.get("visit_dates")
     reservation_data = data.get("reservation")
     duration_data = data.get("duration")
@@ -194,6 +210,14 @@ def _build_query(data: dict[str, object]) -> RecommendationQuery:
                 end=visit_date_data["end"],
             )
             if visit_date_data is not None
+            else None
+        ),
+        exhibition_dates=(
+            ExhibitionDateRange(
+                start=exhibition_date_data["start"],
+                end=exhibition_date_data["end"],
+            )
+            if exhibition_date_data is not None
             else None
         ),
         max_budget_krw=data.get("max_budget_krw"),

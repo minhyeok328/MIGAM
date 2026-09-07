@@ -304,6 +304,145 @@ class InternalRecommendationAPITests(TestCase):
         self.assertEqual(response.json()["recommendations"], [])
         self.assertEqual(response.json()["needs_verification"], [])
 
+    def test_exhibition_period_includes_boundaries_without_claiming_open_days(self) -> None:
+        canceled, _ = self.create_exhibition("취소된 전시")
+        canceled.lifecycle = Exhibition.Lifecycle.CANCELED
+        canceled.save(update_fields=["lifecycle"])
+        OperatingSchedule.objects.create(
+            exhibition=self.featured, source_record=self.featured_source,
+            status="CONFIRMED", kind="REGULAR", weekdays=[0], is_open=False,
+            rule_version="test-v1", effective_from=self.featured.start_date,
+            effective_to=self.featured.end_date,
+        )
+        cases = (
+            ("2026-08-31", "2026-09-01", 3),
+            ("2026-09-30", "2026-10-01", 3),
+            ("2026-09-07", "2026-09-07", 3),
+            ("2026-08-01", "2026-08-31", 0),
+            ("2026-10-01", "2026-10-31", 0),
+        )
+        for start, end, expected_count in cases:
+            with self.subTest(start=start, end=end):
+                response = self.client.post(
+                    RECOMMENDATION_URL,
+                    data={"exhibition_dates": {"start": start, "end": end}},
+                    content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 200)
+                payload = response.json()
+                self.assertEqual(payload["candidate_count"], expected_count)
+                self.assertEqual(len(payload["recommendations"]), expected_count)
+                self.assertEqual(payload["needs_verification"], [])
+                for item in payload["recommendations"]:
+                    self.assertNotEqual(item["id"], canceled.pk)
+                    self.assertIsNone(item["visit_availability"])
+
+    def test_visit_dates_still_require_opening_evidence(self) -> None:
+        for day, expected_ids in (
+            ("2026-09-07", []),
+            ("2026-09-08", [self.featured.pk]),
+        ):
+            with self.subTest(day=day):
+                response = self.client.post(
+                    RECOMMENDATION_URL,
+                    data={"visit_dates": {"start": day, "end": day}},
+                    content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(
+                    [item["id"] for item in response.json()["recommendations"]],
+                    expected_ids,
+                )
+                self.assertEqual(response.json()["needs_verification"], [])
+
+    def test_combined_date_filters_require_an_open_day_in_the_intersection(self) -> None:
+        cases = (
+            ("2026-09-08", "2026-09-08", "2026-09-07", "2026-09-15", "2026-09-08"),
+            ("2026-09-09", "2026-09-15", "2026-09-08", "2026-09-15", "2026-09-15"),
+            ("2026-09-09", "2026-09-14", "2026-09-08", "2026-09-15", None),
+            ("2026-09-01", "2026-09-07", "2026-09-08", "2026-09-15", None),
+            ("2026-09-16", "2026-09-30", "2026-09-08", "2026-09-15", None),
+        )
+        for period_start, period_end, visit_start, visit_end, expected_day in cases:
+            with self.subTest(period=(period_start, period_end), visit=(visit_start, visit_end)):
+                response = self.client.post(
+                    RECOMMENDATION_URL,
+                    data={
+                        "exhibition_dates": {"start": period_start, "end": period_end},
+                        "visit_dates": {"start": visit_start, "end": visit_end},
+                    },
+                    content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 200)
+                payload = response.json()
+                expected_ids = [self.featured.pk] if expected_day else []
+                self.assertEqual([item["id"] for item in payload["recommendations"]], expected_ids)
+                self.assertEqual(payload["candidate_count"], len(expected_ids))
+                self.assertEqual(payload["needs_verification"], [])
+                if expected_day:
+                    self.assertEqual(
+                        payload["recommendations"][0]["visit_availability"]["first_open_date"],
+                        expected_day,
+                    )
+
+    def test_exhibition_period_preserves_safety_and_visit_information_conditions(self) -> None:
+        request = self.complete_request()
+        del request["visit_dates"]
+        request["exhibition_dates"] = {"start": "2026-09-07", "end": "2026-09-07"}
+        response = self.client.post(RECOMMENDATION_URL, data=request, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            [item["id"] for item in response.json()["recommendations"]], [self.featured.pk],
+        )
+        self.assertIsNone(response.json()["recommendations"][0]["visit_availability"])
+
+        request = {
+            "exhibition_dates": {"start": "2026-09-01", "end": "2026-09-30"},
+            "max_budget_krw": 10000,
+            "reservation": {"mode": "REQUIRED", "types": ["REQUIRED"]},
+            "duration": {"mode": "REQUIRED", "maximum_minutes": 90},
+        }
+        response = self.client.post(RECOMMENDATION_URL, data=request, content_type="application/json")
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual([item["id"] for item in payload["recommendations"]], [self.featured.pk])
+        self.assertEqual([item["id"] for item in payload["needs_verification"]], [self.unknown_price.pk])
+        self.assertEqual(
+            payload["needs_verification"][0]["verification_reasons"],
+            ["PRICE_UNKNOWN", "RESERVATION_UNKNOWN", "DURATION_UNKNOWN"],
+        )
+
+    def test_exhibition_period_rejects_malformed_dates_and_unknown_request_keys(self) -> None:
+        invalid_ranges = (
+            {"start": "2026-09-20", "end": "2026-09-10"},
+            {"start": "2026-02-30", "end": "2026-09-10"},
+            {"start": "20260901", "end": "2026-09-10"},
+            {"start": "2026-9-1", "end": "2026-09-10"},
+            {"start": "2026-W36-1", "end": "2026-09-10"},
+            {"start": "2026-09-01T00:00:00", "end": "2026-09-10"},
+            {"start": None, "end": "2026-09-10"},
+            {"start": "2026-09-01", "end": True},
+            {"start": "2026-09-01"},
+            {"start": "2026-09-01", "end": "2026-09-10", "open_only": True},
+            None,
+            [],
+        )
+        for value in invalid_ranges:
+            with self.subTest(exhibition_dates=value):
+                response = self.client.post(
+                    RECOMMENDATION_URL, data={"exhibition_dates": value}, content_type="application/json",
+                )
+                self.assertEqual(response.status_code, 400)
+                self.assertEqual(response.json()["error"]["code"], "INVALID_RECOMMENDATION_REQUEST")
+                self.assertIn("exhibition_dates", response.json()["error"]["details"])
+        response = self.client.post(
+            RECOMMENDATION_URL,
+            data={"exhibition_dates": {"start": "2026-09-01", "end": "2026-09-10"}, "open_only": True},
+            content_type="application/json",
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(set(response.json()["error"]["details"]), {"open_only"})
+
     def test_invalid_nested_inputs_return_machine_readable_400(self) -> None:
         invalid_requests = (
             {"visit_dates": {"start": "2026-09-20", "end": "2026-09-10"}},
