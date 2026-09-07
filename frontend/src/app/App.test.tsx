@@ -44,6 +44,41 @@ afterEach(() => {
 });
 
 describe('discovery user flows', () => {
+  it('keeps browsing and applies an exhibition period without hidden visit filters', async () => {
+    const user = userEvent.setup();
+    const bodies: unknown[] = [];
+    renderAppAt('/discover', {
+      api: apiWith(async (request) => {
+        if (request.method !== 'POST') return response();
+        bodies.push(await request.json());
+        return Response.json(recommendationFixture);
+      }),
+    });
+    expect(screen.getByRole('tab', { name: '전시 둘러보기' })).toBeInTheDocument();
+    await user.click(screen.getByRole('tab', { name: '조건으로 추천받기' }));
+    fireEvent.change(screen.getByLabelText('찾을 기간 시작일'), {
+      target: { value: '2026-09-07' },
+    });
+    fireEvent.change(screen.getByLabelText('찾을 기간 종료일'), {
+      target: { value: '2026-09-13' },
+    });
+    expect(screen.queryByLabelText('최대 예산 (원)')).not.toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /자세한 조건/ }));
+    expect(screen.queryByLabelText('예약 방식')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('최대 관람시간 (분)')).not.toBeInTheDocument();
+    await user.click(screen.getByLabelText('섬광'));
+    await user.keyboard('{Escape}');
+    await user.click(screen.getByRole('button', { name: '이 조건으로 추천받기' }));
+    await waitFor(() =>
+      expect(bodies.at(-1)).toEqual({
+        limit: 6,
+        exhibition_dates: { start: '2026-09-07', end: '2026-09-13' },
+        avoided_sensory: ['FLASHING_LIGHTS'],
+      }),
+    );
+    await user.click(screen.getByRole('tab', { name: '전시 둘러보기' }));
+    expect(screen.getByRole('searchbox')).toBeInTheDocument();
+  });
   it('keeps the brand home separate from discovery requests and controls', async () => {
     const requests: Request[] = [];
     renderAppAt('/', {
@@ -344,7 +379,7 @@ describe('discovery user flows', () => {
     expect(screen.queryByRole('heading', { name: '고요의 형태' })).not.toBeInTheDocument();
   });
 
-  it('sends zero budget and explicit safety and visit modes, restoring dialog focus', async () => {
+  it('preserves explicit safety, separate verification candidates and dialog focus', async () => {
     const user = userEvent.setup();
     const bodies: unknown[] = [];
     const api = apiWith(async (request) => {
@@ -354,21 +389,16 @@ describe('discovery user flows', () => {
     });
     renderAppAt('/discover', { api });
     await user.click(screen.getByRole('tab', { name: '조건으로 추천받기' }));
-    await user.type(screen.getByLabelText('최대 예산 (원)'), '0');
     const trigger = screen.getByRole('button', { name: /자세한 조건/ });
     await user.click(trigger);
-    expect(screen.getByRole('dialog')).toHaveAccessibleName('방문 조건 자세히');
+    expect(screen.getByRole('dialog')).toHaveAccessibleName('접근성·감각 조건');
     await user.click(screen.getByLabelText('휠체어 접근'));
-    await user.selectOptions(screen.getByLabelText('예약 방식'), 'NOT_REQUIRED');
-    await user.selectOptions(screen.getByLabelText('예약 조건 중요도'), 'REQUIRED');
     await user.keyboard('{Escape}');
     expect(trigger).toHaveFocus();
     await user.click(screen.getByRole('button', { name: '이 조건으로 추천받기' }));
     await waitFor(() =>
       expect(bodies.at(-1)).toMatchObject({
-        max_budget_krw: 0,
         required_accessibility: ['WHEELCHAIR_ACCESS'],
-        reservation: { mode: 'REQUIRED', types: ['NOT_REQUIRED'] },
       }),
     );
     const verified = await screen.findByRole('region', { name: '추천 전시' });
@@ -378,7 +408,6 @@ describe('discovery user flows', () => {
     expect(within(verified).queryByText('빛을 따라 걷는 시간')).not.toBeInTheDocument();
     const applied = screen.getByLabelText('적용한 추천 조건');
     expect(applied).toHaveTextContent('휠체어 접근 · 필수');
-    expect(applied).toHaveTextContent('예약 없이 관람 · 필수');
     await user.click(trigger);
     await user.click(screen.getByLabelText('휠체어 접근'));
     await user.keyboard('{Escape}');

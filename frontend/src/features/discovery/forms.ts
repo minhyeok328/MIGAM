@@ -64,15 +64,9 @@ export type RecommendationDraft = {
   district: string;
   start: string;
   end: string;
-  budget: string;
   accessibility: string[];
   sensory: string[];
   moods: string[];
-  reservationType: string;
-  reservationMode: 'REQUIRED' | 'PREFERRED';
-  durationMin: string;
-  durationMax: string;
-  durationMode: 'REQUIRED' | 'PREFERRED';
 };
 export const emptySearchDraft: SearchDraft = {
   q: '',
@@ -87,28 +81,15 @@ export const emptyRecommendationDraft: RecommendationDraft = {
   district: '',
   start: '',
   end: '',
-  budget: '',
   accessibility: [],
   sensory: [],
   moods: [],
-  reservationType: '',
-  reservationMode: 'PREFERRED',
-  durationMin: '',
-  durationMax: '',
-  durationMode: 'PREFERRED',
 };
 
 function checkRegion(area: string, district: string) {
   if (district.trim() && !area) throw new Error('시·군·구를 입력하려면 먼저 시·도를 선택해주세요.');
   if (area.length > 100 || district.length > 100)
     throw new Error('지역은 100자 이내로 입력해주세요.');
-}
-function integer(value: string, label: string, minimum: number): number | undefined {
-  if (!value.trim()) return undefined;
-  const number = Number(value);
-  if (!/^\d+$/.test(value.trim()) || !Number.isSafeInteger(number) || number < minimum)
-    throw new Error(`${label}은 ${minimum} 이상의 정수로 입력해주세요.`);
-  return number;
 }
 function known<T extends string>(values: string[], options: Record<T, string>): T[] {
   if (values.some((value) => !(value in options)) || new Set(values).size !== values.length)
@@ -151,31 +132,12 @@ export function buildRecommendationRequest(draft: RecommendationDraft): Recommen
       !z.iso.date().safeParse(draft.end).success ||
       draft.start > draft.end
     )
-      throw new Error('방문 시작일과 종료일을 올바른 순서로 입력해주세요.');
-    request.visit_dates = { start: draft.start, end: draft.end };
+      throw new Error('찾을 기간의 시작일과 종료일을 올바른 순서로 입력해주세요.');
+    request.exhibition_dates = { start: draft.start, end: draft.end };
   }
-  const budget = integer(draft.budget, '최대 예산', 0);
-  if (budget !== undefined) request.max_budget_krw = budget;
   if (draft.accessibility.length)
     request.required_accessibility = known(draft.accessibility, accessibilityOptions);
   if (draft.sensory.length) request.avoided_sensory = known(draft.sensory, sensoryOptions);
-  if (draft.reservationType)
-    request.reservation = {
-      mode: draft.reservationMode,
-      types: known([draft.reservationType], reservationOptions),
-    };
-  const minimum = integer(draft.durationMin, '최소 관람시간', 1);
-  const maximum = integer(draft.durationMax, '최대 관람시간', 1);
-  if (minimum !== undefined && maximum !== undefined && minimum > maximum)
-    throw new Error('최대 관람시간은 최소 시간보다 작을 수 없습니다.');
-  if (minimum !== undefined)
-    request.duration = {
-      mode: draft.durationMode,
-      minimum_minutes: minimum,
-      ...(maximum !== undefined ? { maximum_minutes: maximum } : {}),
-    };
-  else if (maximum !== undefined)
-    request.duration = { mode: draft.durationMode, maximum_minutes: maximum };
   if (
     draft.moods.length > 3 ||
     new Set(draft.moods).size !== draft.moods.length ||

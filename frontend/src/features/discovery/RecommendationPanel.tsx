@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { ArrowUpRight, Info } from 'lucide-react';
 import { useDiscovery, usePersonal } from '../../app/providers';
 import { recommendationSignals } from '../personal/store';
-import { areas, moods, accessibilityOptions, sensoryOptions, reservationOptions } from './forms';
+import { areas, moods, accessibilityOptions, sensoryOptions } from './forms';
 import { ConditionDialog } from './ConditionDialog';
 import { ExhibitionCard } from '../../entities/ExhibitionCard';
 import { EmptyState, ErrorNotice, FormError, LoadingState } from '../../shared/ui/Feedback';
@@ -83,9 +83,9 @@ export function RecommendationPanel() {
         }}
       >
         <div className="form-section-label">
-          <span className="editorial-label">01 / VISIT</span>
-          <h2>언제, 어디에서 만나볼까요?</h2>
-          <span>선택한 방문 조건은 필수로 지켜요</span>
+          <span className="editorial-label">01 / DISCOVER</span>
+          <h2>어느 기간, 어느 지역의 전시를 찾나요?</h2>
+          <span>선택한 기간과 지역의 전시를 찾아요</span>
         </div>
         <div className="filter-grid recommendation-filters">
           <label className="field">
@@ -111,7 +111,7 @@ export function RecommendationPanel() {
             />
           </label>
           <label className="field">
-            방문 시작일
+            찾을 기간 시작일
             <input
               type="date"
               value={draft.start}
@@ -119,28 +119,17 @@ export function RecommendationPanel() {
             />
           </label>
           <label className="field">
-            방문 종료일
+            찾을 기간 종료일
             <input
               type="date"
               value={draft.end}
               onChange={(e) => state.setRecommendation({ end: e.target.value })}
             />
           </label>
-          <label className="field">
-            최대 예산 (원)
-            <input
-              type="number"
-              min="0"
-              step="1"
-              value={draft.budget}
-              placeholder="제한 없음 · 무료는 0"
-              onChange={(e) => state.setRecommendation({ budget: e.target.value })}
-            />
-          </label>
         </div>
         <p className="helper-note">
-          날짜를 선택하면 공식 일정에서 개관일이 확인된 전시만 추천합니다. 운영일 미확인 전시는
-          제외하며, 예약 가능 여부는 공식 페이지에서 확인해주세요.
+          선택 기간에 열리는 전시를 찾아요. 날짜는 전시 기간 기준이며, 휴관일·운영시간·예약은 각
+          전시의 공식 안내에서 확인해주세요.
         </p>
         <fieldset className="mood-section">
           <legend>
@@ -194,7 +183,7 @@ export function RecommendationPanel() {
       <section className="results-section" aria-label="추천 전시">
         <div className="section-heading">
           <div>
-            <span className="editorial-label">SELECTED FOR YOUR VISIT</span>
+            <span className="editorial-label">SELECTED FOR YOU</span>
             <h2>이런 전시는 어떠세요?</h2>
           </div>
           <p role="status">
@@ -211,13 +200,10 @@ export function RecommendationPanel() {
               ? `${applied.region.area} ${applied.region.district ?? ''}`
               : '모든 지역'}
           </span>
-          {applied.visit_dates && (
+          {applied.exhibition_dates && (
             <span>
-              {applied.visit_dates.start} — {applied.visit_dates.end}
+              전시 기간 {applied.exhibition_dates.start} — {applied.exhibition_dates.end}
             </span>
-          )}
-          {applied.max_budget_krw !== undefined && (
-            <span>최대 {applied.max_budget_krw.toLocaleString()}원</span>
           )}
           {Object.entries(accessibilityOptions)
             .filter(([code]) => applied.required_accessibility?.some((value) => value === code))
@@ -229,22 +215,6 @@ export function RecommendationPanel() {
             .map(([code, label]) => (
               <span key={code}>{label} 회피 · 필수</span>
             ))}
-          {applied.reservation && (
-            <span>
-              {applied.reservation.types.map((value) => reservationOptions[value]).join(', ')} ·{' '}
-              {applied.reservation.mode === 'REQUIRED' ? '필수' : '선호'}
-            </span>
-          )}
-          {applied.duration && (
-            <span>
-              관람시간{' '}
-              {applied.duration.minimum_minutes !== undefined &&
-                `${applied.duration.minimum_minutes}분 이상 `}
-              {applied.duration.maximum_minutes !== undefined &&
-                `${applied.duration.maximum_minutes}분 이하 `}
-              · {applied.duration.mode === 'REQUIRED' ? '필수' : '선호'}
-            </span>
-          )}
           {moods
             .filter((mood) =>
               applied.preferred_features?.some(
@@ -256,9 +226,9 @@ export function RecommendationPanel() {
             ))}
         </div>
         <p className="result-caution">
-          {applied.visit_dates
-            ? '선택 기간에 공식 개관 일정이 확인된 전시만 추천합니다. 예약 가능 여부는 공식 안내에서 확인해주세요.'
-            : '방문 날짜를 선택하면 공식 개관 일정이 확인된 전시로 좁힐 수 있습니다.'}
+          {applied.exhibition_dates
+            ? '선택 기간과 전시 기간이 겹치는 전시입니다. 실제 개관일·운영시간·예약은 공식 안내에서 확인해주세요.'
+            : '취향과 관심을 바탕으로 전시를 제안해요. 관람 정보는 상세와 공식 안내에서 확인해주세요.'}
         </p>
         {query.isPending && <LoadingState />}
         {query.isError && <ErrorNotice error={query.error} retry={() => void query.refetch()} />}

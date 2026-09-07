@@ -8,41 +8,33 @@ import {
 import { createDiscoveryStore } from './store';
 
 describe('explicit discovery inputs', () => {
-  it('preserves free budget and separates required safety from preferred visits', () => {
+  it('sends an exhibition period without claiming verified opening dates', () => {
     expect(
       buildRecommendationRequest({
         ...emptyRecommendationDraft,
-        budget: '0',
+        start: '2026-09-07',
+        end: '2026-09-13',
+        accessibility: ['WHEELCHAIR_ACCESS'],
+      }),
+    ).toEqual({
+      limit: 6,
+      exhibition_dates: { start: '2026-09-07', end: '2026-09-13' },
+      required_accessibility: ['WHEELCHAIR_ACCESS'],
+    });
+  });
+  it('keeps only explicit safety and taste conditions in the launch request', () => {
+    expect(
+      buildRecommendationRequest({
+        ...emptyRecommendationDraft,
         accessibility: ['WHEELCHAIR_ACCESS'],
         sensory: ['FLASHING_LIGHTS'],
-        reservationType: 'NOT_REQUIRED',
-        durationMax: '90',
         moods: ['CALM'],
       }),
     ).toEqual({
       limit: 6,
-      max_budget_krw: 0,
       required_accessibility: ['WHEELCHAIR_ACCESS'],
       avoided_sensory: ['FLASHING_LIGHTS'],
-      reservation: { mode: 'PREFERRED', types: ['NOT_REQUIRED'] },
-      duration: { mode: 'PREFERRED', maximum_minutes: 90 },
       preferred_features: [{ axis: 'MOOD', value: 'CALM' }],
-    });
-  });
-
-  it('sends required reservation and duration only when explicitly selected', () => {
-    expect(
-      buildRecommendationRequest({
-        ...emptyRecommendationDraft,
-        reservationType: 'TIMED_ENTRY',
-        reservationMode: 'REQUIRED',
-        durationMin: '30',
-        durationMax: '90',
-        durationMode: 'REQUIRED',
-      }),
-    ).toMatchObject({
-      reservation: { mode: 'REQUIRED', types: ['TIMED_ENTRY'] },
-      duration: { mode: 'REQUIRED', minimum_minutes: 30, maximum_minutes: 90 },
     });
     expect(buildRecommendationRequest(emptyRecommendationDraft)).toEqual({ limit: 6 });
   });
@@ -51,11 +43,6 @@ describe('explicit discovery inputs', () => {
     { start: '2026-09-20', end: '2026-09-10' },
     { start: '2026-02-30', end: '2026-03-01' },
     { start: '2026-09-10' },
-    { budget: '-1' },
-    { budget: '100abc' },
-    { budget: 'Infinity' },
-    { durationMin: '100', durationMax: '50' },
-    { durationMax: '0' },
     { district: '종로구' },
     { moods: ['CALM', 'LIVELY', 'IMMERSIVE', 'EXPERIMENTAL'] },
   ])('rejects invalid inputs without silently removing conditions: %j', (patch) => {

@@ -82,7 +82,7 @@
   }
 
   .recommendation-filters {
-    @apply grid-cols-5;
+    @apply grid-cols-4;
   }
 
   .field {
@@ -375,7 +375,7 @@
 
 @media (max-width: 1100px) {
   .recommendation-filters {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .mood-grid {
@@ -446,10 +446,6 @@
   .recommendation-filters {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1rem;
-  }
-
-  .recommendation-filters > :last-child {
-    grid-column: 1 / -1;
   }
 
   .section-heading {
