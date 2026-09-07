@@ -1,0 +1,563 @@
+{
+  "schema_version": "1.0",
+  "entries": [
+    {
+      "exhibition_id": 1,
+      "title": "2026 호반미술상 이수경 개인전 <아직, 이제는, 여전히>",
+      "start_date": "2026-09-04",
+      "end_date": "2026-09-27",
+      "venue": "세종미술관 1관,세종미술관 2관",
+      "official_url": "https://www.sejongpac.or.kr/portal/performance/performance/performTicket.do?performIdx=37607&menuNo=200558",
+      "source_id": "seoul-oa-2708-sejong",
+      "source_record_id": "37607",
+      "source_record_hash": "871701139c5a447afbc05064c81ef05a7d72886ac000c992468add3c477c9abb",
+      "source_owner": "세종문화회관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "2026 호반미술상 수상을 기념해 마련한 이수경 개인전입니다. 전통을 오늘의 조형 언어로 옮기고, 흩어진 파편을 다시 연결해 온 작가의 작업을 살펴봅니다.",
+      "highlights": [
+        "도자기 조각을 금박 등으로 이어 붙인 ‘번역된 도자기’ 작업",
+        "세종미술관 두 전시관에서 만나는 수상 기념 개인전"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "10:00–18:30, 입장 마감 18:00."
+        },
+        {
+          "kind": "AGE",
+          "text": "전 연령 관람 가능"
+        },
+        {
+          "kind": "LOCATION",
+          "text": "세종미술관 1관·2관"
+        }
+      ],
+      "evidence_notes": "수상 기념 전시 소개와 도자기 작품 캡션, 일정표의 무료·시간·연령을 확인."
+    },
+    {
+      "exhibition_id": 6,
+      "title": "서울시립 서서울미술관 플레이 라운지 《어쩌면 우리에게 더 멋진 일이 있을지도 몰라》",
+      "start_date": "2026-09-01",
+      "end_date": "2026-10-11",
+      "venue": "서울시립 서서울미술관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1576627",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1576627",
+      "source_record_hash": "5e7b589d3b9060e6b855f6bc102517c56a639e4729b90a3d90e9bfa5390b736f",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "이우성이 그린 파도가 애니메이션이 되어 흐르는 플레이 라운지입니다. 서로 다른 길이의 영상과 피아노 음악이 겹치면서, 머무는 순간마다 그림과 소리의 조합이 달라집니다.",
+      "highlights": [
+        "1,969장의 그림을 이어 만든 파도 애니메이션",
+        "영상·사운드·회화를 함께 만나는 이우성의 작업"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–금 10:00–20:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 30분 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "서서울미술관 1층 제3전시실"
+        }
+      ],
+      "evidence_notes": "공식 소개에서 애니메이션 제작 방식·음악, 상세 표에서 장소·무료·운영시간을 확인."
+    },
+    {
+      "exhibition_id": 7,
+      "title": "서울시립 서서울미술관 미디어 작가전 《김희천: 두더지들》",
+      "start_date": "2026-08-20",
+      "end_date": "2026-11-08",
+      "venue": "서울시립 서서울미술관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1565012",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1565012",
+      "source_record_hash": "7857be27237ac2efeec79128717b10a9301b05edbbe303b4e9731b365dc6600b",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "김희천이 게임과 영상, 사진을 통해 디지털 환경 속에서 자신과 세계를 인식하는 방식을 탐구합니다. 2023년 이후의 작업과 미술관의 제작 지원으로 완성한 신작을 함께 소개합니다.",
+      "highlights": [
+        "녹화 영상 대신 게임 엔진으로 실시간 재생되는 작품",
+        "가상과 현실, 데이터와 스크린의 관계를 다루는 미디어 작업"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–금 10:00–20:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 30분 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "서서울미술관 지하 1층 제1·2전시실, 다목적홀"
+        }
+      ],
+      "evidence_notes": "공식 소개의 근작·신작과 자동 플레이 게임, 상세 표의 무료·전시실·운영시간을 확인."
+    },
+    {
+      "exhibition_id": 11,
+      "title": "《마틴 파 : We Are Martin Parr》",
+      "start_date": "2026-07-16",
+      "end_date": "2026-10-18",
+      "venue": "서울시립 사진미술관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1553791",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1553791",
+      "source_record_hash": "4a64ab4f2ddde6b5b4e7a2e91285a4e973778efca3497b7689cd4e1def502e9e",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "마틴 파가 일상의 소비와 여가를 기록한 사진을 초기부터 말년까지 살펴보는 회고전입니다. 가까이에서 포착한 인물과 강한 색채를 따라, 익숙한 생활 풍경을 새롭게 바라볼 수 있습니다.",
+      "highlights": [
+        "14개 시리즈의 사진 약 500점과 사진책 90권",
+        "1990년대 후반부터 2000년대 초반 남한·북한에서 촬영한 작업"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–금 10:00–20:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 1시간 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "사진미술관 2층 1·2전시실·영상홀, 3층 3·4전시실"
+        }
+      ],
+      "evidence_notes": "전시 소개의 시리즈·규모·한국 촬영 작업, 상세 표의 무료·장소·운영시간 확인."
+    },
+    {
+      "exhibition_id": 16,
+      "title": "2026 국제전 《패트리샤 피치니니: 킨쉽》",
+      "start_date": "2026-07-23",
+      "end_date": "2026-11-01",
+      "venue": "수원시립미술관 행궁 본관",
+      "official_url": "https://suma.suwon.go.kr/exhi/current_view.do?lang=ko&ge_idx=1266",
+      "source_id": "kcisa-cultureinfo",
+      "source_record_id": "394181",
+      "source_record_hash": "5b133db424a12a78ffa8b7bdde21641fd09fab7034e5898cc3f5ad9ad2b92bb2",
+      "source_owner": "수원시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "패트리샤 피치니니가 만든 낯선 생명체를 통해 인간과 다른 존재가 맺는 관계를 살펴봅니다. 실리콘과 유리섬유 등을 사용한 사실적인 조각, 사진과 영상으로 기술·생명·돌봄의 문제를 다룹니다.",
+      "highlights": [
+        "만남에서 유대로 이어지는 네 부분의 전시 구성",
+        "작가의 기록과 교육 공간에서 이어지는 전시의 질문"
+      ],
+      "visit_notes": [
+        {
+          "kind": "LOCATION",
+          "text": "수원시립미술관 행궁 본관"
+        }
+      ],
+      "evidence_notes": "공식 본문에서 작가·재료·네 부분 구성 확인. 가격은 별도 관람안내를 참조하도록 되어 있어 금액을 기록하지 않음."
+    },
+    {
+      "exhibition_id": 17,
+      "title": "2026 소장품전 《블랑 블랙 파노라마》",
+      "start_date": "2026-02-12",
+      "end_date": "2027-03-01",
+      "venue": "수원시립미술관 행궁 본관",
+      "official_url": "https://suma.suwon.go.kr/exhi/schedule_view.do?lang=ko&ge_idx=1258",
+      "source_id": "kcisa-cultureinfo",
+      "source_record_id": "368076",
+      "source_record_hash": "d3a8d8c3f1913aa62b4963ec2c7e0e8b3d5a2279e99d4bd91b2833066fd0c690",
+      "source_owner": "수원시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "흑과 백을 중심으로 수원시립미술관의 소장품을 묶은 전시입니다. 반복하거나 겹치고, 적거나 비워내는 작가들의 서로 다른 작업 방식을 통해 밝음과 어둠의 관계를 살펴봅니다.",
+      "highlights": [
+        "이배·최병소·고산금 등 참여 작가의 소장품 20여 점",
+        "흑백의 대비와 재료·표면의 차이를 비교하는 감상"
+      ],
+      "visit_notes": [
+        {
+          "kind": "LOCATION",
+          "text": "수원시립미술관 행궁 본관"
+        }
+      ],
+      "evidence_notes": "공식 소개의 소장품 수·제작 방식과 참여 작가 표 확인. 별도 관람안내 참조인 가격은 확정하지 않음."
+    },
+    {
+      "exhibition_id": 21,
+      "title": "제로: 민속의 길에서 만난 북한",
+      "start_date": "2026-08-12",
+      "end_date": "2027-02-14",
+      "venue": "국립민속박물관 서울 본관 기획전시실 Ⅰ",
+      "official_url": "https://www.nfm.go.kr/user/planexhibition/home/20/selectPlanExhibitionNView.do?planExhibitionIdx=1640&page=1",
+      "source_id": "kcisa-cultureinfo",
+      "source_record_id": "394528",
+      "source_record_hash": "ab6dd90ab0e4675d39a431c0a16e4e9ae7c0bccda93e87fd8aa46e416daa4858",
+      "source_owner": "국립민속박물관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "북한 지역의 민속자료를 통해 북녘의 생활과 문화를 살펴보는 전시입니다. 생활도구와 공예, 그림과 기록을 따라 지역의 차이와 남북이 공유해 온 일상의 모습을 함께 만납니다.",
+      "highlights": [
+        "316건 346점의 민속자료로 구성한 세 부분의 전시",
+        "황해도·개성·평안도·함경도의 생활과 금강산의 문화적 기억"
+      ],
+      "visit_notes": [
+        {
+          "kind": "LOCATION",
+          "text": "국립민속박물관 본관 기획전시실Ⅰ"
+        }
+      ],
+      "evidence_notes": "공식 전시개요·구성에서 자료 규모와 지역·주제 확인. 이 상세에 없는 가격·개관시간은 추가하지 않음."
+    },
+    {
+      "exhibition_id": 319,
+      "title": "《린 허쉬만 리슨: 나의 [나]들》",
+      "start_date": "2026-10-21",
+      "end_date": "2027-02-21",
+      "venue": "서울시립미술관 서소문본관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1559068",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1559068",
+      "source_record_hash": "1a5f01c305871e98211ab50468451a4808e9229c0621d890512c852c35d67507",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "미디어아티스트이자 영화감독인 린 허쉬만 리슨의 60여 년 작업을 살펴보는 전시입니다. 인간과 기술의 관계, 정체성과 감시를 다룬 작업을 통해 디지털 기술이 개인과 사회를 어떻게 바꾸는지 질문합니다.",
+      "highlights": [
+        "작가의 아시아 첫 미술관 개인전",
+        "인공지능 시대의 정체성과 인간·기술의 공존이라는 주제"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–목 10:00–20:00, 금 10:00–21:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 1시간 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "서소문본관 2·3층 전시실, 3층 크리스탈 갤러리"
+        }
+      ],
+      "evidence_notes": "예정 전시 공식 소개의 작가·기간·주제, 상세 표의 무료·전시장소와 기관 운영시간 확인."
+    },
+    {
+      "exhibition_id": 320,
+      "title": "《오윤》",
+      "start_date": "2026-08-27",
+      "end_date": "2027-02-14",
+      "venue": "서울시립 미술아카이브",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1576838",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1576838",
+      "source_record_hash": "ce1afa1a0ac922cb64fde6b23ac950e593e5ede828387a4a02972b7a8fabd3a8",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "오윤의 작고 40주기를 맞아 작품과 창작 과정을 함께 살펴보는 전시입니다. 미술아카이브가 수집한 자료를 중심으로 민중의 삶, 전통문화와 미술의 관계를 고민했던 작가의 여정을 따라갑니다.",
+      "highlights": [
+        "판화 원판·습작·드로잉·노트·창작 도구",
+        "기록을 따라 작업의 변화를 읽는 여섯 개의 장"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–금 10:00–20:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 1시간 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "미술아카이브 모음동 1층 전시실 1·2, 1·2층 라운지"
+        }
+      ],
+      "evidence_notes": "공식 소개에서 작고 40주기·자료 종류·여섯 장 확인. 무료·전시공간·운영시간은 상세 표 기준."
+    },
+    {
+      "exhibition_id": 321,
+      "title": "2026 타이틀 매치 《오인환 vs. 장서영: 휴먼 에러》",
+      "start_date": "2026-08-13",
+      "end_date": "2026-10-25",
+      "venue": "서울시립 북서울미술관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1563285",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1563285",
+      "source_record_hash": "906bba163209117c6a93fd71ffce35b61f1beca54e42a3044b369036c5071f9c",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "오인환과 장서영의 작업을 나란히 보며 인간의 불완전함과 창작의 관계를 살펴봅니다. 사회의 규범을 흔드는 행동과 통제할 수 없는 신체의 변화를 서로 다른 영상·사진·설치로 다룹니다.",
+      "highlights": [
+        "두 작가의 영상·사진·설치 등 23점",
+        "오인환의 참여형 작업과 장서영의 기술·신체에 관한 작업"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–목 10:00–20:00, 금 10:00–21:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 1시간 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "북서울미술관 1층 전시실 1·2, 2층 전시실 3·4"
+        }
+      ],
+      "evidence_notes": "공식 작가별 소개와 작품 수 확인. 무료·장소·운영시간은 전시 상세 표 기준."
+    },
+    {
+      "exhibition_id": 322,
+      "title": "2026년 한국 대표 조각가전 《조숙진: 지나가는 자리》",
+      "start_date": "2026-07-29",
+      "end_date": "2026-11-15",
+      "venue": "서울시립 남서울미술관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1556711",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1556711",
+      "source_record_hash": "d241f0574d1518f39e999722d4eb94c6f1d79880dc986c611878927793c49739",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "조숙진의 40여 년 작업을 초기 작품부터 최근 프로젝트까지 살펴봅니다. 버려진 나무와 사물을 활용한 작업을 비롯해 회화·조각·설치·사진 등에서 삶과 자연, 사물 사이의 관계를 만납니다.",
+      "highlights": [
+        "신작과 미공개 드로잉·아카이브를 포함한 100여 점",
+        "야외 정원과 실내 전시실을 잇는 구성"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–금 10:00–20:00, 토·일·공휴일 10:00–18:00. 입장은 종료 1시간 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "남서울미술관 1층 야외, 2층 전시실"
+        }
+      ],
+      "evidence_notes": "공식 소개의 작업 기간·매체·작품 규모와 상세 표의 무료·실내외 장소·운영시간 확인."
+    },
+    {
+      "exhibition_id": 323,
+      "title": "유휴공간 전시 《보편타당한 당신 ? 심이다은》",
+      "start_date": "2026-06-25",
+      "end_date": "2027-04-11",
+      "venue": "서울시립 북서울미술관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1549929",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1549929",
+      "source_record_hash": "941077d781a78cccca07e98c6b7306b7b90e83be27ede4fee79f4c57e4c0afae",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "심이다은이 수집한 환경음과 관람객의 움직임이 만나는 참여형 전시입니다. 미술관 주변을 다니는 가상의 고양이를 매개로, 사람에게 익숙한 감각의 기준을 다른 존재의 입장에서 돌아봅니다.",
+      "highlights": [
+        "핸들을 돌려 실시간 환경음에 소리를 더하는 구조물",
+        "움직임을 연결하는 영상과 서랍으로 구성한 작업"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–목 10:00–20:00, 금 10:00–21:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 1시간 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "북서울미술관 2층 유휴공간"
+        }
+      ],
+      "evidence_notes": "공식 소개의 참여 방식·고양이 서사와 상세 표의 작품 3점·무료·장소·운영시간 확인."
+    },
+    {
+      "exhibition_id": 324,
+      "title": "2026년 한국 근대 거장전 《유영국: 산은 내 안에 있다》",
+      "start_date": "2026-05-19",
+      "end_date": "2026-10-25",
+      "venue": "서울시립미술관 서소문본관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1529410",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1529410",
+      "source_record_hash": "50559045f83541f485671ec78f568246a26d5e25a57eb20ca2bed68f125fdab9",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "유영국 탄생 110주년을 기념해 추상미술 실험부터 후기 작업까지 살펴보는 회고전입니다. 작가에게 전환점이 된 1964년을 중심으로 시간을 오가며, 산이 선과 면·색으로 바뀌는 과정을 만납니다.",
+      "highlights": [
+        "회화·부조·사진·드로잉·아카이브 170여 점",
+        "미공개작을 포함해 60여 년의 작업을 조망하는 구성"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–목 10:00–20:00, 금 10:00–21:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 1시간 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "서소문본관 1층 전시실"
+        }
+      ],
+      "evidence_notes": "공식 소개의 110주년·1964년 구성·매체·작품 수 확인. 무료와 별개로 현장 오디오가이드는 유료 안내됨."
+    },
+    {
+      "exhibition_id": 326,
+      "title": "《권병준: 내 마음속에 너는》",
+      "start_date": "2026-06-11",
+      "end_date": "2027-05-16",
+      "venue": "서울시립 북서울미술관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1538201",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1538201",
+      "source_record_hash": "c33209b73ce452739b7b6cfda751924266cb61929c2ebdac70a3312f1250c6a6",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "권병준의 기술과 예술 실험을 어린이의 시선으로 만나는 전시입니다. 서로 다른 존재가 함께 살아가는 방식을 주제로, 움직임과 소리를 만드는 로봇과 공간을 경험할 수 있습니다.",
+      "highlights": [
+        "어린이를 감싸는 공간을 주제로 제작한 신작",
+        "회차별 약 10분간 진행되는 로봇 공연과 어린이 해설"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–목 10:00–20:00, 금 10:00–21:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 1시간 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관. 로봇 공연은 별도 회차로 진행됩니다."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "북서울미술관 지하 1층 전시실 5·6"
+        }
+      ],
+      "evidence_notes": "공식 소개의 어린이 전시·로봇 공연을 확인. 약 10분은 공연 한 회 길이이며 전체 예상 관람시간으로 쓰지 않음."
+    },
+    {
+      "exhibition_id": 330,
+      "title": "가나아트컬렉션 《기술의 저변: 경계에 선 장면들》",
+      "start_date": "2026-04-16",
+      "end_date": "2026-11-22",
+      "venue": "서울시립미술관 서소문본관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1509709",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1509709",
+      "source_record_hash": "cb6a49d7f5def67e7048016264896321a424fe73f79fd2d29664e0100d2333e8",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "1970~90년대 산업화와 도시화 속 한국 사회의 변화를 살펴보는 소장품 전시입니다. 가나아트 기증 작품과 미술관 소장품을 함께 보며 노동과 소비, 대중매체가 일상에 남긴 장면을 읽습니다.",
+      "highlights": [
+        "회화·판화·뉴미디어·사진으로 구성한 26점",
+        "산업화의 변화와 기술·자본의 관계를 다루는 세 섹션"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–목 10:00–20:00, 금 10:00–21:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 1시간 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "서소문본관 2층 가나아트컬렉션 전시실"
+        }
+      ],
+      "evidence_notes": "공식 소개의 시대·세 섹션과 상세 표의 매체·26점·무료·장소·운영시간 확인."
+    },
+    {
+      "exhibition_id": 331,
+      "title": "유휴공간 프로젝트 전시 《몸을 위한 간주곡 ? 소목장세미》",
+      "start_date": "2026-04-02",
+      "end_date": "2027-05-30",
+      "venue": "서울시립 북서울미술관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1512457",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1512457",
+      "source_record_hash": "183a42e4e990988e5062a9d62c7af8909189fcc12b033c0f26ac8852391bb51c",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "소목장세미의 목공 조각과 설치를 통해 몸을 움직이고 소리를 만드는 전시입니다. 미술관 관람 사이에 잠시 머물며 시각 이외의 감각을 사용하고, 다른 사람과 함께하는 경험을 제안합니다.",
+      "highlights": [
+        "전통 소목장 기술을 현대적으로 풀어낸 8점",
+        "목공 조각과 기하학적 문양, 신체 참여를 연결한 공간"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–목 10:00–20:00, 금 10:00–21:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 1시간 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "북서울미술관 1층 라운지 1"
+        }
+      ],
+      "evidence_notes": "공식 소개의 목공·신체·소리 참여와 작품 수 확인. 이미 지난 7월 프로그램의 관람 제한은 현재 안내로 옮기지 않음."
+    },
+    {
+      "exhibition_id": 344,
+      "title": "SeMA 공용공간 프로젝트 《영원히 교차하는 춤》",
+      "start_date": "2025-08-13",
+      "end_date": "2026-12-31",
+      "venue": "서울시립미술관 서소문본관",
+      "official_url": "https://sema.seoul.go.kr/kr/whatson/exhibition/detail?exNo=1431437",
+      "source_id": "seoul-oa-15323-sema",
+      "source_record_id": "1431437",
+      "source_record_hash": "a34561290b72591840009c6fd6ed41e32cfa38e4a40bd2687405c48b25a33908",
+      "source_owner": "서울시립미술관",
+      "reviewed_at": "2026-09-07T07:58:00Z",
+      "expires_at": "2026-10-07T07:58:00Z",
+      "introduction": "에르네스토 네토의 대형 설치가 서소문본관 로비를 가로지릅니다. 갈색과 분홍색 면직물을 엮고 구아바 잎과 차나무 잎을 채운 작품을 통해 건축 공간과 재료, 감각의 관계를 살펴봅니다.",
+      "highlights": [
+        "미술관 의뢰로 제작한 ‘바 카 바, 영원히 교차하는 춤’",
+        "일반 전시실 밖 로비에서 만나는 공용공간 프로젝트"
+      ],
+      "visit_notes": [
+        {
+          "kind": "PRICE",
+          "text": "무료"
+        },
+        {
+          "kind": "HOURS",
+          "text": "화–목 10:00–20:00, 금 10:00–21:00. 토·일·공휴일은 3–10월 10:00–19:00, 11–2월 10:00–18:00. 입장은 종료 1시간 전까지. 월요일·1월 1일 휴관, 공휴일인 월요일은 개관."
+        },
+        {
+          "kind": "LOCATION",
+          "text": "서소문본관 1층 로비"
+        }
+      ],
+      "evidence_notes": "공식 소개의 제작 방식·재료·로비 장소 확인. 무료와 운영시간은 상세 페이지 기준."
+    }
+  ]
+}
