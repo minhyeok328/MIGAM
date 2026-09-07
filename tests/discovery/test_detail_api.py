@@ -74,7 +74,7 @@ class InternalDetailAPITests(TestCase):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         body = response.json()
-        self.assertEqual(set(body), {"exhibition", "visit_information", "features", "operating_schedule"})
+        self.assertEqual(set(body), {"exhibition", "content", "visit_information", "features", "operating_schedule"})
         self.assertEqual(body["exhibition"]["id"], self.exhibition.pk)
         info = body["visit_information"]
         self.assertEqual(info["price"]["amount"], 12000)

@@ -43,6 +43,7 @@ class ChangeHistoryAdmin(EvidenceAdmin):
 
 
 for model in (
+    models.ExhibitionContent,
     models.ExhibitionSourceLink, models.VerificationRecord, models.FieldEvidence,
     models.OperatingSchedule, models.PriceOption, models.ReservationInfo,
     models.VisitDuration, models.AccessibilityFact, models.SensoryNotice, models.MediaAsset,

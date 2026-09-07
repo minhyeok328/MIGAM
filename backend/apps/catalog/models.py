@@ -106,6 +106,63 @@ class ExhibitionSourceLink(models.Model):
         ]
 
 
+class ImmutableContentQuerySet(models.QuerySet):
+    def update(self, **kwargs):
+        raise ValidationError("Exhibition content snapshots are immutable.")
+
+    def delete(self):
+        raise ValidationError("Exhibition content snapshots are immutable.")
+
+    def bulk_create(self, *args, **kwargs):
+        raise ValidationError("Use the catalog content service to create snapshots.")
+
+    def bulk_update(self, *args, **kwargs):
+        raise ValidationError("Exhibition content snapshots are immutable.")
+
+
+class ExhibitionContent(models.Model):
+    exhibition = models.ForeignKey(Exhibition, on_delete=models.PROTECT, related_name="content_snapshots")
+    source_record = models.ForeignKey(SourceRecord, on_delete=models.PROTECT, related_name="exhibition_content")
+    source_record_hash = models.CharField(max_length=64)
+    canonical_fingerprint = models.CharField(max_length=64)
+    review_hash = models.CharField(max_length=64, unique=True)
+    introduction = models.TextField(max_length=2000)
+    highlights = models.JSONField(default=list, blank=True)
+    visit_notes = models.JSONField(default=list, blank=True)
+    official_url = models.URLField(max_length=2048, validators=[HTTPS_URL_VALIDATOR])
+    source_owner = models.CharField(max_length=255)
+    evidence_notes = models.TextField(max_length=2000)
+    reviewed_at = models.DateTimeField()
+    expires_at = models.DateTimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    objects = ImmutableContentQuerySet.as_manager()
+
+    class Meta:
+        ordering = ("-reviewed_at", "-id")
+        indexes = [models.Index(fields=("exhibition", "reviewed_at"), name="catalog_content_lookup")]
+        constraints = [models.CheckConstraint(
+            condition=models.Q(expires_at__gt=models.F("reviewed_at")), name="catalog_content_valid_period",
+        )]
+
+    def clean(self):
+        from .content import validate_content_values
+
+        super().clean()
+        validate_content_values(self)
+
+    def save(self, *args, **kwargs):
+        if not self._state.adding or kwargs.get("force_update") or (
+            self.pk is not None and type(self).objects.filter(pk=self.pk).exists()
+        ):
+            raise ValidationError("Exhibition content snapshots are immutable.")
+        self.full_clean()
+        return super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        raise ValidationError("Exhibition content snapshots are immutable.")
+
+
 class VerificationRecord(models.Model):
     class Outcome(models.TextChoices):
         SUCCESS = "SUCCESS", "Success"

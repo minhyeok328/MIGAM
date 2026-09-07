@@ -13,6 +13,7 @@ from backend.apps.catalog.models import (
     AccessibilityFact, Exhibition, Institution, OperatingSchedule, PriceOption,
     ReservationInfo, SensoryNotice, SourceConflict, VisitDuration,
 )
+from backend.apps.catalog.content import current_exhibition_content
 from backend.apps.discovery.models import ContentFeatureAssertion
 from backend.apps.discovery.operating_schedule import OperatingScheduleResolver, OpeningState
 from backend.apps.discovery.presenters import _load_exhibitions, present_exhibition
@@ -173,6 +174,7 @@ def exhibition_detail(exhibition_id: int) -> dict[str, object] | None:
     ).select_related("source_record").order_by("axis", "value")
     return {
         "exhibition": presented,
+        "content": current_exhibition_content(exhibition),
         "visit_information": visit_information,
         "features": [{
             "axis": row.axis, "value": row.value, "evidence_kind": row.evidence_kind,
