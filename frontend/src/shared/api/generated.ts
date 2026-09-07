@@ -26,7 +26,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** 조건과 명시적 취향에 맞는 전시 추천 */
+        /**
+         * 조건과 명시적 취향에 맞는 전시 추천
+         * @description exhibition_dates는 전시 기간의 경계 포함 겹침만 판정하며 실제 개관을 보장하지 않습니다. visit_dates는 공식 운영일 근거가 확인된 개관일을 요구합니다. 두 조건을 함께 보내면 교집합 안에 개관일이 있어야 하며 유효하지만 서로 겹치지 않는 기간은 빈 결과를 반환합니다.
+         */
         post: operations["recommendExhibitions"];
         delete?: never;
         options?: never;
@@ -190,9 +193,28 @@ export interface components {
         };
         ExhibitionDetailResponse: {
             exhibition: components["schemas"]["ExhibitionSearchResult"];
+            content: components["schemas"]["ExhibitionContent"];
             visit_information: components["schemas"]["VisitInformation"];
             features: components["schemas"]["DetailFeature"][];
             operating_schedule: components["schemas"]["DetailOperatingSchedule"];
+        };
+        /** @description 공식 상세를 검토해 작성한 소개와 안내입니다. 현재 정본·원본이 바뀌거나 검토 유효기간이 지나면 null입니다. 관람 안내 문구는 추천용 확정 방문값과 구분합니다. */
+        ExhibitionContent: {
+            introduction: string;
+            highlights: string[];
+            visit_notes: components["schemas"]["ExhibitionVisitNote"][];
+            /** Format: uri */
+            official_url: string;
+            source_owner: string;
+            /** Format: date-time */
+            reviewed_at: string;
+            /** Format: date-time */
+            expires_at: string;
+        } | null;
+        ExhibitionVisitNote: {
+            /** @enum {string} */
+            kind: "PRICE" | "HOURS" | "RESERVATION" | "AGE" | "LOCATION";
+            text: string;
         };
         InstitutionDetailResponse: {
             institution: components["schemas"]["InstitutionSearchResult"];
@@ -301,6 +323,7 @@ export interface components {
         };
         RecommendationRequest: {
             region?: components["schemas"]["RecommendationRegion"];
+            exhibition_dates?: components["schemas"]["ExhibitionDateRange"];
             visit_dates?: components["schemas"]["VisitDateRange"];
             max_budget_krw?: number;
             required_accessibility?: ("WHEELCHAIR_ACCESS" | "MOBILITY_ACCESS" | "CAPTIONS" | "SIGN_LANGUAGE" | "AUDIO_DESCRIPTION" | "AGE_CONDITION")[];
@@ -317,6 +340,14 @@ export interface components {
             area: string;
             district?: string;
         };
+        /** @description 공식 전시 기간과 경계를 포함해 하루 이상 겹치는 전시를 찾는 기간입니다. 개관일·휴관일·운영시간은 판정하지 않으며 이 조건만 사용하면 visit_availability는 null입니다. start는 end보다 늦을 수 없습니다. */
+        ExhibitionDateRange: {
+            /** Format: date */
+            start: string;
+            /** Format: date */
+            end: string;
+        };
+        /** @description 공식 운영일 근거가 확인된 개관일이 하루 이상 있어야 하는 방문 기간입니다. exhibition_dates와 함께 사용하면 두 기간의 교집합에 적용합니다. start는 end보다 늦을 수 없습니다. */
         VisitDateRange: {
             /** Format: date */
             start: string;

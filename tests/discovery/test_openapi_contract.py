@@ -75,7 +75,7 @@ class InternalOpenAPIContractTests(SimpleTestCase):
         )
 
     def test_document_defines_recommendation_post_request_contract(self) -> None:
-        self.assertEqual(self.document["info"]["version"], "1.4.0")
+        self.assertEqual(self.document["info"]["version"], "1.6.0")
         operation = self.document["paths"][
             "/api/internal/v1/recommendations/"
         ]["post"]
@@ -95,6 +95,7 @@ class InternalOpenAPIContractTests(SimpleTestCase):
             set(request["properties"]),
             {
                 "region",
+                "exhibition_dates",
                 "visit_dates",
                 "max_budget_krw",
                 "required_accessibility",
@@ -108,6 +109,14 @@ class InternalOpenAPIContractTests(SimpleTestCase):
             },
         )
         self.assertEqual(request["properties"]["limit"]["default"], 6)
+        self.assertEqual(
+            request["properties"]["exhibition_dates"]["$ref"],
+            "#/components/schemas/ExhibitionDateRange",
+        )
+        self.assertEqual(
+            request["properties"]["visit_dates"]["$ref"],
+            "#/components/schemas/VisitDateRange",
+        )
         self.assertEqual(request["properties"]["limit"]["maximum"], 24)
         for field in (
             "required_accessibility",
@@ -215,7 +224,7 @@ class InternalOpenAPIContractTests(SimpleTestCase):
         self.assertEqual(parameters["page_size"]["schema"]["maximum"], 24)
         schemas = self.document["components"]["schemas"]
         self.assertEqual(set(schemas["ExhibitionDetailResponse"]["required"]), {
-            "exhibition", "visit_information", "features", "operating_schedule",
+            "exhibition", "content", "visit_information", "features", "operating_schedule",
         })
         self.assertEqual(schemas["EvidenceState"]["enum"], ["CONFIRMED", "UNKNOWN", "CONFLICT"])
         self.assertEqual(set(schemas["DetailEvidence"]["required"]), {"scope", "verified_at", "source"})
@@ -227,3 +236,22 @@ class InternalOpenAPIContractTests(SimpleTestCase):
         })
         for field in ("payload", "content_hash", "origin_url", "registry_id", "health"):
             self.assertNotIn(field, schemas["ExhibitionDetailResponse"]["properties"])
+
+    def test_reviewed_exhibition_content_is_nullable_bounded_and_has_public_provenance(self):
+        self.assertEqual(self.document["info"]["version"], "1.6.0")
+        schemas = self.document["components"]["schemas"]
+        self.assertEqual(schemas["ExhibitionDetailResponse"]["properties"]["content"], {
+            "$ref": "#/components/schemas/ExhibitionContent",
+        })
+        content = schemas["ExhibitionContent"]
+        self.assertEqual(content["type"], ["object", "null"])
+        self.assertFalse(content["additionalProperties"])
+        self.assertEqual(set(content["required"]), {
+            "introduction", "highlights", "visit_notes", "official_url", "source_owner", "reviewed_at", "expires_at",
+        })
+        self.assertEqual(content["properties"]["introduction"]["maxLength"], 2000)
+        self.assertEqual(content["properties"]["highlights"]["maxItems"], 3)
+        self.assertEqual(content["properties"]["visit_notes"]["maxItems"], 5)
+        self.assertEqual(schemas["ExhibitionVisitNote"]["properties"]["kind"]["enum"], ["PRICE", "HOURS", "RESERVATION", "AGE", "LOCATION"])
+        for field in ("review_hash", "canonical_fingerprint", "evidence_notes", "source_record_hash"):
+            self.assertNotIn(field, content["properties"])

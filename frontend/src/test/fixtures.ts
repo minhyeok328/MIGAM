@@ -31,6 +31,7 @@ export const searchFixture = {
 
 export const detailFixture = {
   exhibition: exhibitionFixture,
+  content: null,
   visit_information: {
     price: { state: 'UNKNOWN', amount: null, currency: null, is_free: null, evidence: [] },
     reservation: {
@@ -46,6 +47,20 @@ export const detailFixture = {
   },
   features: [],
   operating_schedule: { state: 'UNKNOWN', visit_availability: null, rules: [] },
+};
+
+export const contentFixture = {
+  introduction: '파도의 움직임을 그림과 음악으로 경험하는 전시입니다.',
+  highlights: ['여러 장의 그림을 연결한 애니메이션', '영상과 피아노 음악의 만남'],
+  visit_notes: [
+    { kind: 'PRICE', text: '무료' },
+    { kind: 'HOURS', text: '화–금 10:00–20:00. 월요일 휴관.' },
+    { kind: 'LOCATION', text: '미술관 1층 제3전시실' },
+  ],
+  official_url: exhibitionFixture.official_url,
+  source_owner: '가상 미감 미술관',
+  reviewed_at: '2026-09-07T07:00:00Z',
+  expires_at: '2026-10-07T07:00:00Z',
 };
 
 export const recommendationFixture = {

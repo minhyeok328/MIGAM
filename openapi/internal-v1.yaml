@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: 미감 내부 API
-  version: 1.4.0
+  version: 1.6.0
   description: 로컬 프론트엔드와 후속 챗봇이 사용하는 비공개 내부 계약입니다.
 paths:
   /api/internal/v1/search/:
@@ -89,6 +89,7 @@ paths:
     post:
       operationId: recommendExhibitions
       summary: 조건과 명시적 취향에 맞는 전시 추천
+      description: exhibition_dates는 전시 기간의 경계 포함 겹침만 판정하며 실제 개관을 보장하지 않습니다. visit_dates는 공식 운영일 근거가 확인된 개관일을 요구합니다. 두 조건을 함께 보내면 교집합 안에 개관일이 있어야 하며 유효하지만 서로 겹치지 않는 기간은 빈 결과를 반환합니다.
       requestBody:
         required: true
         content:
@@ -363,10 +364,12 @@ components:
     ExhibitionDetailResponse:
       type: object
       additionalProperties: false
-      required: [exhibition, visit_information, features, operating_schedule]
+      required: [exhibition, content, visit_information, features, operating_schedule]
       properties:
         exhibition:
           $ref: "#/components/schemas/ExhibitionSearchResult"
+        content:
+          $ref: "#/components/schemas/ExhibitionContent"
         visit_information:
           $ref: "#/components/schemas/VisitInformation"
         features:
@@ -375,6 +378,33 @@ components:
             $ref: "#/components/schemas/DetailFeature"
         operating_schedule:
           $ref: "#/components/schemas/DetailOperatingSchedule"
+    ExhibitionContent:
+      type: [object, "null"]
+      description: 공식 상세를 검토해 작성한 소개와 안내입니다. 현재 정본·원본이 바뀌거나 검토 유효기간이 지나면 null입니다. 관람 안내 문구는 추천용 확정 방문값과 구분합니다.
+      additionalProperties: false
+      required: [introduction, highlights, visit_notes, official_url, source_owner, reviewed_at, expires_at]
+      properties:
+        introduction: { type: string, minLength: 1, maxLength: 2000 }
+        highlights:
+          type: array
+          maxItems: 3
+          items: { type: string, minLength: 1, maxLength: 300 }
+        visit_notes:
+          type: array
+          maxItems: 5
+          items:
+            $ref: "#/components/schemas/ExhibitionVisitNote"
+        official_url: { type: string, format: uri, maxLength: 2048 }
+        source_owner: { type: string, minLength: 1, maxLength: 255 }
+        reviewed_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+    ExhibitionVisitNote:
+      type: object
+      additionalProperties: false
+      required: [kind, text]
+      properties:
+        kind: { type: string, enum: [PRICE, HOURS, RESERVATION, AGE, LOCATION] }
+        text: { type: string, minLength: 1, maxLength: 500 }
     InstitutionDetailResponse:
       type: object
       additionalProperties: false
@@ -576,6 +606,8 @@ components:
       properties:
         region:
           $ref: "#/components/schemas/RecommendationRegion"
+        exhibition_dates:
+          $ref: "#/components/schemas/ExhibitionDateRange"
         visit_dates:
           $ref: "#/components/schemas/VisitDateRange"
         max_budget_krw:
@@ -647,8 +679,23 @@ components:
         district:
           type: string
           maxLength: 100
+    ExhibitionDateRange:
+      type: object
+      description: 공식 전시 기간과 경계를 포함해 하루 이상 겹치는 전시를 찾는 기간입니다. 개관일·휴관일·운영시간은 판정하지 않으며 이 조건만 사용하면 visit_availability는 null입니다. start는 end보다 늦을 수 없습니다.
+      additionalProperties: false
+      required: [start, end]
+      properties:
+        start:
+          type: string
+          format: date
+          pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
+        end:
+          type: string
+          format: date
+          pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
     VisitDateRange:
       type: object
+      description: 공식 운영일 근거가 확인된 개관일이 하루 이상 있어야 하는 방문 기간입니다. exhibition_dates와 함께 사용하면 두 기간의 교집합에 적용합니다. start는 end보다 늦을 수 없습니다.
       additionalProperties: false
       required: [start, end]
       properties:

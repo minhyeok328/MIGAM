@@ -205,6 +205,29 @@ const factFields = {
 };
 const detailSchema = z.strictObject({
   exhibition,
+  content: z
+    .strictObject({
+      introduction: text.max(2000),
+      highlights: z.array(text.max(300)).max(3),
+      visit_notes: z
+        .array(
+          z.strictObject({
+            kind: z.enum(['PRICE', 'HOURS', 'RESERVATION', 'AGE', 'LOCATION']),
+            text: text.max(500),
+          }),
+        )
+        .max(5)
+        .refine((notes) => new Set(notes.map((note) => note.kind)).size === notes.length),
+      official_url: safeUrl.refine((url) => url.startsWith('https://')),
+      source_owner: text,
+      reviewed_at: timestamp,
+      expires_at: timestamp,
+    })
+    .refine((content) => {
+      const duration = Date.parse(content.expires_at) - Date.parse(content.reviewed_at);
+      return duration > 0 && duration <= 30 * 24 * 60 * 60 * 1000;
+    })
+    .nullable(),
   visit_information: z.strictObject({
     price: z.strictObject({
       ...evidenceFields,
@@ -287,7 +310,12 @@ const detailSchema = z.strictObject({
 }) satisfies z.ZodType<components['schemas']['ExhibitionDetailResponse']>;
 
 export function parseExhibitionDetail(input: unknown) {
-  const parsed = detailSchema.parse(input);
+  const parsed = detailSchema
+    .refine(
+      (detail) => !detail.content || detail.content.official_url === detail.exhibition.official_url,
+      'Content belongs to a different official exhibition',
+    )
+    .parse(input);
   return { ...parsed, item: presentExhibition(parsed.exhibition) };
 }
 export type ExhibitionDetail = ReturnType<typeof parseExhibitionDetail>;
