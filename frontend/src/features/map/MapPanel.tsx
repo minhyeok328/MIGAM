@@ -1,14 +1,18 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { createKakaoProvider, type MapProvider, type MapView, type Place } from './provider';
+import { mapSearchPlan, matchesMapPlace } from './searchNames';
+import { MapControls } from './MapControls';
 
 export function MapPanel({
   institution,
   area,
+  venue,
   demo = false,
   provider,
 }: {
   institution: string;
   area: string;
+  venue?: string;
   demo?: boolean;
   provider?: MapProvider;
 }) {
@@ -17,92 +21,128 @@ export function MapPanel({
   );
   const mapProvider = provider ?? defaultProvider;
   const embedded = Boolean(provider || import.meta.env.VITE_KAKAO_JAVASCRIPT_KEY);
+  const searchPlan = useMemo(
+    () => mapSearchPlan(institution, area, venue),
+    [institution, area, venue],
+  );
   const [places, setPlaces] = useState<Place[]>([]);
   const [place, setPlace] = useState<Place | null>(null);
   const [status, setStatus] = useState('');
   const [busy, setBusy] = useState(false);
+  const [canRetry, setCanRetry] = useState(false);
+  const [attempt, setAttempt] = useState(0);
   const container = useRef<HTMLDivElement>(null);
   const map = useRef<MapView | null>(null);
-  const mounted = useRef(true);
+  const descriptionId = useId();
+
   useEffect(() => {
-    mounted.current = true;
+    let active = true;
+    setPlaces([]);
+    setPlace(null);
+    setCanRetry(false);
+    setBusy(embedded && !demo);
+    setStatus(
+      demo
+        ? ''
+        : embedded
+          ? '지도를 불러오는 중이에요.'
+          : '지도를 표시할 수 없어요. 위의 공식 전시 안내에서 위치를 확인해주세요.',
+    );
+    if (!embedded || demo) return;
+
+    // Defer until effect setup settles so StrictMode cleanup can cancel duplicate work.
+    queueMicrotask(async () => {
+      if (!active) return;
+      try {
+        let result: Place[] = [];
+        for (const query of searchPlan.queries) {
+          result = (await mapProvider.search(query)).filter((candidate) =>
+            matchesMapPlace(candidate, searchPlan),
+          );
+          if (!active) return;
+          if (result.length) break;
+        }
+        if (!result.length && searchPlan.target) {
+          result = (await mapProvider.geocode(searchPlan.target.address)).filter((candidate) =>
+            matchesMapPlace(candidate, searchPlan),
+          );
+          if (!active) return;
+        }
+        setPlaces(result);
+        if (result.length && searchPlan.target) {
+          const name = searchPlan.target.name.replace(/\s+/g, '');
+          const selected =
+            result.find((candidate) => candidate.name.replace(/\s+/g, '') === name) ?? result[0];
+          setPlace(selected);
+          setStatus('');
+        } else {
+          setCanRetry(!result.length);
+          setStatus(
+            result.length
+              ? '실제 방문 장소가 맞는지 주소를 확인한 뒤 선택해주세요.'
+              : '일치하는 장소를 찾지 못했어요. 공식 안내에서 주소를 확인해주세요.',
+          );
+        }
+      } catch {
+        if (active) {
+          setCanRetry(true);
+          setStatus(
+            '현재 지도를 불러올 수 없어요. 다시 시도하거나 위의 공식 전시 안내를 확인해주세요.',
+          );
+        }
+      } finally {
+        if (active) setBusy(false);
+      }
+    });
     return () => {
-      mounted.current = false;
+      active = false;
     };
-  }, []);
+  }, [searchPlan, mapProvider, embedded, demo, attempt]);
+
   useEffect(() => {
     if (!place || !container.current) return;
+    let view: MapView;
     try {
-      map.current = mapProvider.render(container.current, place);
+      view = mapProvider.render(container.current, place);
+      map.current = view;
     } catch {
-      setStatus('지도를 표시하지 못했어요. 공식 안내와 장소 검색 링크를 이용해주세요.');
+      setPlace(null);
+      setCanRetry(true);
+      setStatus('지도를 표시하지 못했어요. 다시 시도하거나 위의 공식 전시 안내를 확인해주세요.');
+      return;
     }
     return () => {
-      map.current?.destroy();
-      map.current = null;
+      if (map.current === view) map.current = null;
+      view.destroy();
     };
   }, [place, mapProvider]);
+
   return (
-    <section className="map-panel" aria-labelledby="map-title">
-      <h2 id="map-title">장소와 지도</h2>
+    <section className="map-panel" aria-label="전시장 지도">
       {demo ? (
         <p>가상 기관은 실제 지도에 표시하지 않습니다.</p>
       ) : (
         <>
-          <p>
-            {embedded
-              ? '선택하면 기관명과 지역으로 카카오 장소 검색을 실행합니다. 주소를 확인한 뒤 장소를 골라주세요.'
-              : '카카오맵에서 기관의 위치와 길찾기를 확인할 수 있어요. 실제 전시장 주소는 공식 안내와 함께 확인해주세요.'}
-          </p>
-          <div className="detail-actions">
-            {embedded && (
-              <button
-                className="secondary-button"
-                disabled={busy}
-                onClick={async () => {
-                  setBusy(true);
-                  setStatus('장소를 찾고 있어요.');
-                  try {
-                    const result = await mapProvider.search(`${area} ${institution}`);
-                    if (!mounted.current) return;
-                    setPlaces(result);
-                    setStatus(
-                      result.length
-                        ? '카카오 장소 검색 결과입니다. 실제 방문 장소가 맞는지 확인해주세요.'
-                        : '일치하는 장소를 찾지 못했어요. 공식 안내에서 주소를 확인해주세요.',
-                    );
-                  } catch {
-                    if (mounted.current)
-                      setStatus(
-                        '현재 지도를 불러올 수 없어요. 카카오맵에서 장소를 직접 확인할 수 있습니다.',
-                      );
-                  } finally {
-                    if (mounted.current) setBusy(false);
-                  }
-                }}
-              >
-                지도에서 장소 찾기
-              </button>
-            )}
-            <a
-              className="text-button"
-              href={`https://map.kakao.com/link/search/${encodeURIComponent(`${area} ${institution}`)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              referrerPolicy="no-referrer"
+          {!place && status && <p role="status">{status}</p>}
+          {embedded && canRetry && (
+            <button
+              className="secondary-button"
+              disabled={busy}
+              onClick={() => setAttempt((value) => value + 1)}
             >
-              카카오맵에서 검색 ↗
-            </a>
-          </div>
-          <p role="status">{status}</p>
-          {places.length > 0 && (
+              지도 다시 불러오기
+            </button>
+          )}
+          {!place && !searchPlan.target && places.length > 0 && (
             <ul className="map-places">
               {places.map((value) => (
                 <li key={value.id}>
                   <button
                     className="secondary-button"
-                    aria-pressed={value.id === place?.id}
-                    onClick={() => setPlace(value)}
+                    onClick={() => {
+                      setPlace(value);
+                      setStatus('');
+                    }}
                   >
                     {value.name} · {value.address}
                   </button>
@@ -112,33 +152,21 @@ export function MapPanel({
           )}
           {place && (
             <>
-              <div ref={container} className="map-canvas" aria-label={`${place.name} 지도`} />
-              <button
-                className="secondary-button"
-                onClick={() => {
-                  if (!navigator.geolocation) {
-                    setStatus('이 브라우저에서는 위치 기능을 사용할 수 없어요.');
-                    return;
-                  }
-                  navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                      if (mounted.current && map.current) {
-                        map.current.locate(position.coords.latitude, position.coords.longitude);
-                        setStatus('현재 위치를 지도에 표시했어요. 좌표는 저장하지 않습니다.');
-                      }
-                    },
-                    () => {
-                      if (mounted.current)
-                        setStatus(
-                          '현재 위치를 확인할 수 없어요. 선택한 장소 지도는 계속 사용할 수 있습니다.',
-                        );
-                    },
-                    { timeout: 10000, maximumAge: 0, enableHighAccuracy: false },
-                  );
-                }}
-              >
-                내 위치 표시
-              </button>
+              <p id={descriptionId} className="sr-only">
+                {place.name} · {place.address}
+                {place.kind === 'address' &&
+                  ' 공식 주소의 위치이며 전시실·입구 위치는 공식 안내에서 확인해주세요.'}
+                {searchPlan.target?.note && ' ' + searchPlan.target.note}
+              </p>
+              <div className="map-frame">
+                <div
+                  ref={container}
+                  className="map-canvas"
+                  aria-label={place.name + ' 지도'}
+                  aria-describedby={descriptionId}
+                />
+                <MapControls key={place.id} view={map} />
+              </div>
             </>
           )}
         </>

@@ -146,6 +146,7 @@ export function ExhibitionDetailPage({ id }: { id: number }) {
           <MapPanel
             key={id}
             institution={detail.item.institution}
+            venue={detail.item.venue}
             area={`${detail.item.area} ${detail.item.district}`}
             demo={demo}
           />

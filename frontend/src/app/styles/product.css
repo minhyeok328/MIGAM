@@ -371,11 +371,84 @@
     justify-content: flex-start;
     width: 100%;
   }
+  .map-frame {
+    position: relative;
+    isolation: isolate;
+    margin: 20px 0;
+  }
   .map-canvas {
     width: 100%;
     height: 360px;
     background: var(--color-limestone);
-    margin: 20px 0;
+  }
+  .map-controls {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    z-index: 2;
+    display: grid;
+    gap: 8px;
+  }
+  .map-controls button {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-ink);
+    box-shadow: 0 1px 4px #0002;
+    cursor: pointer;
+  }
+  .map-controls button:hover {
+    background: var(--color-limestone);
+  }
+  .map-controls button:disabled {
+    cursor: wait;
+    opacity: 0.65;
+  }
+  .map-controls button:focus-visible,
+  .map-notice button:focus-visible {
+    outline: 2px solid var(--color-ink);
+    outline-offset: 2px;
+  }
+  .map-zoom-controls {
+    display: grid;
+  }
+  .map-zoom-controls button:first-child {
+    border-radius: 3px 3px 0 0;
+  }
+  .map-zoom-controls button:last-child {
+    border-top: 0;
+    border-radius: 0 0 3px 3px;
+  }
+  .map-notice {
+    position: absolute;
+    right: 12px;
+    bottom: 32px;
+    left: 12px;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 8px 8px 12px;
+    border: 1px solid var(--color-line);
+    border-radius: 3px;
+    background: #fff;
+    color: var(--color-ink);
+    font-size: 0.8rem;
+    box-shadow: 0 1px 4px #0002;
+  }
+  .map-notice button {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
   }
   @media (max-width: 700px) {
     .artwork-search {
