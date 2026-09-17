@@ -1,8 +1,8 @@
 ---
 title: "미감 구현 준비도"
 status: DRAFT
-version: "0.3.11"
-last_updated: "2026-09-07"
+version: "0.3.12"
+last_updated: "2026-09-17"
 authoritative_for:
   - "P0 구현 착수 전 확인 항목"
   - "확정 결정과 미결정 의존성의 구분"
@@ -17,6 +17,10 @@ related_documents:
 ---
 
 # 미감 구현 준비도
+
+## 2026-09-17 카카오 무료 쿼터 앱 전환
+
+사용자 승인에 따라 미사용 빵찾깅 앱 `1528032`를 미감으로 전환하고, 무료 쿼터를 유지한 기존 JavaScript 키를 일반 개발 환경에 연결한다. 같은 날 최신 사용자 요청에 따라 키가 설정된 일반 전시 상세에서 MapProvider를 자동 실행하고, 검토된 장소명·주소와 일치하는 장소 또는 공식 주소 위치를 바로 표시한다. 지도 주변의 제목·주소·성공 안내·외부 지도 링크는 제거하며, 후속 요청에 따라 지도 안에 내 위치·확대·축소·전시장으로 돌아가기 아이콘 버튼을 제공한다. 사용자 위치 권한은 내 위치 버튼을 직접 눌렀을 때만 요청한다. 위치는 현재 지도 메모리에서만 사용하고 지도 안의 닫을 수 있는 메시지로 상태를 알리며 상세 전환 뒤의 응답은 무시한다. 미검토 장소는 후보를 직접 선택하고, 로딩·실패·0건에는 짧은 안내와 가능한 재시도만 제공한다. 키 없는 실행은 SDK 없이 비가용 안내를 표시하며 공식 안내는 상단 관람 정보의 기존 전시 링크를 이용한다. 5181 데모의 외부 지도 금지와 공개 배포 범위는 유지한다. 최신 범위와 확인 결과는 [TP-008](task-packets/TP-008-p0-product-completion.md)의 브라우저 상태와 경로 계약을 따른다. 아래 날짜별 결과의 내장 지도 비활성 상태는 당시의 기록이다.
 
 ## 2026-09-07 실제 전시 내용 보강
 
@@ -64,7 +68,7 @@ TP-006의 프론트 자동 테스트·빌드·백엔드 회귀·로컬 API 연�
 | 저장소·실행 | monorepo, 네이티브 개발 우선, Docker 재현성, `backend/` 단일 `uv` 의존성 경계 |
 | 웹 | React + TypeScript + Vite, Tailwind CSS, Radix 또는 shadcn/ui 기반 접근성 primitive, Lucide React, TanStack Query, Zustand |
 | 서버·데이터 | `backend/apps/`의 Django + DRF, `backend/data_pipeline/`의 Python 처리 계층, SQLite P0 |
-| 탐색 경계 | SQLite FTS5 뒤의 SearchService. 현 지도 흐름은 외부 카카오맵 링크이며 내장 MapProvider는 비활성 |
+| 탐색 경계 | SQLite FTS5 뒤의 SearchService. 공개 JavaScript 키를 주입한 일반 전시 상세에서는 내장 MapProvider를 자동 실행해 지도와 지도 내부 조작 버튼을 표시하며, 키 없는 실행은 SDK 없이 비가용 안내 제공 |
 | 추천 경계 | 일회성 RecommendationService 요청, 하드 조건 우선, ContentFeatureSnapshot 근거, 비영속 명시 신호와 정성 등급·이유 |
 | 계약 | OpenAPI 1.4.0 정본, 생성 TypeScript, 경계 Zod 어댑터. 일반 작품 SOURCE_PENDING·데모 분리 |
 | 도메인 | catalog, discovery, sources, data_quality |

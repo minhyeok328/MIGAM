@@ -1,8 +1,8 @@
 ---
 title: "미감 문서 인덱스"
 status: DRAFT
-version: "0.5.16"
-last_updated: "2026-09-07"
+version: "0.5.17"
+last_updated: "2026-09-17"
 authoritative_for:
   - "프로젝트 문서 목록과 읽기 순서"
   - "문서별 권한·상태·열린 결정 현황"
@@ -14,6 +14,8 @@ related_documents:
 # 미감 문서 인덱스
 
 ## 1. 현재 문서 세트
+
+2026-09-17 사용자 승인으로 미사용 빵찾깅 앱을 미감으로 전환하고 무료 쿼터가 있는 기존 JavaScript 키를 일반 개발 환경에 연결한다. [TP-008](07-execution/task-packets/TP-008-p0-product-completion.md) `APPROVED 1.0.1`에 기록했으며, 키 없는 5180 실행·데모와 공개 배포 범위는 유지한다.
 
 2026-09-07 DEC-119와 [TP-011](07-execution/task-packets/TP-011-exhibition-content.md) `APPROVED 1.0.0`은 현재·예정 전시의 실제 소개·볼거리·관람 안내와 상세 화면 보강을 승인한다. 현재 내부 API는 OpenAPI `1.6.0`이다. 17건 보강과 기존 데이터 보존, 화면 검증은 [TP-011 검증 기록](06-quality/tp-011-verification.md)을 따른다. TP-001~TP-011은 해당 범위에서 승인된 작업 패킷이다.
 
@@ -56,6 +58,7 @@ related_documents:
 | 품질 | [Acceptance Criteria](06-quality/acceptance-criteria.md) | 요구사항별 관찰 가능한 합격 조건 | `DRAFT` |
 | 품질 | [Test Plan](06-quality/test-plan.md) | 테스트 계층·환경·fixture·검증 범위 | `DRAFT` |
 | 품질 | [TP-008 검증 기록](06-quality/tp-008-verification.md) | 273개 백엔드·80개 프론트 검사, 브라우저 연결과 실제 데이터 제약·잔여 작업 | `DRAFT 1.0.0` |
+| 품질 | [지도 검색 검증](06-quality/map-search-verification.md) | 9개 기관의 공식 장소명·주소, 검색·선택·지도와 주소 fallback 검증 | `DRAFT 1.0.0` |
 | 품질 | [TP-009 검증 기록](06-quality/tp-009-verification.md) | 전시 기간·공식 안내 연결의 128개 백엔드·78개 프론트 검사와 실제 브라우저 확인 | `DRAFT 1.0.0` |
 | 품질 | [TP-010 검증 기록](06-quality/tp-010-verification.md) | 로컬 실행·실제 복구·23개 브라우저·290개 백엔드·78개 프론트 검사와 환경 제한 | `DRAFT 1.0.0` |
 | 품질 | [TP-011 검증 기록](06-quality/tp-011-verification.md) | 실제 전시 17건 보강·기존 데이터 보존·상세 화면과 24개 브라우저 검사 | `DRAFT 1.0.0` |
@@ -69,7 +72,7 @@ related_documents:
 | 실행 | [TP-005 조건 보존 설명형 추천](07-execution/task-packets/TP-005-explainable-recommendation.md) | ContentFeatureSnapshot, 하드 조건·UNKNOWN·점수·다양성·이유와 내부 추천 API | `APPROVED 1.0.1` |
 | 실행 | [TP-006 프론트엔드 홈과 검색·추천 분리](07-execution/task-packets/TP-006-frontend-discovery.md) | API 없는 몰입형 홈 `/`, 검색·추천 `/discover`, 생성 타입·Zod, 조건 보존·권리 경계와 격리 데모 | `APPROVED 2.2.2` |
 | 실행 | [TP-007 실데이터 연결과 공식 관람 근거](07-execution/task-packets/TP-007-live-data-and-visit-evidence.md) | DB 보존·업그레이드, 실제 재확인 입력, 선택 필드 백필과 공식 운영일 추천 | `APPROVED 1.0.0` |
-| 실행 | [TP-008 P0 제품 E2E 완성](07-execution/task-packets/TP-008-p0-product-completion.md) | 데이터 확대·상세·관심·비교·취향·작품·외부 지도 링크·staff·통합 검증 위임 | `APPROVED 1.0.0` |
+| 실행 | [TP-008 P0 제품 E2E 완성](07-execution/task-packets/TP-008-p0-product-completion.md) | 데이터 확대·상세·관심·비교·취향·작품·선택 지도 연동·staff·통합 검증 위임 | `APPROVED 1.0.1` |
 | 실행 | [TP-009 전시 발견과 공식 관람 안내](07-execution/task-packets/TP-009-discovery-and-official-guidance.md) | 둘러보기 유지·전시 기간 탐색·초기 필터 정리·공식 안내 연결 | `APPROVED 1.0.0` |
 | 실행 | [TP-010 로컬 마무리와 브라우저 회귀](07-execution/task-packets/TP-010-local-completion-and-browser-regression.md) | 공개 배포 제외·실제 로컬 실행·별도 DB 복원·격리 브라우저 검사와 CI | `APPROVED 1.0.0` |
 | 실행 | [TP-011 실제 전시 콘텐츠](07-execution/task-packets/TP-011-exhibition-content.md) | 공식 소개·볼거리·관람 안내의 불변 검토 자료와 내용 중심 상세 화면 | `APPROVED 1.0.0` |
