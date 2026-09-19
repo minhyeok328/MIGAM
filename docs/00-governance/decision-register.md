@@ -1,8 +1,8 @@
 ---
 title: "미감 결정 등록부"
 status: DRAFT
-version: "0.5.3"
-last_updated: "2026-09-07"
+version: "0.5.4"
+last_updated: "2026-09-19"
 authoritative_for:
   - "제품 기획의 확정·폐기·미확정 결정 추적"
   - "후반 결정이 대체한 초기안 기록"
@@ -13,6 +13,8 @@ related_documents:
 ---
 
 # 미감 결정 등록부
+
+2026-09-19 사용자 승인 DEC-120 (`CURRENT`): 현재 완료된 방문자 기능을 Vercel의 무료 범위에 공개하고 처음부터 정기 수집·자동 갱신을 구성한다. DEC-118의 공개 배포 제외만 `SUPERSEDED`이며 로컬 실행·복구 지원은 유지한다. TP-012와 Public Deployment가 구현 범위를 소유한다. OD-006의 호스팅·월 비용은 Vercel Hobby·0원으로 이 범위에서 결정하며, 유료 전환·도메인 구매·외부 행동 분석은 승인하지 않는다.
 
 ## 1. 사용법
 

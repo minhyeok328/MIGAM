@@ -1,8 +1,8 @@
 ---
 title: "미감(美感) Data Pipeline"
 status: DRAFT
-version: "0.3.3"
-last_updated: "2026-09-06"
+version: "0.3.4"
+last_updated: "2026-09-19"
 authoritative_for:
   - "공식 출처에서 정본·검색·추천 데이터로 이어지는 처리 단계"
   - "증분 수집·재시도·충돌·중복·실패 복구 원칙"
@@ -107,7 +107,7 @@ P0에서는 새 전시, 종료일 변경·연장, 요금 변경, 장소 변경, 
 
 ### 2.3 P0 관리 명령과 스케줄러 계약
 
-TP-007부터 자격 심사 fixture는 `--fixture`로 명시한 오프라인 검증에만 사용한다. 실제 `refresh_exhibition`·`refresh_due_exhibitions`는 문화정보 API의 해당 `seq` 상세를 순차 재확인하고, 서울 Source는 `--sejong-csv`·`--sema-csv`로 전달한 최신 공식 다운로드를 사용한다. 필요한 파일·키가 없으면 과거 fixture로 대체하지 않는다. `--source`는 due 대상의 Source를 제한한다. 선택된 기관의 수집 게이트를 통과한 뒤 네트워크에 접근한다.
+TP-007부터 자격 심사 fixture는 `--fixture`로 명시한 오프라인 검증에만 사용한다. 실제 `refresh_exhibition`·`refresh_due_exhibitions`는 문화정보 API의 해당 `seq` 상세를 순차 재확인하고, 서울 Source는 `--sejong-csv`·`--sema-csv`로 전달한 최신 공식 다운로드를 사용한다. 필요한 파일·키가 없으면 과거 fixture로 대체하지 않는다. `--source`는 due 대상의 Source를 제한한다. 선택된 기관의 수집 게이트를 통과한 뒤 네트워크에 접근한다. TP-012는 이 입력 앞에 승인된 서울 데이터셋의 공개 CSV 내려받기를 자동화한다. 획득 URL·시각·hash와 기관 게이트를 유지하고 403·429는 우회하지 않는다. 예약 실행 자체가 공식 재확인 성공을 의미하지 않는다.
 
 `rebuild_discovery_data`는 registry 초기화·시간 경과 생명주기/최신성·선택정보 백필·검색 파생본을 갱신하는 오프라인 명령이다. 원본 재조회, 마지막 공식 확인 시각 갱신, VerificationRecord·승격 성공 생성을 하지 않는다. 기존 DB 업그레이드는 `scripts/prepare_local_data.py`의 SQLite backup → migrate → 이 명령 순서로 수행하며 백업은 Git에서 제외된 `data/incoming/backups/`에 보관한다.
 

@@ -1,8 +1,8 @@
 ---
 title: "미감 보안과 개인정보 원칙"
 status: DRAFT
-version: "0.2.0"
-last_updated: "2026-09-17"
+version: "0.2.1"
+last_updated: "2026-09-19"
 authoritative_for:
   - "P0 개인정보 최소화와 데이터 보존 경계"
   - "외부 연동과 비밀값 처리 원칙"
@@ -15,6 +15,8 @@ related_documents:
 ---
 
 # 미감 보안과 개인정보 원칙
+
+TP-012 공개 배포는 [공개 배포 계약](public-deployment.md)에 따라 비공개 Blob의 전시·출처 DB를 서버에서만 읽고, 예약 갱신 경로를 별도 비밀값으로 인증한다. 공개 런타임에 Admin·DB 다운로드·원문/키 조회 경로를 만들지 않는다. 기존 브라우저 취향 저장·요청 payload 비영속·외부 Analytics 미사용 원칙을 유지한다.
 
 ## 기본 원칙
 

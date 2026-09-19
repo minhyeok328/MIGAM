@@ -1,8 +1,8 @@
 ---
 title: "미감 문서 인덱스"
 status: DRAFT
-version: "0.5.17"
-last_updated: "2026-09-17"
+version: "0.5.18"
+last_updated: "2026-09-19"
 authoritative_for:
   - "프로젝트 문서 목록과 읽기 순서"
   - "문서별 권한·상태·열린 결정 현황"
@@ -12,6 +12,8 @@ related_documents:
 ---
 
 # 미감 문서 인덱스
+
+2026-09-19 사용자 결정은 [TP-012 무료 공개 배포와 일일 수집](07-execution/task-packets/TP-012-free-public-deployment.md)과 [공개 배포 계약](05-engineering/public-deployment.md)을 승인한다. 무료 Vercel에서 현재 방문자 기능과 정기 수집·자동 갱신을 제공하는 범위이며, 아래 DEC-118의 공개 배포 제외는 이 범위에서 대체된다.
 
 ## 1. 현재 문서 세트
 
