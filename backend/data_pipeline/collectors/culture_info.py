@@ -172,7 +172,9 @@ class CultureInfoApiCollector:
         self.service_key = service_key
         self.transport = transport or UrllibXmlTransport()
 
-    def collect(self, period_params: Mapping[str, str]) -> list[RawExhibitionRecord]:
+    def collect(
+        self, period_params: Mapping[str, str], *, summary_places: frozenset[str] | None = None,
+    ) -> list[RawExhibitionRecord]:
         source = self.registry.source(self.SOURCE_ID)
         base_url = source["base_url"].rstrip("/")
         endpoints = source["endpoints"]
@@ -202,6 +204,8 @@ class CultureInfoApiCollector:
                 if seq in seen:
                     continue
                 seen.add(seq)
+                if summary_places is not None and summary.get("place") and summary["place"] not in summary_places:
+                    continue
                 detail_payload = self.transport.get(
                     base_url + endpoints["detail"],
                     {key_parameter: self.service_key, "seq": seq},
