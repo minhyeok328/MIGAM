@@ -1,0 +1,40 @@
+# Deployment export of backend/uv.lock, including the deployment dependency group.
+annotated-types==0.8.0
+anyio==4.15.1
+asgiref==3.12.1
+cbor2==6.1.4
+cffi==2.1.1 ; platform_python_implementation != 'PyPy'
+cryptography==50.0.1
+Django==5.2.17
+djangorestframework==3.18.0
+h11==0.16.0 ; sys_platform != 'emscripten'
+h2==4.4.1
+hpack==4.2.0
+httpcore2==2.13.0 ; sys_platform != 'emscripten'
+httpx2==2.13.0
+httpx2-jsfetch==1.0 ; python_full_version >= '3.12' and sys_platform == 'emscripten'
+hyperframe==6.1.0
+idna==3.20
+pycparser==3.0 ; implementation_name != 'PyPy' and platform_python_implementation != 'PyPy'
+pydantic==2.13.5
+pydantic-core==2.46.5
+python-dotenv==1.2.3
+python-multipart==0.0.32
+PyYAML==6.0.3
+semver==3.1.0
+sqlparse==0.6.0
+truststore==0.10.4 ; sys_platform != 'emscripten'
+typing-extensions==4.16.0
+typing-inspection==0.4.4
+tzdata==2026.3 ; sys_platform == 'win32'
+vercel==0.11.3
+vercel-cache==0.7.5
+vercel-headers==0.7.2
+vercel-internal-core==0.2.0
+vercel-internal-telemetry==0.8.0
+vercel-oidc==0.9.0
+vercel-queue==0.9.0
+vercel-sandbox==0.6.0
+vercel-workflow==0.10.2
+websockets==16.1.1
+zstandard==0.25.0 ; python_full_version < '3.14'
