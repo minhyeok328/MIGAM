@@ -1,8 +1,8 @@
 ---
 title: "TP-005 조건 보존 설명형 추천"
 status: APPROVED
-version: "1.0.1"
-last_updated: "2026-09-03"
+version: "1.0.2"
+last_updated: "2026-09-21"
 authoritative_for:
   - "P0 RecommendationService 후보·필터·점수·다양성·이유 계약"
   - "ContentFeatureSnapshot과 근거 assertion의 물리 모델"
@@ -89,7 +89,7 @@ related_documents:
 - 오류 응답은 잘못된 필드만 표시하고 내부 SQL·경로·원천 payload를 포함하지 않는다.
 - API는 읽기 전용이며 staff lifecycle·health·CollectionIssue를 반환하지 않는다.
 
-## 외부 의존성과 안전한 저하
+## 외부 의존성과 실패 시 대체 동작
 
 - 새 외부 패키지·API 키·`.env`·네트워크 호출은 없다.
 - feature snapshot이 없으면 후보를 제외하지 않고 해당 축을 중립으로 둔다. 개인화 이유도 만들지 않는다.
@@ -104,7 +104,7 @@ related_documents:
 - scoring: 콜드 스타트, preferred feature, 관심 전시 feature, 관심 기관, preferred 예약·시간, soft `UNKNOWN` 중립과 결정적 결과를 검증한다.
 - diversity/exploration: 중복 0, 기관·매체 반복 완화, 연결된 탐색 한 건 이하, 후보 부족 시 억지 채움 없음과 같은 입력의 같은 결과·이유를 검증한다.
 - reason: 모든 feature 이유가 현재 assertion과 양의 contribution에 대응하고 1~3개이며 퍼센트·내부 점수가 응답에 없는지 검증한다.
-- API/OpenAPI: 정상·0건·400, enum·날짜·범위·목록 상한, exact response shape, 정본 재조회, 공식 출처·권리 안전 미디어를 검증한다.
+- API/OpenAPI: 정상·0건·400, enum·날짜·범위·목록 상한, exact response shape, 정본 재조회, 공식 출처와 미디어 사용 권한을 검증한다.
 - privacy: 요청 전후 사용자·추천 결과 영속 모델이 생기지 않고 추천 payload 로그·외부 호출이 없는 구조를 확인한다.
 - 회귀: 전체 Django 테스트, migration 일치, Django system check, OpenAPI YAML 파싱과 `git diff --check`를 확인한다.
 

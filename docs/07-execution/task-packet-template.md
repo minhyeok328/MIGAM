@@ -1,8 +1,8 @@
 ---
 title: "미감 작업 패킷 템플릿"
 status: DRAFT
-version: "0.2.1"
-last_updated: "2026-09-05"
+version: "0.2.2"
+last_updated: "2026-09-21"
 authoritative_for:
   - "P0 구현 작업의 최소 명세 형식"
   - "작업별 범위·검증·의존성 기록 기준"
@@ -55,7 +55,7 @@ related_documents:
 - 계정·서버 프로필·외부 분석 없음 확인:
 - 개발 이벤트 계약: 이벤트 이름·허용 속성 / 외부 전송·영속 0 / 운영 빌드 no-op / 해당 없음
 
-### 외부 의존성과 안전한 저하
+### 외부 의존성과 실패 시 대체 동작
 
 - MapProvider / SearchService / 출처 / 기타:
 - 외부 정책·권리·호출 제한과 검토 근거:

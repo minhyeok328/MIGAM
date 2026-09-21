@@ -1,8 +1,8 @@
 ---
 title: "TP-004 내부 OpenAPI와 FTS5 검색"
 status: APPROVED
-version: "1.0.1"
-last_updated: "2026-09-03"
+version: "1.0.2"
+last_updated: "2026-09-21"
 authoritative_for:
   - "전시·기관 내부 검색 API v1 계약"
   - "SearchService 경계와 SQLite FTS5 구현"
@@ -72,7 +72,7 @@ related_documents:
 - API는 읽기 전용이며 Source·CollectionIssue·기관 lifecycle·health 같은 staff 운영 정보를 노출하지 않는다.
 - 외부 분석·원격 전송·새 네트워크 호출은 없다.
 
-## 외부 의존성과 안전한 저하
+## 외부 의존성과 실패 시 대체 동작
 
 - `djangorestframework >= 3.18, < 3.19`만 추가한다. 프로젝트의 Python 3.11+와 Django 5.2 경계 안에서 사용한다.
 - DRF 내장 OpenAPI 생성기는 사용하지 않고 정본 YAML과 계약 테스트를 사용한다.

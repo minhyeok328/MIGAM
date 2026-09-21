@@ -1,8 +1,8 @@
 ---
 title: "미감 문서 인덱스"
 status: DRAFT
-version: "0.5.18"
-last_updated: "2026-09-19"
+version: "0.5.19"
+last_updated: "2026-09-21"
 authoritative_for:
   - "프로젝트 문서 목록과 읽기 순서"
   - "문서별 권한·상태·열린 결정 현황"
@@ -21,7 +21,7 @@ related_documents:
 
 2026-09-07 DEC-119와 [TP-011](07-execution/task-packets/TP-011-exhibition-content.md) `APPROVED 1.0.0`은 현재·예정 전시의 실제 소개·볼거리·관람 안내와 상세 화면 보강을 승인한다. 현재 내부 API는 OpenAPI `1.6.0`이다. 17건 보강과 기존 데이터 보존, 화면 검증은 [TP-011 검증 기록](06-quality/tp-011-verification.md)을 따른다. TP-001~TP-011은 해당 범위에서 승인된 작업 패킷이다.
 
-2026-09-07 최신 DEC-118과 [`TP-010`](07-execution/task-packets/TP-010-local-completion-and-browser-regression.md) `APPROVED 1.0.0`은 공개 배포를 제외한 로컬 프로젝트 마무리를 승인한다. 단일 origin 실제 DB 실행·별도 파일 복구·브라우저 회귀와 CI 설정의 실행 증거와 제한은 [TP-010 검증 기록](06-quality/tp-010-verification.md)을 따른다.
+2026-09-07 DEC-118과 [`TP-010`](07-execution/task-packets/TP-010-local-completion-and-browser-regression.md) `APPROVED 1.0.0`은 공개 배포를 제외한 로컬 프로젝트 마무리를 승인한다. 단일 origin 실제 DB 실행·별도 파일 복구·브라우저 회귀와 CI 설정의 실행 증거와 제한은 [TP-010 검증 기록](06-quality/tp-010-verification.md)을 따른다.
 
 2026-09-07 [`TP-009`](07-execution/task-packets/TP-009-discovery-and-official-guidance.md) `APPROVED 1.0.0`이 초기 출시의 전시 기간 탐색·공식 관람 안내 연결을 승인한다. 전시 둘러보기는 유지하며, 포괄 P0의 방문 조건 자동 판정 범위와 구분한다. 당시 내부 계약은 OpenAPI `1.5.0`이며 후속 TP-011에서 확장했다.
 
@@ -33,10 +33,10 @@ related_documents:
 | --- | --- | --- | --- |
 | 거버넌스 | [문서 관리 정책](00-governance/document-policy.md) | 상태·버전·권한·충돌·변경 규칙 | `DRAFT` |
 | 거버넌스 | [결정 등록부](00-governance/decision-register.md) | 현재·폐기·열린 결정 추적 | `DRAFT` |
-| 제품 | [Project Brief](01-product/project-brief.md) | 제품 정체성·사용자·단계 범위·비범위·성공 정의 | `APPROVED 1.0.3` |
+| 제품 | [Project Brief](01-product/project-brief.md) | 제품 정체성·사용자·단계 범위·비범위·성공 정의 | `APPROVED 1.0.4` |
 | 제품 | [P0 PRD](01-product/prd-p0.md) | P0 사용자 기능·예외·요구사항 ID | `DRAFT` |
 | 제품 | [Roadmap](01-product/roadmap.md) | P0 이후 후보 범위와 진입 조건 | `DRAFT` |
-| 도메인 | [Domain Rules](01-product/domain-rules.md) | 용어·분류·상태·판정 불변식 | `APPROVED 1.0.2` |
+| 도메인 | [Domain Rules](01-product/domain-rules.md) | 용어·분류·상태·판정 불변식 | `APPROVED 1.0.3` |
 | 데이터 | [Data Source Policy](02-data/data-source-policy.md) | 허용 출처·출처 우선순위·미디어 권리 | `DRAFT` |
 | 데이터 | [Source Qualification](02-data/source-qualification.md) | OD-003 후보 기관 표본·출처 접근·권리 심사 증거 | `APPROVED` |
 | 데이터 | [Source Registry](../sources.yaml) | 승인 Source 3개와 `PROVISIONAL` 기관 9곳의 실행 설정 | `APPROVED` |
@@ -59,7 +59,7 @@ related_documents:
 | 기술 | [Local Delivery](05-engineering/local-delivery.md) | 실제 데이터·가상 데모 단일 origin 실행, 검토 콘텐츠 반영·별도 DB 복구와 브라우저 회귀 | `APPROVED 1.1.1` |
 | 품질 | [Acceptance Criteria](06-quality/acceptance-criteria.md) | 요구사항별 관찰 가능한 합격 조건 | `DRAFT` |
 | 품질 | [Test Plan](06-quality/test-plan.md) | 테스트 계층·환경·fixture·검증 범위 | `DRAFT` |
-| 품질 | [TP-008 검증 기록](06-quality/tp-008-verification.md) | 273개 백엔드·80개 프론트 검사, 브라우저 연결과 실제 데이터 제약·잔여 작업 | `DRAFT 1.0.0` |
+| 품질 | [TP-008 검증 기록](06-quality/tp-008-verification.md) | 273개 백엔드·80개 프론트 검사, 브라우저 연결과 실제 데이터 제약·잔여 작업 | `DRAFT 1.0.1` |
 | 품질 | [지도 검색 검증](06-quality/map-search-verification.md) | 9개 기관의 공식 장소명·주소, 검색·선택·지도와 주소 fallback 검증 | `DRAFT 1.0.0` |
 | 품질 | [TP-009 검증 기록](06-quality/tp-009-verification.md) | 전시 기간·공식 안내 연결의 128개 백엔드·78개 프론트 검사와 실제 브라우저 확인 | `DRAFT 1.0.0` |
 | 품질 | [TP-010 검증 기록](06-quality/tp-010-verification.md) | 로컬 실행·실제 복구·23개 브라우저·290개 백엔드·78개 프론트 검사와 환경 제한 | `DRAFT 1.0.0` |
@@ -67,11 +67,11 @@ related_documents:
 | 품질 | [Traceability Matrix](06-quality/traceability-matrix.md) | 요구사항·화면·API·테스트 연결 | `DRAFT` |
 | 실행 | [Implementation Readiness](07-execution/implementation-readiness.md) | 구현 착수 게이트와 미결정 의존성 | `DRAFT` |
 | 실행 | [Task Packet Template](07-execution/task-packet-template.md) | 작업 단위 명세 형식 | `DRAFT` |
-| 실행 | [TP-001 기관 운영 상태와 수집 전 게이트](07-execution/task-packets/TP-001-institution-collection-gate.md) | Source·기관 상태 부트스트랩, 수집 전 게이트, 기관별 기본 실행 결과 | `APPROVED 1.0.3` |
-| 실행 | [TP-002 기관 ACTIVE 승격 증거와 자동 전이](07-execution/task-packets/TP-002-institution-active-promotion.md) | 자격 실행, ChangeHistory, 14일·3일자 성공과 PromotionEvidence | `APPROVED 1.0.3` |
-| 실행 | [TP-003 선택 관람 정보와 미디어 권리 모델](07-execution/task-packets/TP-003-visit-information-and-media-rights.md) | 선택 정보 UNKNOWN 정본, MediaAsset·MediaRights 이력과 안전한 노출 판정 | `APPROVED 1.0.1` |
-| 실행 | [TP-004 내부 OpenAPI와 FTS5 검색](07-execution/task-packets/TP-004-internal-search-openapi.md) | 전시·기관 내부 검색 API, SearchDocument·SearchService·SQLite FTS5 | `APPROVED 1.0.1` |
-| 실행 | [TP-005 조건 보존 설명형 추천](07-execution/task-packets/TP-005-explainable-recommendation.md) | ContentFeatureSnapshot, 하드 조건·UNKNOWN·점수·다양성·이유와 내부 추천 API | `APPROVED 1.0.1` |
+| 실행 | [TP-001 기관 운영 상태와 수집 전 게이트](07-execution/task-packets/TP-001-institution-collection-gate.md) | Source·기관 상태 부트스트랩, 수집 전 게이트, 기관별 기본 실행 결과 | `APPROVED 1.0.4` |
+| 실행 | [TP-002 기관 ACTIVE 승격 증거와 자동 전이](07-execution/task-packets/TP-002-institution-active-promotion.md) | 자격 실행, ChangeHistory, 14일·3일자 성공과 PromotionEvidence | `APPROVED 1.0.4` |
+| 실행 | [TP-003 선택 관람 정보와 미디어 권리 모델](07-execution/task-packets/TP-003-visit-information-and-media-rights.md) | 선택 정보 UNKNOWN 정본, MediaAsset·MediaRights 이력과 안전한 노출 판정 | `APPROVED 1.0.2` |
+| 실행 | [TP-004 내부 OpenAPI와 FTS5 검색](07-execution/task-packets/TP-004-internal-search-openapi.md) | 전시·기관 내부 검색 API, SearchDocument·SearchService·SQLite FTS5 | `APPROVED 1.0.2` |
+| 실행 | [TP-005 조건 보존 설명형 추천](07-execution/task-packets/TP-005-explainable-recommendation.md) | ContentFeatureSnapshot, 하드 조건·UNKNOWN·점수·다양성·이유와 내부 추천 API | `APPROVED 1.0.2` |
 | 실행 | [TP-006 프론트엔드 홈과 검색·추천 분리](07-execution/task-packets/TP-006-frontend-discovery.md) | API 없는 몰입형 홈 `/`, 검색·추천 `/discover`, 생성 타입·Zod, 조건 보존·권리 경계와 격리 데모 | `APPROVED 2.2.2` |
 | 실행 | [TP-007 실데이터 연결과 공식 관람 근거](07-execution/task-packets/TP-007-live-data-and-visit-evidence.md) | DB 보존·업그레이드, 실제 재확인 입력, 선택 필드 백필과 공식 운영일 추천 | `APPROVED 1.0.0` |
 | 실행 | [TP-008 P0 제품 E2E 완성](07-execution/task-packets/TP-008-p0-product-completion.md) | 데이터 확대·상세·관심·비교·취향·작품·선택 지도 연동·staff·통합 검증 위임 | `APPROVED 1.0.1` |

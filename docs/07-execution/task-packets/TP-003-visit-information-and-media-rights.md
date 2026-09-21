@@ -1,8 +1,8 @@
 ---
 title: "TP-003 선택 관람 정보와 미디어 권리 모델"
 status: APPROVED
-version: "1.0.1"
-last_updated: "2026-09-03"
+version: "1.0.2"
+last_updated: "2026-09-21"
 authoritative_for:
   - "요금·예약·예상 관람시간·접근성·감각 정보의 정본 저장 계약"
   - "MediaAsset·MediaRights의 권리 이력과 안전한 이미지 노출 판정"
@@ -73,7 +73,7 @@ related_documents:
 - 계정·익명 프로필·외부 분석·개발 이벤트 변경은 없다.
 - 미디어 URL은 권리 판정 전 사용자 응답으로 전달하지 않으며 공개 URL이라는 사실만으로 표시 권한을 만들지 않는다.
 
-## 외부 의존성과 안전한 저하
+## 외부 의존성과 실패 시 대체 동작
 
 - 신규 외부 출처·API 키·네트워크 호출은 없다. 테스트는 로컬 SourceRecord와 정본 fixture만 사용한다.
 - 선택 정보 누락은 명시적 `UNKNOWN`으로 기록할 수 있지만 기존 확인값을 빈 새 응답으로 덮어쓰지 않는다.

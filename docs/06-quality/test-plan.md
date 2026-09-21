@@ -1,8 +1,8 @@
 ---
 title: "미감 P0 테스트 계획"
 status: DRAFT
-version: "0.3.7"
-last_updated: "2026-09-07"
+version: "0.3.8"
+last_updated: "2026-09-21"
 authoritative_for:
   - "P0 계층별 테스트 전략과 검증 범위"
   - "데이터·추천·백엔드·프론트·E2E·브라우저·접근성 테스트 시나리오"
@@ -162,7 +162,7 @@ P0 대표 데모 데이터는 전시 300~500, 작품 500~1,000, 기관 약 100�
 | --- | --- | --- | --- |
 | `TEST-035` | 운영자 인증·품질 화면 | 비인증·비staff 차단, staff의 `/admin/data-status/` 접근, 전체·현재·예정·종료·`STALE`·`UNVERIFIED`·충돌·중복·권리·수집 성공·실패·재확인·기관별 CORE_PASS·`PASS`·`HOLD`와 보류 사유·네 lifecycle·health·연속 최종 실패 수·우선 재검증·CollectionIssue·격리 레코드·전이 근거·검증 경과일·연속 성공일·의미 변경 chain·마지막 실행·Source 상태·미해결 구조 충돌 및 Django Admin drill-through 확인 | `AC-021`, `AC-025`~`AC-027` |
 | `TEST-036` | 외부 출처·지도 장애 | 마지막 검증 데이터 보존, 부분 오류, 목록 대체, 재시도, 잘못된 새 사실 없음 | `AC-013`, `AC-016` |
-| `TEST-037` | 비범위 표면 감사 | 사용자 경로·화면·네트워크 계약·영속 데이터에서 `P0-OUT-001`~`P0-OUT-008` 기능이 노출되지 않음 | `AC-022` |
+| `TEST-037` | 제외 기능 노출 검사 | 사용자 경로·화면·네트워크 계약·영속 데이터에서 `P0-OUT-001`~`P0-OUT-008` 기능이 노출되지 않음 | `AC-022` |
 | `TEST-038` | 개발 전용 이벤트 계약 | 허용 이벤트·속성·값 범위만 수용하고 민감·식별 값을 거절하며, 외부 요청·분석 SDK·서버 DB·`localStorage` 영속은 0건이고 운영 빌드에서는 no-op | `AC-014` |
 | `TEST-039` | 동기화 명령·재확인 실행 경로 | 네 변경 명령과 배포 스케줄러가 대상 선택 뒤 공통 서비스를 사용하고 `PROVISIONAL`·`ACTIVE` 모두 같은 레코드 게이트와 정본·파생·게시 경로를 사용하는지 확인한다. 공유 Source에서도 InstitutionRunResult·health를 기관별로 기록하고, 승격 증거는 `PROVISIONAL`, 연속 실패 수는 `ACTIVE`에서만 갱신해야 한다. `--source`는 미등록·비정상 Source와 `CANDIDATE`·`SUSPENDED`·미해결 Critical scope를 네트워크 전에 거부하되 Critical 없는 `DEGRADED`는 실행 가능하고 우선 재검증해야 한다. `show_refresh_schedule`은 due·우선 재검증·Critical scope·승격 진행 상태를 읽기 전용으로 사용한다. source·canonical ID 범위, 48시간·3일·종료 제외 경계, 실패 시 정본·이력 보존과 기관별 `SourceConflict` 연결도 검증한다. | `AC-016`, `AC-017`, `AC-023`, `AC-026`, `AC-027` |
 | `TEST-040` | 전시 데이터 최소 품질 게이트 | 핵심 항목을 하나씩 누락·무효·충돌시킨 레코드는 `CORE_PASS`가 아니며 격리되고, 핵심 항목을 갖춘 채 요금·예약·예상 관람시간·접근성·감각만 `UNKNOWN`인 레코드는 `CORE_PASS`이며 추론값이 0건이고, 같은 `UNKNOWN`을 필수 방문 조건으로 지정하면 추천 조건을 통과하지 않음 | `AC-005`, `AC-017`, `AC-024` |

@@ -1,8 +1,8 @@
 ---
 title: "TP-001 기관 운영 상태와 수집 전 게이트"
 status: APPROVED
-version: "1.0.3"
-last_updated: "2026-09-03"
+version: "1.0.4"
+last_updated: "2026-09-21"
 authoritative_for:
   - "승인 Source와 기관 allowlist의 DB 운영 상태 부트스트랩"
   - "P0 변경 명령의 lifecycle·Source 상태·Critical 수집 전 차단"
@@ -83,7 +83,7 @@ related_documents:
 - 새 운영 레코드는 공식 출처 운영과 기관별 실행 결과만 보존한다.
 - 외부 분석이나 신규 외부 전송을 추가하지 않는다.
 
-## 외부 의존성과 안전한 저하
+## 외부 의존성과 실패 시 대체 동작
 
 - 승인 Source와 필드·호출 제약은 `sources.yaml`, 표본은 `fixtures/source-qualification.json`을 따른다.
 - 키 없는 fixture 경로가 모든 자동 테스트의 기본 경로다.

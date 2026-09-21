@@ -1,8 +1,8 @@
 ---
 title: "미감 시스템 아키텍처"
 status: DRAFT
-version: "0.2.2"
-last_updated: "2026-09-05"
+version: "0.2.3"
+last_updated: "2026-09-21"
 authoritative_for:
   - "P0 시스템 경계와 런타임 구성"
   - "저장소 구조와 기술 선택"
@@ -45,7 +45,7 @@ related_documents:
 - P0에는 Celery나 별도의 상시 실행 worker를 두지 않는다. 배포 스케줄러는 정해진 시각에 due 대상 재확인 명령만 호출한다.
 - 문서·예제·테스트는 외부 API 키 없이 동작해야 한다.
 
-## 프론트엔드 경계
+## 프론트엔드 구성과 책임
 
 TP-006은 Radix 직접 사용과 npm lockfile을 선택한다. TanStack Query는 비영속 서버 응답, Zustand는 현재 탭의 draft/적용 입력만 소유한다. 브라우저 영속 저장은 아직 구현하지 않는다. 로컬 API 전용 설정은 loopback host만 허용하고 request access log를 끈다. 데모 실행기는 임시 DB를 사용하며 기존 `backend/db.sqlite3`를 수정하지 않는다.
 
@@ -70,7 +70,7 @@ frontend/src/
 - 취향 테스트 결과와 `관심 있음`은 버전이 명시된 browser `localStorage`에 저장한다. 마이그레이션 실패 시 안전하게 초기화할 수 있어야 하며, 부분·전체 삭제를 지원한다.
 - OpenAPI를 정본 계약으로 삼아 TypeScript 클라이언트를 생성한다. 생성 타입을 UI에 그대로 흘려보내지 않고, API 경계에서 Zod 어댑터로 검증·변환한다.
 
-## 백엔드 경계
+## 백엔드 구성과 책임
 
 백엔드는 웹 도메인과 수집 처리 과정을 물리적으로 분리한다.
 
@@ -112,7 +112,7 @@ Django Admin과 품질 상태 화면은 staff 운영자만 사용한다.
 
 ### 데이터 파이프라인 실행 계약
 
-P0의 관리 명령 표면은 다음과 같다. 각 명령의 대상 선택, 실패 보존, 실행 이력 규칙은 `data-pipeline.md`가 정본이다.
+P0에서 사용하는 관리 명령은 아래와 같다. 각 명령의 대상 선택, 실패 보존, 실행 이력 규칙은 `data-pipeline.md`를 따른다.
 
 | 목적 | 명령 |
 | --- | --- |
@@ -128,14 +128,14 @@ P0의 관리 명령 표면은 다음과 같다. 각 명령의 대상 선택, 실
 
 `show_refresh_schedule`은 due 대상과 함께 기관별 승격 검증 시작일, `InstitutionQualificationRun.finished_at`을 `Asia/Seoul` 달력일로 환산한 서로 다른 날짜의 연속 최종 성공, health·`ACTIVE` 연속 최종 실패 수, 첫 실패와 선택 구조 문제의 우선 재검증, 미해결 Critical 차단 scope, 의미 변경 근거와 최종 상태 조건을 읽기 전용으로 보여준다. 첫 최종 `FAILED`는 `ACTIVE + DEGRADED`, 중간 성공 없는 서로 다른 IngestionRun 2회 연속 최종 `FAILED`는 `SUSPENDED`다. `POLICY_BLOCK`·`ACCESS_BLOCK`·`STRUCTURAL_CRITICAL`은 즉시 중단하며 실행 중 발견된 경우에만 해당 InstitutionRunResult를 `FAILED`로 기록한다. `PROVISIONAL`은 lifecycle을 유지하되 미해결 Critical로 수집·승격을 차단하고, `STRUCTURAL_OPTIONAL`·`RECORD_EXCEPTION`은 각각 `UNKNOWN + DEGRADED`·단건 격리로 제한한다. 수정·승인 후 `PROVISIONAL`에서 검증을 처음부터 다시 시작한다.
 
-## 검색·지도·추천 경계
+## 검색·지도·추천의 역할
 
 - 검색은 `SearchService` 뒤에 둔다. P0 구현은 SQLite FTS5이며, 호출자와 API는 FTS5 세부사항에 의존하지 않는다.
 - 지도는 `MapProvider` 추상화 뒤에 둔다. P0의 Kakao 지도 연동은 해당 구현체이며, 지도 키·SDK 부재 시에도 목록·비교·테스트가 작동해야 한다.
 - 추천은 서버가 콘텐츠와 명시적 요청 조건을 일회성으로 평가해 반환한다. 브라우저에 있는 취향·관심 신호를 요청에 포함할 수 있으나, 서버가 일반 사용자별 장기 프로필로 저장하지 않는다.
 - 정확 좌표는 지도 표시 또는 필요한 순간의 요청 처리 외 장기 로그로 보존하지 않는다.
 
-## 데이터 흐름과 안전한 저하
+## 데이터 흐름과 오류·정보 누락 시 처리
 
 `공식·허용 출처 → backend/data_pipeline → sources/data_quality 검토 → catalog → discovery/search API → frontend`가 기본 흐름이다. 출처 충돌, 최신성 초과, 필수 방문 조건 누락, 이미지 권리 미확인은 긍정 사실이나 주요 추천에 사용하지 않는다. 데모 데이터는 같은 적재·표현 계약을 따르며 외부 키 없이 대표 흐름과 예외를 재현한다.
 

@@ -1,8 +1,8 @@
 ---
 title: "TP-002 기관 ACTIVE 승격 증거와 자동 전이"
 status: APPROVED
-version: "1.0.3"
-last_updated: "2026-09-05"
+version: "1.0.4"
+last_updated: "2026-09-21"
 authoritative_for:
   - "PROVISIONAL 기관의 승격 검증 실행과 QualificationRun 기록"
   - "Canonical ChangeHistory와 P0 의미 변경 증거"
@@ -64,7 +64,7 @@ related_documents:
 - 미해결 SourceConflict는 해당 기관 Canonical Exhibition의 `OPEN` 레코드 전체를 veto로 사용한다.
 - 단건 격리 완료는 같은 기관·Source·source_record_id에 연결된 열린 `RECORD_EXCEPTION`, `ENTRY` scope, `QUARANTINE_RECORD` 조치가 모두 일치할 때만 승인한다. 그 밖의 `CORE_FAIL`·`EXCLUDED`·격리 레코드는 핵심 처리 완료 수에 포함하지 않는다.
 
-## 외부 의존성과 안전한 저하
+## 외부 의존성과 실패 시 대체 동작
 
 - 자동 테스트와 기본 자격 검증은 승인 fixture를 사용하며 외부 API 키가 필요 없다.
 - 자격 대상 수를 충족하지 못하면 기존 정상 정본을 삭제하지 않고 실행·기관·Qualification 실패 근거만 남긴다.
