@@ -140,6 +140,47 @@ class UrllibXmlTransportTests(unittest.TestCase):
 
 
 class CultureInfoApiCollectorTests(unittest.TestCase):
+    def test_decodes_html_entities_in_official_url_and_preserves_raw_value(self) -> None:
+        transport = StaticXmlTransport()
+        original_get = transport.get
+        transport.get = lambda url, params: original_get(url, params).replace(
+            b"&amp;ge_idx=", b"&amp;amp;ge_idx=",
+        )
+        collector = CultureInfoApiCollector(
+            SourceRegistry.load(ROOT / "sources.yaml"), "test-only", transport,
+        )
+        record = collector.collect_ids(["394181"])[0]
+        self.assertEqual(record.official_url,
+                         "https://suma.suwon.go.kr/exhi/current_view.do?lang=ko&ge_idx=1266")
+        self.assertIn("&amp;ge_idx=1266", record.raw["url"])
+
+    def test_accepts_only_reviewed_exact_address_forms(self) -> None:
+        registry = SourceRegistry.load(ROOT / "sources.yaml")
+        original = "경기도 수원시 팔달구 정조로 833"
+        for address, accepted in (
+            (original, True),
+            (original + " 수원시립미술관", True),
+            (original + " 다른 별관", False),
+            ("경기도 수원시 팔달구 정조로 834", False),
+            ("", False),
+        ):
+            with self.subTest(address=address):
+                transport = StaticXmlTransport()
+                original_get = transport.get
+
+                def get(url, params):
+                    return original_get(url, params).replace(
+                        f"<placeAddr>{original}</placeAddr>".encode(),
+                        f"<placeAddr>{address}</placeAddr>".encode(),
+                    )
+
+                transport.get = get
+                collector = CultureInfoApiCollector(registry, "test-only", transport)
+                records = collector.collect_ids(["394181"])
+                self.assertEqual(bool(records), accepted)
+                if accepted:
+                    self.assertEqual(records[0].institution_id, "suma-haenggung")
+
     def test_expands_period_results_and_keeps_only_allowed_fact_fields(self) -> None:
         registry = SourceRegistry.load(ROOT / "sources.yaml")
         transport = StaticXmlTransport()
