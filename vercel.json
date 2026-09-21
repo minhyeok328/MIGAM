@@ -1,7 +1,8 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "git": { "deploymentEnabled": { "main": false } },
+  "git": { "deploymentEnabled": { "main": true } },
   "framework": "vite",
+  "regions": ["icn1"],
   "installCommand": "npm ci --prefix frontend",
   "buildCommand": "npm --prefix frontend run build",
   "outputDirectory": "frontend/dist",
