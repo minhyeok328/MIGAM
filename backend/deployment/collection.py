@@ -70,7 +70,7 @@ def collect_source(source_id, registry, institutions, targets, directory, blobs,
                            for row in institutions)
         new = collector.collect({"from": (today - timedelta(days=365)).strftime("%Y%m%d"),
                                  "to": (today + timedelta(days=180)).strftime("%Y%m%d"),
-                                 "numOfrows": "100"}, summary_places=places)
+                                 "numOfrows": "1000"}, summary_places=places)
         known = {row.source_record_id for row in records}
         records.extend(row for row in new if row.source_record_id not in known)
     allowed = {row.registry_id for row in institutions}

@@ -1,5 +1,6 @@
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
+from html import unescape
 from time import monotonic, sleep
 from typing import Protocol
 from urllib.error import HTTPError, URLError
@@ -243,7 +244,10 @@ class CultureInfoApiCollector:
                 for key, expected in filters.items()
                 if not key.endswith("_host")
             }
-            if all(_clean(detail.get(key)) == expected for key, expected in fact_filters.items()):
+            if all(
+                _clean(detail.get(key)) in (expected if isinstance(expected, list) else [expected])
+                for key, expected in fact_filters.items()
+            ):
                 return institution
         return None
 
@@ -282,6 +286,7 @@ class CultureInfoApiCollector:
         }
         for source_field in source.get("optional_fields", {}).values():
             selected_raw[source_field] = _clean(detail.get(source_field))
+        official_url = _clean(detail.get(str(fields["official_url"])))
         return RawExhibitionRecord(
             source_id=self.SOURCE_ID,
             institution_id=str(institution["id"]),
@@ -299,6 +304,6 @@ class CultureInfoApiCollector:
                 _clean(detail.get(str(fields.get("district", ""))))
                 or _clean(region.get("district"))
             ),
-            official_url=_clean(detail.get(str(fields["official_url"]))),
+            official_url=unescape(official_url) if official_url else None,
             raw=selected_raw,
         )

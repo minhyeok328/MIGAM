@@ -292,7 +292,10 @@ institution_allowlist:
     consecutive_final_failed_count: 0
     source_filter:
       place: "수원시립미술관"
-      placeAddr: "경기도 수원시 팔달구 정조로 833"
+      # Both exact forms confirmed for the same venue; reviewed 2026-09-21.
+      placeAddr:
+        - "경기도 수원시 팔달구 정조로 833"
+        - "경기도 수원시 팔달구 정조로 833 수원시립미술관"
       official_url_host: "suma.suwon.go.kr"
     region:
       area: "경기"
